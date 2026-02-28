@@ -23,11 +23,17 @@ export interface Installment {
   status: "pendente" | "pago" | "atrasado";
 }
 
+export interface CashflowItem {
+  label: string;
+  amount: number;
+  paid?: boolean;
+}
+
 export interface CashflowMonth {
   month: string;
   year: number;
-  incomes: { label: string; amount: number }[];
-  expenses: { label: string; amount: number }[];
+  incomes: CashflowItem[];
+  expenses: CashflowItem[];
 }
 
 export interface Creditor {
@@ -35,6 +41,22 @@ export interface Creditor {
   name: string;
   totalDebt: number;
   amountPaid: number;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  targetAmount: number;
+  savedAmount: number;
+  image: string;
+  color: string;
+}
+
+export interface MonthlySnapshot {
+  month: string;
+  debt: number;
+  balance: number;
+  savings: number;
 }
 
 export const banks: Bank[] = [
@@ -118,45 +140,45 @@ export const cashflowMonths: CashflowMonth[] = [
     month: "Março",
     year: 2026,
     incomes: [
-      { label: "Salário", amount: 8500 },
-      { label: "Freelance", amount: 2200 },
-      { label: "Dividendos", amount: 380 },
+      { label: "Salário", amount: 8500, paid: true },
+      { label: "Freelance", amount: 2200, paid: false },
+      { label: "Dividendos", amount: 380, paid: false },
     ],
     expenses: [
-      { label: "Aluguel", amount: 2800 },
-      { label: "Parcelas Cartões", amount: 3860 },
-      { label: "Alimentação", amount: 1200 },
-      { label: "Transporte", amount: 450 },
-      { label: "Lazer", amount: 600 },
+      { label: "Aluguel", amount: 2800, paid: true },
+      { label: "Parcelas Cartões", amount: 3860, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+      { label: "Lazer", amount: 600, paid: false },
     ],
   },
   {
     month: "Abril",
     year: 2026,
     incomes: [
-      { label: "Salário", amount: 8500 },
-      { label: "Freelance", amount: 1800 },
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 1800, paid: false },
     ],
     expenses: [
-      { label: "Aluguel", amount: 2800 },
-      { label: "Parcelas Cartões", amount: 4293 },
-      { label: "Alimentação", amount: 1200 },
-      { label: "Transporte", amount: 450 },
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 4293, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
     ],
   },
   {
     month: "Maio",
     year: 2026,
     incomes: [
-      { label: "Salário", amount: 8500 },
-      { label: "Freelance", amount: 2500 },
-      { label: "13º (parcela)", amount: 4250 },
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 2500, paid: false },
+      { label: "13º (parcela)", amount: 4250, paid: false },
     ],
     expenses: [
-      { label: "Aluguel", amount: 2800 },
-      { label: "Parcelas Cartões", amount: 4293 },
-      { label: "Alimentação", amount: 1200 },
-      { label: "IPVA", amount: 1800 },
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 4293, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "IPVA", amount: 1800, paid: false },
     ],
   },
 ];
@@ -166,4 +188,26 @@ export const creditors: Creditor[] = [
   { id: "cr2", name: "Maria Souza", totalDebt: 2000, amountPaid: 800 },
   { id: "cr3", name: "Pedro Almeida", totalDebt: 3500, amountPaid: 3500 },
   { id: "cr4", name: "Ana Costa", totalDebt: 1500, amountPaid: 500 },
+];
+
+export const initialGoals: Goal[] = [
+  { id: "g1", title: "Viagem Europa", targetAmount: 25000, savedAmount: 8500, image: "✈️", color: "265 80% 50%" },
+  { id: "g2", title: "Carro Novo", targetAmount: 60000, savedAmount: 15000, image: "🚗", color: "145 63% 42%" },
+  { id: "g3", title: "Fundo de Emergência", targetAmount: 30000, savedAmount: 22000, image: "🛡️", color: "45 100% 50%" },
+  { id: "g4", title: "Reforma Casa", targetAmount: 40000, savedAmount: 5000, image: "🏠", color: "27 100% 50%" },
+];
+
+export const monthlySnapshots: MonthlySnapshot[] = [
+  { month: "Jan", debt: 42000, balance: 2100, savings: 38000 },
+  { month: "Fev", debt: 39500, balance: 1800, savings: 40500 },
+  { month: "Mar", debt: 33250, balance: 2170, savings: 50500 },
+  { month: "Abr", debt: 30800, balance: 1557, savings: 52000 },
+  { month: "Mai", debt: 28200, balance: 5157, savings: 56200 },
+  { month: "Jun", debt: 25500, balance: 3200, savings: 59000 },
+  { month: "Jul", debt: 22800, balance: 4100, savings: 62500 },
+  { month: "Ago", debt: 20000, balance: 3800, savings: 65000 },
+  { month: "Set", debt: 17500, balance: 4500, savings: 68200 },
+  { month: "Out", debt: 15000, balance: 5200, savings: 71000 },
+  { month: "Nov", debt: 12000, balance: 6000, savings: 74500 },
+  { month: "Dez", debt: 9500, balance: 8500, savings: 78000 },
 ];

@@ -1,12 +1,15 @@
-import { type Bank } from "@/data/financialData";
-import { CreditCard, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { type Bank, type BankId } from "@/data/financialData";
+import { CreditCard, AlertTriangle, Pencil, Check, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 interface BankCardProps {
   bank: Bank;
   index: number;
   onClick: () => void;
+  onUpdateBalance: (bankId: BankId, newUsed: number) => void;
 }
 
 const statusLabels = {
@@ -37,14 +40,36 @@ const bankProgressColor: Record<string, string> = {
   "bank-bb": "[&>div]:bg-bank-bb",
 };
 
-export function BankCard({ bank, index, onClick }: BankCardProps) {
+export function BankCard({ bank, index, onClick, onUpdateBalance }: BankCardProps) {
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
   const usagePercent = Math.min((bank.limitUsed / bank.limitTotal) * 100, 100);
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
 
+  const handleStartEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditValue(String(bank.limitUsed));
+    setEditing(true);
+  };
+
+  const handleSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const val = parseFloat(editValue);
+    if (!isNaN(val) && val >= 0) {
+      onUpdateBalance(bank.id, val);
+    }
+    setEditing(false);
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditing(false);
+  };
+
   return (
-    <button
-      onClick={onClick}
+    <div
+      onClick={editing ? undefined : onClick}
       className={`masonry-item w-full text-left glass-card-hover rounded-2xl p-5 cursor-pointer group animate-float-in ${bank.glowClass}`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
@@ -89,9 +114,35 @@ export function BankCard({ bank, index, onClick }: BankCardProps) {
           </div>
           <div>
             <p className="text-muted-foreground text-xs">Usado</p>
-            <p className="text-money text-foreground">
-              R$ {bank.limitUsed.toLocaleString("pt-BR")}
-            </p>
+            {editing ? (
+              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                <Input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="h-7 text-xs rounded-lg w-24"
+                  autoFocus
+                />
+                <button onClick={handleSave} className="p-1 rounded hover:bg-income/20 text-income">
+                  <Check className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={handleCancel} className="p-1 rounded hover:bg-expense/20 text-expense">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 group/edit">
+                <p className="text-money text-foreground">
+                  R$ {bank.limitUsed.toLocaleString("pt-BR")}
+                </p>
+                <button
+                  onClick={handleStartEdit}
+                  className="opacity-0 group-hover/edit:opacity-100 p-0.5 rounded hover:bg-secondary text-muted-foreground transition-opacity"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -121,7 +172,15 @@ export function BankCard({ bank, index, onClick }: BankCardProps) {
             R$ {bank.debtFinal.toLocaleString("pt-BR")}
           </span>
         </div>
+
+        {/* Update balance button */}
+        <button
+          onClick={handleStartEdit}
+          className="mt-3 w-full text-center text-xs text-primary/70 hover:text-primary py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
+        >
+          Atualizar Saldo
+        </button>
       </div>
-    </button>
+    </div>
   );
 }
