@@ -1,4 +1,4 @@
-import { useFinanceStore } from "@/stores/financeStore";
+import { useFinanceStore, FinanceProvider } from "@/stores/financeStore";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { BankCard } from "@/components/BankCard";
 import { CashflowCard } from "@/components/CashflowCard";
@@ -7,6 +7,8 @@ import { CreditorWidget } from "@/components/CreditorWidget";
 import { SpendingChart } from "@/components/SpendingChart";
 import { BankDetailSheet } from "@/components/BankDetailSheet";
 import { ExpenseFAB } from "@/components/ExpenseFAB";
+import { HeroChart } from "@/components/HeroChart";
+import { CalendarCard } from "@/components/CalendarCard";
 
 const Index = () => {
   const store = useFinanceStore();
@@ -17,6 +19,18 @@ const Index = () => {
         totalDebt={store.totalDebt}
         expectedBalance={store.expectedBalance}
         monthLabel={`${store.currentCashflow.month} ${store.currentCashflow.year}`}
+        selectedMonth={store.selectedMonth}
+        totalMonths={store.cashflowMonths.length}
+        onMonthChange={store.setSelectedMonth}
+        cashflowMonths={store.cashflowMonths}
+      />
+
+      {/* Hero Chart */}
+      <HeroChart
+        snapshots={store.monthlySnapshots}
+        totalDebt={store.totalDebt}
+        expectedBalance={store.expectedBalance}
+        savingsGoalMonth={store.savingsGoalMonth}
       />
 
       <div className="masonry-grid">
@@ -27,6 +41,7 @@ const Index = () => {
             bank={bank}
             index={i}
             onClick={() => store.setSelectedBank(bank)}
+            onUpdateBalance={store.updateBankBalance}
           />
         ))}
 
@@ -43,7 +58,12 @@ const Index = () => {
           onNext={store.nextMonth}
           canPrev={store.selectedMonth > 0}
           canNext={store.selectedMonth < store.cashflowMonths.length - 1}
+          monthIndex={store.selectedMonth}
+          onTogglePaid={store.toggleCashflowPaid}
         />
+
+        {/* Calendar */}
+        <CalendarCard installments={store.allInstallments} />
 
         {/* Timeline */}
         <InstallmentTimeline installments={store.allInstallments} />

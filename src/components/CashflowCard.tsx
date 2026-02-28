@@ -1,5 +1,6 @@
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CashflowCardProps {
   cashflow: CashflowMonth;
@@ -10,6 +11,8 @@ interface CashflowCardProps {
   onNext: () => void;
   canPrev: boolean;
   canNext: boolean;
+  monthIndex: number;
+  onTogglePaid: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
 }
 
 export function CashflowCard({
@@ -21,6 +24,8 @@ export function CashflowCard({
   onNext,
   canPrev,
   canNext,
+  monthIndex,
+  onTogglePaid,
 }: CashflowCardProps) {
   return (
     <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in">
@@ -66,10 +71,20 @@ export function CashflowCard({
           </span>
         </div>
         <div className="space-y-1.5">
-          {cashflow.incomes.map((item) => (
-            <div key={item.label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{item.label}</span>
-              <span className="text-foreground text-money">R$ {item.amount.toLocaleString("pt-BR")}</span>
+          {cashflow.incomes.map((item, idx) => (
+            <div key={item.label} className="flex items-center gap-2 text-sm group">
+              <Checkbox
+                checked={item.paid}
+                onCheckedChange={() => onTogglePaid(monthIndex, "incomes", idx)}
+                className="h-4 w-4 rounded border-border data-[state=checked]:bg-income data-[state=checked]:border-income"
+              />
+              <span className={`flex-1 ${item.paid ? "text-muted-foreground line-through" : "text-muted-foreground"}`}>
+                {item.label}
+              </span>
+              <span className={`text-money ${item.paid ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                R$ {item.amount.toLocaleString("pt-BR")}
+              </span>
+              {item.paid && <Check className="w-3.5 h-3.5 text-income" />}
             </div>
           ))}
         </div>
@@ -85,10 +100,20 @@ export function CashflowCard({
           </span>
         </div>
         <div className="space-y-1.5">
-          {cashflow.expenses.map((item) => (
-            <div key={item.label} className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{item.label}</span>
-              <span className="text-foreground text-money">R$ {item.amount.toLocaleString("pt-BR")}</span>
+          {cashflow.expenses.map((item, idx) => (
+            <div key={item.label} className="flex items-center gap-2 text-sm group">
+              <Checkbox
+                checked={item.paid}
+                onCheckedChange={() => onTogglePaid(monthIndex, "expenses", idx)}
+                className="h-4 w-4 rounded border-border data-[state=checked]:bg-expense data-[state=checked]:border-expense"
+              />
+              <span className={`flex-1 ${item.paid ? "text-muted-foreground line-through" : "text-muted-foreground"}`}>
+                {item.label}
+              </span>
+              <span className={`text-money ${item.paid ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                R$ {item.amount.toLocaleString("pt-BR")}
+              </span>
+              {item.paid && <Check className="w-3.5 h-3.5 text-expense" />}
             </div>
           ))}
         </div>
