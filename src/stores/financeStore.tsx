@@ -49,6 +49,11 @@ export interface FinanceStore {
   addGoal: (title: string, targetAmount: number) => void;
   removeGoal: (id: string) => void;
   updateGoal: (id: string, updates: Partial<Pick<Goal, "title" | "targetAmount" | "image">>) => void;
+  // CRUD - Banks
+  updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => void;
+  addInstallment: (bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => void;
+  removeInstallment: (bankId: BankId, installmentId: string) => void;
+  updateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => void;
   // Savings goal
   setSavingsGoalMonth: (v: number) => void;
 }
@@ -186,6 +191,33 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
+  // CRUD - Banks
+  const updateBank = useCallback((bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => {
+    setBanks((prev) => prev.map((b) => (b.id === bankId ? { ...b, ...updates } : b)));
+  }, []);
+
+  const addInstallment = useCallback((bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => {
+    setBanks((prev) => prev.map((b) => {
+      if (b.id !== bankId) return b;
+      const newInst = { ...inst, id: `${bankId}-${Date.now()}` };
+      return { ...b, installments: [...b.installments, newInst] };
+    }));
+  }, []);
+
+  const removeInstallment = useCallback((bankId: BankId, installmentId: string) => {
+    setBanks((prev) => prev.map((b) => {
+      if (b.id !== bankId) return b;
+      return { ...b, installments: b.installments.filter((i) => i.id !== installmentId) };
+    }));
+  }, []);
+
+  const updateInstallment = useCallback((bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => {
+    setBanks((prev) => prev.map((b) => {
+      if (b.id !== bankId) return b;
+      return { ...b, installments: b.installments.map((i) => (i.id === installmentId ? { ...i, ...updates } : i)) };
+    }));
+  }, []);
+
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots,
     selectedMonth, selectedBank, currentCashflow,
@@ -197,6 +229,7 @@ function useFinanceStoreInternal(): FinanceStore {
     addCashflowItem, removeCashflowItem, updateCashflowItem,
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
+    updateBank, addInstallment, removeInstallment, updateInstallment,
     setSavingsGoalMonth,
   };
 }
