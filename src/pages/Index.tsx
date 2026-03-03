@@ -41,6 +41,7 @@ const Index = () => {
             index={i}
             onClick={() => store.setSelectedBank(bank)}
             onUpdateBalance={store.updateBankBalance}
+            onUpdateBank={store.updateBank}
           />
         ))}
 
@@ -64,7 +65,13 @@ const Index = () => {
 
         <CalendarCard installments={store.allInstallments} />
 
-        <InstallmentTimeline installments={store.allInstallments} />
+        <InstallmentTimeline
+          installments={store.allInstallments}
+          onUpdate={store.updateInstallment}
+          onRemove={store.removeInstallment}
+          onAdd={store.addInstallment}
+          banks={store.banks.map((b) => ({ id: b.id, name: b.name }))}
+        />
 
         <CreditorWidget
           creditors={store.creditors}
