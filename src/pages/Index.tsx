@@ -1,4 +1,4 @@
-import { useFinanceStore, FinanceProvider } from "@/stores/financeStore";
+import { useFinanceStore } from "@/stores/financeStore";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { BankCard } from "@/components/BankCard";
 import { CashflowCard } from "@/components/CashflowCard";
@@ -25,16 +25,15 @@ const Index = () => {
         cashflowMonths={store.cashflowMonths}
       />
 
-      {/* Hero Chart */}
       <HeroChart
         snapshots={store.monthlySnapshots}
         totalDebt={store.totalDebt}
         expectedBalance={store.expectedBalance}
         savingsGoalMonth={store.savingsGoalMonth}
+        onSavingsGoalChange={store.setSavingsGoalMonth}
       />
 
       <div className="masonry-grid">
-        {/* Bank Cards */}
         {store.banks.map((bank, i) => (
           <BankCard
             key={bank.id}
@@ -45,10 +44,8 @@ const Index = () => {
           />
         ))}
 
-        {/* Spending Chart */}
         <SpendingChart banks={store.banks} />
 
-        {/* Cashflow */}
         <CashflowCard
           cashflow={store.currentCashflow}
           totalIncome={store.totalIncome}
@@ -60,32 +57,31 @@ const Index = () => {
           canNext={store.selectedMonth < store.cashflowMonths.length - 1}
           monthIndex={store.selectedMonth}
           onTogglePaid={store.toggleCashflowPaid}
+          onAddItem={store.addCashflowItem}
+          onRemoveItem={store.removeCashflowItem}
+          onUpdateItem={store.updateCashflowItem}
         />
 
-        {/* Calendar */}
         <CalendarCard installments={store.allInstallments} />
 
-        {/* Timeline */}
         <InstallmentTimeline installments={store.allInstallments} />
 
-        {/* Creditors */}
         <CreditorWidget
           creditors={store.creditors}
           totalDebt={store.totalCreditorsDebt}
           totalPaid={store.totalCreditorsPaid}
+          onAdd={store.addCreditor}
+          onRemove={store.removeCreditor}
+          onUpdate={store.updateCreditor}
         />
       </div>
 
-      {/* Bank Detail Sheet */}
       <BankDetailSheet
         bank={store.selectedBank}
         open={!!store.selectedBank}
-        onOpenChange={(open) => {
-          if (!open) store.setSelectedBank(null);
-        }}
+        onOpenChange={(open) => { if (!open) store.setSelectedBank(null); }}
       />
 
-      {/* FAB */}
       <ExpenseFAB />
     </div>
   );

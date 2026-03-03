@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFinanceStore } from "@/stores/financeStore";
-import { Target, Plus, ArrowRight } from "lucide-react";
+import { Target, Plus, ArrowRight, Check, X, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,34 +18,22 @@ function CircularProgress({ percent, color, size = 100 }: { percent: number; col
 
   return (
     <svg width={size} height={size} className="transform -rotate-90">
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke="hsl(240 5% 16%)"
-        strokeWidth={strokeWidth}
-      />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke={`hsl(${color})`}
-        strokeWidth={strokeWidth}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        className="transition-all duration-700 ease-out"
-      />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(240 5% 16%)" strokeWidth={strokeWidth} />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={`hsl(${color})`} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" className="transition-all duration-700 ease-out" />
     </svg>
   );
 }
 
 export default function GoalsPage() {
-  const { goals, depositToGoal } = useFinanceStore();
+  const { goals, depositToGoal, addGoal, removeGoal, updateGoal } = useFinanceStore();
   const [depositGoalId, setDepositGoalId] = useState<string | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
+  const [addingGoal, setAddingGoal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newTarget, setNewTarget] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editTarget, setEditTarget] = useState("");
 
   const handleDeposit = () => {
     if (!depositGoalId || !depositAmount) return;
@@ -56,23 +44,44 @@ export default function GoalsPage() {
     setDepositAmount("");
   };
 
+  const handleAddGoal = () => {
+    const val = parseFloat(newTarget);
+    if (newTitle.trim() && !isNaN(val) && val > 0) {
+      addGoal(newTitle.trim(), val);
+      setNewTitle("");
+      setNewTarget("");
+      setAddingGoal(false);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingId) return;
+    const val = parseFloat(editTarget);
+    if (editTitle.trim() && !isNaN(val) && val > 0) {
+      updateGoal(editingId, { title: editTitle.trim(), targetAmount: val });
+    }
+    setEditingId(null);
+  };
+
+  const startEdit = (g: typeof goals[0]) => {
+    setEditingId(g.id);
+    setEditTitle(g.title);
+    setEditTarget(String(g.targetAmount));
+  };
+
   const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
   const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
   const overallPercent = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
-      {/* Header */}
       <div className="mb-8 animate-float-in">
         <div className="flex items-center gap-3 mb-2">
           <Target className="w-6 h-6 text-primary" />
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Objetivos</h1>
         </div>
-        <p className="text-muted-foreground text-sm">
-          Acompanhe seus sonhos e metas financeiras
-        </p>
+        <p className="text-muted-foreground text-sm">Acompanhe seus sonhos e metas financeiras</p>
 
-        {/* Overall progress */}
         <div className="glass-card rounded-2xl p-5 mt-4 flex items-center gap-6">
           <CircularProgress percent={overallPercent} color="265 80% 50%" size={80} />
           <div>
@@ -82,35 +91,58 @@ export default function GoalsPage() {
               R$ {totalSaved.toLocaleString("pt-BR")} de R$ {totalTarget.toLocaleString("pt-BR")}
             </p>
           </div>
+          <div className="ml-auto">
+            <Button variant="outline" size="sm" className="rounded-xl gap-2" onClick={() => setAddingGoal(true)}>
+              <Plus className="w-4 h-4" /> Novo Objetivo
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Goals grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {goals.map((goal, i) => {
           const pct = goal.targetAmount > 0 ? (goal.savedAmount / goal.targetAmount) * 100 : 0;
           const remaining = goal.targetAmount - goal.savedAmount;
+          const isEditing = editingId === goal.id;
+
           return (
             <div
               key={goal.id}
-              className="glass-card-hover rounded-2xl p-5 animate-float-in relative overflow-hidden"
+              className="glass-card-hover rounded-2xl p-5 animate-float-in relative overflow-hidden group"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              {/* Glow */}
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle at top right, hsl(${goal.color}), transparent 60%)`,
-                }}
-              />
+              <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ background: `radial-gradient(circle at top right, hsl(${goal.color}), transparent 60%)` }} />
+
+              {/* Delete button */}
+              <button
+                onClick={() => removeGoal(goal.id)}
+                className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-expense/20 text-muted-foreground hover:text-expense transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
 
               <div className="relative z-10">
-                {/* Icon */}
                 <div className="text-4xl mb-4">{goal.image}</div>
 
-                <h3 className="text-lg font-semibold text-foreground mb-1">{goal.title}</h3>
+                {isEditing ? (
+                  <div className="space-y-2 mb-4">
+                    <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="h-8 text-sm rounded-lg" autoFocus />
+                    <Input type="number" value={editTarget} onChange={(e) => setEditTarget(e.target.value)} placeholder="Valor alvo" className="h-8 text-sm rounded-lg" />
+                    <div className="flex gap-1">
+                      <button onClick={handleSaveEdit} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-4 h-4" /></button>
+                      <button onClick={() => setEditingId(null)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                ) : (
+                  <h3
+                    className="text-lg font-semibold text-foreground mb-1 cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => startEdit(goal)}
+                  >
+                    {goal.title}
+                    <Pencil className="w-3 h-3 inline ml-2 opacity-0 group-hover:opacity-50" />
+                  </h3>
+                )}
 
-                {/* Circular progress */}
                 <div className="flex items-center gap-4 my-4">
                   <CircularProgress percent={pct} color={goal.color} size={72} />
                   <div>
@@ -119,7 +151,6 @@ export default function GoalsPage() {
                   </div>
                 </div>
 
-                {/* Values */}
                 <div className="space-y-1 text-sm mb-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Guardado</span>
@@ -131,11 +162,15 @@ export default function GoalsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Meta</span>
-                    <span className="text-money text-foreground">R$ {goal.targetAmount.toLocaleString("pt-BR")}</span>
+                    <span
+                      className="text-money text-foreground cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => startEdit(goal)}
+                    >
+                      R$ {goal.targetAmount.toLocaleString("pt-BR")}
+                    </span>
                   </div>
                 </div>
 
-                {/* Deposit button */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -159,19 +194,26 @@ export default function GoalsPage() {
             <DialogTitle className="text-foreground">Depositar no Objetivo</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <p className="text-sm text-muted-foreground">
-              {goals.find((g) => g.id === depositGoalId)?.title}
-            </p>
-            <Input
-              type="number"
-              placeholder="Valor (R$)"
-              value={depositAmount}
-              onChange={(e) => setDepositAmount(e.target.value)}
-              className="rounded-xl"
-              min={0}
-            />
+            <p className="text-sm text-muted-foreground">{goals.find((g) => g.id === depositGoalId)?.title}</p>
+            <Input type="number" placeholder="Valor (R$)" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="rounded-xl" min={0} />
             <Button className="w-full rounded-xl gap-2" onClick={handleDeposit}>
               <ArrowRight className="w-4 h-4" /> Confirmar Depósito
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add goal dialog */}
+      <Dialog open={addingGoal} onOpenChange={setAddingGoal}>
+        <DialogContent className="glass-card border-border/30 sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Novo Objetivo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Nome do objetivo" className="rounded-xl" autoFocus />
+            <Input type="number" value={newTarget} onChange={(e) => setNewTarget(e.target.value)} placeholder="Valor alvo (R$)" className="rounded-xl" min={0} />
+            <Button className="w-full rounded-xl gap-2" onClick={handleAddGoal}>
+              <Plus className="w-4 h-4" /> Criar Objetivo
             </Button>
           </div>
         </DialogContent>
