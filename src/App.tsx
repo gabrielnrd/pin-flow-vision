@@ -7,6 +7,7 @@ import { FinanceProvider } from "@/stores/financeStore";
 import { AppNav } from "@/components/AppNav";
 import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
+import TransportePage from "./pages/Transporte";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/objetivos" element={<GoalsPage />} />
+            <Route path="/transporte" element={<TransportePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
