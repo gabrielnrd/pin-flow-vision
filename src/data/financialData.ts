@@ -137,6 +137,21 @@ export const banks: Bank[] = [
 
 export const cashflowMonths: CashflowMonth[] = [
   {
+    month: "Fevereiro",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: true },
+      { label: "Freelance", amount: 1500, paid: true },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: true },
+      { label: "Parcelas Cartões", amount: 3600, paid: true },
+      { label: "Alimentação", amount: 1100, paid: true },
+      { label: "Transporte", amount: 400, paid: true },
+      { label: "Lazer", amount: 500, paid: true },
+    ],
+  },
+  {
     month: "Março",
     year: 2026,
     incomes: [

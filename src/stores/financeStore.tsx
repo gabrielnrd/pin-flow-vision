@@ -69,13 +69,15 @@ function useFinanceStoreInternal(): FinanceStore {
 
   const currentCashflow = cashflowMonths[selectedMonth];
 
-  const totalDebt = banks.reduce((sum, b) => sum + b.debtFinal, 0);
+  const totalBankDebt = banks.reduce((sum, b) => sum + b.limitUsed, 0);
+  const totalCreditorsDebt = creditors.reduce((s, c) => s + c.totalDebt, 0);
+  const totalCreditorsPaid = creditors.reduce((s, c) => s + c.amountPaid, 0);
+  const totalCreditorsRemaining = totalCreditorsDebt - totalCreditorsPaid;
+  const totalDebt = totalBankDebt + totalCreditorsRemaining;
   const totalIncome = currentCashflow.incomes.reduce((s, i) => s + i.amount, 0);
   const totalExpense = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
   const expectedBalance = totalIncome - totalExpense;
 
-  const totalCreditorsDebt = creditors.reduce((s, c) => s + c.totalDebt, 0);
-  const totalCreditorsPaid = creditors.reduce((s, c) => s + c.amountPaid, 0);
 
   const allInstallments = banks
     .flatMap((b) =>

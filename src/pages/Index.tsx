@@ -26,7 +26,7 @@ const Index = () => {
       />
 
       <HeroChart
-        snapshots={store.monthlySnapshots}
+        cashflowMonths={store.cashflowMonths}
         totalDebt={store.totalDebt}
         expectedBalance={store.expectedBalance}
         savingsGoalMonth={store.savingsGoalMonth}
@@ -87,6 +87,9 @@ const Index = () => {
         bank={store.selectedBank}
         open={!!store.selectedBank}
         onOpenChange={(open) => { if (!open) store.setSelectedBank(null); }}
+        onUpdateInstallment={store.updateInstallment}
+        onRemoveInstallment={store.removeInstallment}
+        onAddInstallment={store.addInstallment}
       />
 
       <ExpenseFAB />
