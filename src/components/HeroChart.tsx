@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { type CashflowMonth } from "@/data/financialData";
 import { TrendingDown, Wallet, Target, Pencil, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
           </h3>
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 5% 18% / 0.5)" />
                 <XAxis dataKey="month" tick={{ fill: "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
@@ -48,9 +48,9 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
                   ]}
                   contentStyle={{ background: "hsl(240 6% 10% / 0.95)", border: "1px solid hsl(240 5% 25% / 0.4)", borderRadius: "12px", fontSize: "12px", color: "hsl(0 0% 95%)" }}
                 />
-                <Bar dataKey="entradas" fill="hsl(145 63% 42%)" radius={[4, 4, 0, 0]} name="entradas" />
-                <Bar dataKey="saidas" fill="hsl(0 72% 51%)" radius={[4, 4, 0, 0]} name="saidas" />
-              </BarChart>
+                <Line type="monotone" dataKey="entradas" stroke="hsl(145 63% 42%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" />
+                <Line type="monotone" dataKey="saidas" stroke="hsl(0 72% 51%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" />
+              </LineChart>
             </ResponsiveContainer>
           </div>
           <div className="flex gap-5 mt-3">
