@@ -51,6 +51,7 @@ export interface FinanceStore {
   updateGoal: (id: string, updates: Partial<Pick<Goal, "title" | "targetAmount" | "image">>) => void;
   // CRUD - Banks
   updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => void;
+  addBank: (name: string, limitTotal: number, color: string, glowClass: string) => void;
   addInstallment: (bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => void;
   removeInstallment: (bankId: BankId, installmentId: string) => void;
   updateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => void;
@@ -198,6 +199,21 @@ function useFinanceStoreInternal(): FinanceStore {
     setBanks((prev) => prev.map((b) => (b.id === bankId ? { ...b, ...updates } : b)));
   }, []);
 
+  const addBank = useCallback((name: string, limitTotal: number, color: string, glowClass: string) => {
+    const id = `bank-${Date.now()}` as BankId;
+    setBanks((prev) => [...prev, {
+      id,
+      name,
+      color,
+      glowClass,
+      limitTotal,
+      limitUsed: 0,
+      debtFinal: 0,
+      status: "pendente" as const,
+      installments: [],
+    }]);
+  }, []);
+
   const addInstallment = useCallback((bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => {
     setBanks((prev) => prev.map((b) => {
       if (b.id !== bankId) return b;
@@ -231,7 +247,7 @@ function useFinanceStoreInternal(): FinanceStore {
     addCashflowItem, removeCashflowItem, updateCashflowItem,
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
-    updateBank, addInstallment, removeInstallment, updateInstallment,
+    updateBank, addBank, addInstallment, removeInstallment, updateInstallment,
     setSavingsGoalMonth,
   };
 }

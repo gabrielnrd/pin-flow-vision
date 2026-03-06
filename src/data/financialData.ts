@@ -1,4 +1,4 @@
-export type BankId = "nubank" | "inter" | "c6" | "itau" | "bb";
+export type BankId = string;
 
 export interface Bank {
   id: BankId;

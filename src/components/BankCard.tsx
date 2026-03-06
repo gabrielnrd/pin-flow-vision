@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type Bank, type BankId } from "@/data/financialData";
-import { CreditCard, AlertTriangle, Pencil, Check, X } from "lucide-react";
+import { CreditCard, AlertTriangle, Pencil, Check, X, Wifi } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -25,70 +25,47 @@ const statusStyles = {
   parcial: "bg-amber-500/20 text-amber-400 border-amber-500/30",
 };
 
-const bankBgAccent: Record<string, string> = {
-  "bank-nubank": "from-[hsl(280,97%,38%)]/10 to-transparent",
-  "bank-inter": "from-[hsl(27,100%,50%)]/10 to-transparent",
-  "bank-c6": "from-[hsl(220,10%,30%)]/10 to-transparent",
-  "bank-itau": "from-[hsl(27,85%,47%)]/10 to-transparent",
-  "bank-bb": "from-[hsl(45,100%,50%)]/10 to-transparent",
+const bankGradients: Record<string, string> = {
+  "bank-nubank": "from-[hsl(280,97%,38%)] to-[hsl(300,80%,25%)]",
+  "bank-inter": "from-[hsl(27,100%,50%)] to-[hsl(15,90%,40%)]",
+  "bank-c6": "from-[hsl(220,10%,20%)] to-[hsl(220,15%,12%)]",
+  "bank-itau": "from-[hsl(27,85%,47%)] to-[hsl(220,50%,30%)]",
+  "bank-bb": "from-[hsl(45,100%,45%)] to-[hsl(45,80%,30%)]",
+};
+
+const bankTextColor: Record<string, string> = {
+  "bank-nubank": "text-white",
+  "bank-inter": "text-white",
+  "bank-c6": "text-gray-300",
+  "bank-itau": "text-white",
+  "bank-bb": "text-gray-900",
 };
 
 const bankProgressColor: Record<string, string> = {
-  "bank-nubank": "[&>div]:bg-bank-nubank",
-  "bank-inter": "[&>div]:bg-bank-inter",
-  "bank-c6": "[&>div]:bg-muted-foreground",
-  "bank-itau": "[&>div]:bg-bank-itau",
-  "bank-bb": "[&>div]:bg-bank-bb",
+  "bank-nubank": "[&>div]:bg-white/80",
+  "bank-inter": "[&>div]:bg-white/80",
+  "bank-c6": "[&>div]:bg-white/60",
+  "bank-itau": "[&>div]:bg-white/80",
+  "bank-bb": "[&>div]:bg-gray-900/60",
 };
 
 const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial"];
 
-function EditableField({ value, onSave, type = "text", prefix, className = "" }: {
-  value: string | number;
-  onSave: (v: string) => void;
-  type?: string;
-  prefix?: string;
-  className?: string;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [editVal, setEditVal] = useState(String(value));
-
-  const save = () => {
-    onSave(editVal);
-    setEditing(false);
-  };
-
-  if (editing) {
-    return (
-      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-        <Input
-          type={type}
-          value={editVal}
-          onChange={(e) => setEditVal(e.target.value)}
-          className="h-7 text-xs rounded-lg w-24"
-          autoFocus
-          onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEditing(false); }}
-        />
-        <button onClick={save} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
-        <button onClick={() => setEditing(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1.5 group/edit cursor-pointer" onClick={(e) => { e.stopPropagation(); setEditVal(String(value)); setEditing(true); }}>
-      <span className={className}>{prefix}{typeof value === "number" ? value.toLocaleString("pt-BR") : value}</span>
-      <Pencil className="w-3 h-3 opacity-0 group-hover/edit:opacity-100 text-muted-foreground transition-opacity" />
-    </div>
-  );
-}
-
 export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }: BankCardProps) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editingLimit, setEditingLimit] = useState(false);
+  const [editLimit, setEditLimit] = useState("");
+
   const usagePercent = Math.min((bank.limitUsed / bank.limitTotal) * 100, 100);
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
+
+  const gradient = bankGradients[bank.color] || "from-primary to-accent";
+  const textColor = bankTextColor[bank.color] || "text-white";
+  const progressColor = bankProgressColor[bank.color] || "[&>div]:bg-white/80";
 
   const handleStartEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,112 +89,158 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
     onUpdateBank(bank.id, { status: statusOptions[(idx + 1) % statusOptions.length] });
   };
 
+  // Last 4 digits visual
+  const cardNumber = `•••• •••• •••• ${String(Math.abs(bank.name.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % 10000)).padStart(4, "0")}`;
+
   return (
     <div
-      onClick={editing ? undefined : onClick}
-      className={`masonry-item w-full text-left glass-card-hover rounded-2xl p-5 cursor-pointer group animate-float-in ${bank.glowClass} ${isOverLimit ? "animate-over-limit border-expense/40" : ""}`}
-      style={{ animationDelay: `${index * 80}ms` }}
+      onClick={editing || editingName || editingLimit ? undefined : onClick}
+      className={`masonry-item w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""}`}
+      style={{ animationDelay: `${index * 80}ms`, aspectRatio: "1.586/1" }}
     >
-      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${bankBgAccent[bank.color] || ""} pointer-events-none`} />
+      {/* Credit card body */}
+      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between ${textColor}`}>
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{
+          backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
+          backgroundSize: "60px 60px",
+        }} />
 
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl bg-${bank.color}/20 flex items-center justify-center`}>
-              <CreditCard className={`w-5 h-5 text-${bank.color}`} />
-            </div>
-            <div>
-              {onUpdateBank ? (
-                <EditableField
-                  value={bank.name}
-                  onSave={(v) => onUpdateBank(bank.id, { name: v })}
-                  className="font-semibold text-foreground"
-                />
-              ) : (
-                <h3 className="font-semibold text-foreground">{bank.name}</h3>
-              )}
-              <p className="text-xs text-muted-foreground">{bank.installments.length} parcelas</p>
-            </div>
-          </div>
-          <Badge
-            variant="outline"
-            className={`text-[10px] cursor-pointer ${statusStyles[bank.status]}`}
-            onClick={cycleStatus}
-          >
-            {statusLabels[bank.status]}
-          </Badge>
-        </div>
-
-        {/* Limit bar */}
-        <div className="mb-3">
-          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-            <span>Limite usado</span>
-            <span>{usagePercent.toFixed(0)}%</span>
-          </div>
-          <Progress value={usagePercent} className={`h-2 bg-secondary ${bankProgressColor[bank.color] || ""}`} />
-        </div>
-
-        {/* Values */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-muted-foreground text-xs">Limite</p>
-            {onUpdateBank ? (
-              <EditableField
-                value={bank.limitTotal}
-                onSave={(v) => { const n = parseFloat(v); if (!isNaN(n) && n > 0) onUpdateBank(bank.id, { limitTotal: n } as any); }}
-                type="number"
-                prefix="R$ "
-                className="text-money text-foreground"
-              />
-            ) : (
-              <p className="text-money text-foreground">R$ {bank.limitTotal.toLocaleString("pt-BR")}</p>
-            )}
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs">Usado</p>
-            {editing ? (
+        {/* Top row: Bank name + status + contactless */}
+        <div className="relative z-10 flex items-start justify-between">
+          <div className="flex-1">
+            {editingName ? (
               <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                <Input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="h-7 text-xs rounded-lg w-24" autoFocus />
-                <button onClick={handleSave} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
-                <button onClick={handleCancel} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="h-7 text-sm rounded-lg w-32 bg-black/20 border-white/20 text-white placeholder:text-white/50"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { onUpdateBank?.(bank.id, { name: editName }); setEditingName(false); }
+                    if (e.key === "Escape") setEditingName(false);
+                  }}
+                />
+                <button onClick={(e) => { e.stopPropagation(); onUpdateBank?.(bank.id, { name: editName }); setEditingName(false); }} className="p-1"><Check className="w-3.5 h-3.5" /></button>
+                <button onClick={(e) => { e.stopPropagation(); setEditingName(false); }} className="p-1"><X className="w-3.5 h-3.5" /></button>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 group/edit">
-                <p className="text-money text-foreground">R$ {bank.limitUsed.toLocaleString("pt-BR")}</p>
-                <button onClick={handleStartEdit} className="opacity-0 group-hover/edit:opacity-100 p-0.5 rounded hover:bg-secondary text-muted-foreground transition-opacity">
-                  <Pencil className="w-3 h-3" />
-                </button>
+              <div
+                className="flex items-center gap-1.5 group/name"
+                onClick={(e) => { if (onUpdateBank) { e.stopPropagation(); setEditName(bank.name); setEditingName(true); } }}
+              >
+                <h3 className="font-bold text-lg tracking-wide">{bank.name}</h3>
+                {onUpdateBank && <Pencil className="w-3 h-3 opacity-0 group-hover/name:opacity-60 transition-opacity" />}
               </div>
             )}
+            <p className="text-[10px] opacity-60 mt-0.5">{bank.installments.length} parcelas ativas</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={`text-[10px] cursor-pointer border-white/30 ${statusStyles[bank.status]}`}
+              onClick={cycleStatus}
+            >
+              {statusLabels[bank.status]}
+            </Badge>
+            <Wifi className="w-5 h-5 opacity-40 rotate-90" />
           </div>
         </div>
 
-        {/* Free amount / Over limit alert */}
-        <div className="mt-3 pt-3 border-t border-border/50">
-          {isOverLimit ? (
-            <div className="flex items-center gap-2 text-expense animate-pulse-danger">
-              <AlertTriangle className="w-4 h-4" />
-              <span className="text-xs font-medium">Limite excedido em R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}</span>
-            </div>
-          ) : (
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Livre</span>
-              <span className="text-sm text-money text-income">R$ {freeAmount.toLocaleString("pt-BR")}</span>
-            </div>
-          )}
+        {/* Chip + Card Number */}
+        <div className="relative z-10 flex items-center gap-3 my-auto">
+          <div className="w-10 h-7 rounded-md bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
+          <span className="text-sm font-mono tracking-[0.2em] opacity-80">{cardNumber}</span>
         </div>
 
-        {/* Debt */}
-        <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Dívida Total</span>
-          <span className="text-lg text-money text-foreground">R$ {bank.debtFinal.toLocaleString("pt-BR")}</span>
+        {/* Bottom: Financial info */}
+        <div className="relative z-10 space-y-2">
+          {/* Progress bar */}
+          <div>
+            <div className="flex justify-between text-[10px] opacity-70 mb-1">
+              <span>Limite usado</span>
+              <span>{usagePercent.toFixed(0)}%</span>
+            </div>
+            <Progress value={usagePercent} className={`h-1.5 bg-white/20 ${progressColor}`} />
+          </div>
+
+          {/* Values row */}
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="text-[10px] opacity-60">Limite</p>
+              {editingLimit ? (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <Input
+                    type="number"
+                    value={editLimit}
+                    onChange={(e) => setEditLimit(e.target.value)}
+                    className="h-6 text-xs rounded w-20 bg-black/20 border-white/20 text-white"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { const n = parseFloat(editLimit); if (!isNaN(n) && n > 0) onUpdateBank?.(bank.id, { limitTotal: n } as any); setEditingLimit(false); }
+                      if (e.key === "Escape") setEditingLimit(false);
+                    }}
+                  />
+                </div>
+              ) : (
+                <p
+                  className="text-sm font-bold tabular-nums cursor-pointer group/limit flex items-center gap-1"
+                  onClick={(e) => { if (onUpdateBank) { e.stopPropagation(); setEditLimit(String(bank.limitTotal)); setEditingLimit(true); } }}
+                >
+                  R$ {bank.limitTotal.toLocaleString("pt-BR")}
+                  {onUpdateBank && <Pencil className="w-2.5 h-2.5 opacity-0 group-hover/limit:opacity-60 transition-opacity" />}
+                </p>
+              )}
+            </div>
+
+            <div className="text-right">
+              <p className="text-[10px] opacity-60">Usado</p>
+              {editing ? (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <Input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="h-6 text-xs rounded w-20 bg-black/20 border-white/20 text-white" autoFocus />
+                  <button onClick={handleSave} className="p-0.5"><Check className="w-3 h-3" /></button>
+                  <button onClick={handleCancel} className="p-0.5"><X className="w-3 h-3" /></button>
+                </div>
+              ) : (
+                <p
+                  className="text-sm font-bold tabular-nums cursor-pointer group/used flex items-center gap-1"
+                  onClick={handleStartEdit}
+                >
+                  R$ {bank.limitUsed.toLocaleString("pt-BR")}
+                  <Pencil className="w-2.5 h-2.5 opacity-0 group-hover/used:opacity-60 transition-opacity" />
+                </p>
+              )}
+            </div>
+
+            <div className="text-right">
+              {isOverLimit ? (
+                <div className="flex items-center gap-1 animate-pulse-danger">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <div>
+                    <p className="text-[10px] opacity-60">Excedido</p>
+                    <p className="text-sm font-bold tabular-nums">R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}</p>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-[10px] opacity-60">Livre</p>
+                  <p className="text-sm font-bold tabular-nums">R$ {freeAmount.toLocaleString("pt-BR")}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Debt total */}
+          <div className="flex justify-between items-center pt-1 border-t border-white/10">
+            <span className="text-[10px] opacity-60">Dívida Total</span>
+            <span className="text-base font-bold tabular-nums">R$ {bank.debtFinal.toLocaleString("pt-BR")}</span>
+          </div>
         </div>
 
-        {/* Update balance button */}
-        <button onClick={handleStartEdit} className="mt-3 w-full text-center text-xs text-primary/70 hover:text-primary py-1.5 rounded-lg hover:bg-primary/5 transition-colors">
-          Atualizar Saldo
-        </button>
+        {/* Brand icon bottom-right */}
+        <div className="absolute bottom-4 right-5 opacity-20">
+          <CreditCard className="w-10 h-10" />
+        </div>
       </div>
     </div>
   );
