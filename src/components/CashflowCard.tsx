@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, Pencil } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, Pencil, Filter } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -146,6 +146,65 @@ function AddItemRow({ type, monthIndex, onAdd }: {
   );
 }
 
+const FIXED_LABELS = ["aluguel", "parcelas cartões", "luz", "água", "internet", "condomínio", "seguro", "plano de saúde"];
+const VARIABLE_LABELS = ["alimentação", "transporte", "lazer", "ifood", "uber", "99", "roupas", "assinatura"];
+
+type ExpenseFilter = "todas" | "fixas" | "variáveis";
+
+function classifyExpense(label: string): "fixa" | "variável" {
+  const lower = label.toLowerCase();
+  if (FIXED_LABELS.some((f) => lower.includes(f))) return "fixa";
+  return "variável";
+}
+
+function ExpenseSection({ cashflow, totalExpense, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem }: {
+  cashflow: CashflowMonth;
+  totalExpense: number;
+  monthIndex: number;
+  onTogglePaid: CashflowCardProps["onTogglePaid"];
+  onRemoveItem: CashflowCardProps["onRemoveItem"];
+  onUpdateItem: CashflowCardProps["onUpdateItem"];
+  onAddItem: CashflowCardProps["onAddItem"];
+}) {
+  const [filter, setFilter] = useState<ExpenseFilter>("todas");
+
+  const filtered = useMemo(() => {
+    if (filter === "todas") return cashflow.expenses.map((item, idx) => ({ item, idx }));
+    const target = filter === "fixas" ? "fixa" : "variável";
+    return cashflow.expenses
+      .map((item, idx) => ({ item, idx }))
+      .filter(({ item }) => classifyExpense(item.label) === target);
+  }, [cashflow.expenses, filter]);
+
+  const filteredTotal = filtered.reduce((s, { item }) => s + item.amount, 0);
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <ArrowDownRight className="w-4 h-4 text-expense" />
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Saídas</span>
+        <span className="ml-auto text-sm text-money text-expense">R$ {filteredTotal.toLocaleString("pt-BR")}</span>
+      </div>
+      <div className="flex gap-1.5 mb-2">
+        {(["todas", "fixas", "variáveis"] as ExpenseFilter[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-2.5 py-1 text-[10px] rounded-lg font-medium transition-colors ${filter === f ? "bg-primary/20 text-primary" : "bg-secondary/50 text-muted-foreground hover:text-foreground"}`}
+          >
+            {f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-1.5">
+        {filtered.map(({ item, idx }) => (
+          <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="expenses" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} />
+        ))}
+        <AddItemRow type="expenses" monthIndex={monthIndex} onAdd={onAddItem} />
+      </div>
+    </div>
+  );
+}
 export function CashflowCard({
   cashflow, totalIncome, totalExpense, expectedBalance,
   onPrev, onNext, canPrev, canNext, monthIndex,
@@ -190,20 +249,16 @@ export function CashflowCard({
         </div>
       </div>
 
-      {/* Expenses */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <ArrowDownRight className="w-4 h-4 text-expense" />
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Saídas</span>
-          <span className="ml-auto text-sm text-money text-expense">R$ {totalExpense.toLocaleString("pt-BR")}</span>
-        </div>
-        <div className="space-y-1.5">
-          {cashflow.expenses.map((item, idx) => (
-            <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="expenses" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} />
-          ))}
-          <AddItemRow type="expenses" monthIndex={monthIndex} onAdd={onAddItem} />
-        </div>
-      </div>
+      {/* Expenses with filters */}
+      <ExpenseSection
+        cashflow={cashflow}
+        totalExpense={totalExpense}
+        monthIndex={monthIndex}
+        onTogglePaid={onTogglePaid}
+        onRemoveItem={onRemoveItem}
+        onUpdateItem={onUpdateItem}
+        onAddItem={onAddItem}
+      />
     </div>
   );
 }
