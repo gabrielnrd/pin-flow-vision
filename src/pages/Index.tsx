@@ -1,6 +1,7 @@
 import { useFinanceStore } from "@/stores/financeStore";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { BankCard } from "@/components/BankCard";
+import { AddBankCard } from "@/components/AddBankCard";
 import { CashflowCard } from "@/components/CashflowCard";
 import { InstallmentTimeline } from "@/components/InstallmentTimeline";
 import { CreditorWidget } from "@/components/CreditorWidget";
@@ -48,6 +49,7 @@ const Index = () => {
           />
         ))}
 
+        <AddBankCard onAdd={store.addBank} />
         <SpendingChart banks={store.banks} />
 
         <CashflowCard
