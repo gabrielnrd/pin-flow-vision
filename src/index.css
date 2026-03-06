@@ -150,4 +150,12 @@
   .animate-float-in {
     animation: float-in 0.5s ease-out forwards;
   }
+
+  @keyframes over-limit-pulse {
+    0%, 100% { box-shadow: 0 0 8px -2px hsl(0 72% 51% / 0.3); }
+    50% { box-shadow: 0 0 20px -2px hsl(0 72% 51% / 0.6); }
+  }
+  .animate-over-limit {
+    animation: over-limit-pulse 2s ease-in-out infinite;
+  }
 }

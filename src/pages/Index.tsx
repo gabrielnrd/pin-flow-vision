@@ -9,6 +9,8 @@ import { BankDetailSheet } from "@/components/BankDetailSheet";
 import { ExpenseFAB } from "@/components/ExpenseFAB";
 import { HeroChart } from "@/components/HeroChart";
 import { CalendarCard } from "@/components/CalendarCard";
+import { BudgetRuleWidget } from "@/components/BudgetRuleWidget";
+import { SnowballCalculator } from "@/components/SnowballCalculator";
 
 const Index = () => {
   const store = useFinanceStore();
@@ -31,6 +33,7 @@ const Index = () => {
         expectedBalance={store.expectedBalance}
         savingsGoalMonth={store.savingsGoalMonth}
         onSavingsGoalChange={store.setSavingsGoalMonth}
+        selectedMonth={store.selectedMonth}
       />
 
       <div className="masonry-grid">
@@ -81,6 +84,13 @@ const Index = () => {
           onRemove={store.removeCreditor}
           onUpdate={store.updateCreditor}
         />
+
+        <BudgetRuleWidget
+          cashflow={store.currentCashflow}
+          totalIncome={store.totalIncome}
+        />
+
+        <SnowballCalculator creditors={store.creditors} />
       </div>
 
       <BankDetailSheet

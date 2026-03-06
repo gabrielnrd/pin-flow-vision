@@ -115,7 +115,7 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
   return (
     <div
       onClick={editing ? undefined : onClick}
-      className={`masonry-item w-full text-left glass-card-hover rounded-2xl p-5 cursor-pointer group animate-float-in ${bank.glowClass}`}
+      className={`masonry-item w-full text-left glass-card-hover rounded-2xl p-5 cursor-pointer group animate-float-in ${bank.glowClass} ${isOverLimit ? "animate-over-limit border-expense/40" : ""}`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${bankBgAccent[bank.color] || ""} pointer-events-none`} />
