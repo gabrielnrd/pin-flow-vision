@@ -3,6 +3,7 @@ import { useFinanceStore } from "@/stores/financeStore";
 import { Target, Plus, ArrowRight, Check, X, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DolphinEffect } from "@/components/DolphinEffect";
 import {
   Dialog,
   DialogContent,
@@ -97,6 +98,10 @@ export default function GoalsPage() {
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <DolphinEffect />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

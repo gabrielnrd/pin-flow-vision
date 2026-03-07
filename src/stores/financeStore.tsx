@@ -57,6 +57,17 @@ export interface FinanceStore {
   updateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => void;
   // Savings goal
   setSavingsGoalMonth: (v: number) => void;
+  // Brain settings
+  salary: number;
+  monthlyHours: number;
+  hourlyRate: number;
+  safetyMargin: number;
+  dailySavings: number;
+  phantomBalance: number;
+  survivalDays: number;
+  setSalary: (v: number) => void;
+  setMonthlyHours: (v: number) => void;
+  setSafetyMargin: (v: number) => void;
 }
 
 function useFinanceStoreInternal(): FinanceStore {
@@ -67,8 +78,13 @@ function useFinanceStoreInternal(): FinanceStore {
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [savingsGoalMonth, setSavingsGoalMonth] = useState(2000);
+  const [salary, setSalary] = useState(1900);
+  const [monthlyHours, setMonthlyHours] = useState(220);
+  const [safetyMargin, setSafetyMargin] = useState(300);
 
   const currentCashflow = cashflowMonths[selectedMonth];
+  const hourlyRate = monthlyHours > 0 ? salary / monthlyHours : 0;
+  const dailySavings = savingsGoalMonth > 0 ? savingsGoalMonth / 30 : 0;
 
   const totalBankDebt = banks.reduce((sum, b) => sum + b.limitUsed, 0);
   const totalCreditorsDebt = creditors.reduce((s, c) => s + c.totalDebt, 0);
@@ -78,6 +94,9 @@ function useFinanceStoreInternal(): FinanceStore {
   const totalIncome = currentCashflow.incomes.reduce((s, i) => s + i.amount, 0);
   const totalExpense = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
   const expectedBalance = totalIncome - totalExpense;
+  const phantomBalance = expectedBalance - safetyMargin;
+  const avgDailyExpense = totalExpense / 30;
+  const survivalDays = avgDailyExpense > 0 ? Math.floor(expectedBalance / avgDailyExpense) : 0;
 
 
   const allInstallments = banks
@@ -249,6 +268,9 @@ function useFinanceStoreInternal(): FinanceStore {
     addGoal, removeGoal, updateGoal,
     updateBank, addBank, addInstallment, removeInstallment, updateInstallment,
     setSavingsGoalMonth,
+    salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
+    phantomBalance, survivalDays,
+    setSalary, setMonthlyHours, setSafetyMargin,
   };
 }
 
