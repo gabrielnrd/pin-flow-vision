@@ -37,7 +37,7 @@ export function CalendarCard({ installments }: CalendarCardProps) {
   const total = weekItems.reduce((s, i) => s + i.installmentAmount, 0);
 
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "250ms" }}>
+    <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "250ms" }}>
       <div className="flex items-center gap-2 mb-4">
         <CalendarDays className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Vencimentos da Semana</h3>

@@ -211,7 +211,7 @@ export function CashflowCard({
   onTogglePaid, onAddItem, onRemoveItem, onUpdateItem,
 }: CashflowCardProps) {
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in">
+    <div className="glass-card rounded-2xl p-5 animate-float-in">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Fluxo de Caixa</h3>
         <div className="flex items-center gap-1">
