@@ -57,6 +57,17 @@ export interface FinanceStore {
   updateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => void;
   // Savings goal
   setSavingsGoalMonth: (v: number) => void;
+  // Brain settings
+  salary: number;
+  monthlyHours: number;
+  hourlyRate: number;
+  safetyMargin: number;
+  dailySavings: number;
+  phantomBalance: number;
+  survivalDays: number;
+  setSalary: (v: number) => void;
+  setMonthlyHours: (v: number) => void;
+  setSafetyMargin: (v: number) => void;
 }
 
 function useFinanceStoreInternal(): FinanceStore {
