@@ -12,6 +12,7 @@ import { HeroChart } from "@/components/HeroChart";
 import { CalendarCard } from "@/components/CalendarCard";
 import { BudgetRuleWidget } from "@/components/BudgetRuleWidget";
 import { SnowballCalculator } from "@/components/SnowballCalculator";
+import { BrainInsightsPanel } from "@/components/BrainInsightsPanel";
 
 const Index = () => {
   const store = useFinanceStore();
