@@ -94,6 +94,9 @@ function useFinanceStoreInternal(): FinanceStore {
   const totalIncome = currentCashflow.incomes.reduce((s, i) => s + i.amount, 0);
   const totalExpense = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
   const expectedBalance = totalIncome - totalExpense;
+  const phantomBalance = expectedBalance - safetyMargin;
+  const avgDailyExpense = totalExpense / 30;
+  const survivalDays = avgDailyExpense > 0 ? Math.floor(expectedBalance / avgDailyExpense) : 0;
 
 
   const allInstallments = banks
