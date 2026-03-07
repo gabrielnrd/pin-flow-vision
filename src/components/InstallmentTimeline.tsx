@@ -166,7 +166,7 @@ export function InstallmentTimeline({ installments, onUpdate, onRemove, onAdd, b
   const grouped = groupByMonth(installments);
 
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "200ms" }}>
+    <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "200ms" }}>
       <div className="flex items-center gap-2 mb-4">
         <Calendar className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Cronograma de Parcelas</h3>

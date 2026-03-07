@@ -23,7 +23,7 @@ export function SpendingChart({ banks }: SpendingChartProps) {
   const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "100ms" }}>
+    <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "100ms" }}>
       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
         Distribuição por Banco
       </h3>

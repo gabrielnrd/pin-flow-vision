@@ -189,7 +189,7 @@ function BrainSettings() {
 
 export function BrainInsightsPanel() {
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in">
+    <div className="glass-card rounded-2xl p-5 animate-float-in">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Brain className="w-5 h-5 text-primary" />

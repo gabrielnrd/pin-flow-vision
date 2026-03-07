@@ -36,7 +36,7 @@ export function SnowballCalculator({ creditors }: SnowballCalculatorProps) {
   if (activeCreditors.length === 0) return null;
 
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "350ms" }}>
+    <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "350ms" }}>
       <div className="flex items-center gap-2 mb-4">
         <Calculator className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Simulador Snowball</h3>

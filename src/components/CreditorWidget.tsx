@@ -104,7 +104,7 @@ export function CreditorWidget({ creditors, totalDebt, totalPaid, onAdd, onRemov
   };
 
   return (
-    <div className="masonry-item glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "300ms" }}>
+    <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "300ms" }}>
       <div className="flex items-center gap-2 mb-4">
         <Users className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Credores</h3>
