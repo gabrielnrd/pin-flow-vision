@@ -78,8 +78,13 @@ function useFinanceStoreInternal(): FinanceStore {
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [savingsGoalMonth, setSavingsGoalMonth] = useState(2000);
+  const [salary, setSalary] = useState(1900);
+  const [monthlyHours, setMonthlyHours] = useState(220);
+  const [safetyMargin, setSafetyMargin] = useState(300);
 
   const currentCashflow = cashflowMonths[selectedMonth];
+  const hourlyRate = monthlyHours > 0 ? salary / monthlyHours : 0;
+  const dailySavings = savingsGoalMonth > 0 ? savingsGoalMonth / 30 : 0;
 
   const totalBankDebt = banks.reduce((sum, b) => sum + b.limitUsed, 0);
   const totalCreditorsDebt = creditors.reduce((s, c) => s + c.totalDebt, 0);
