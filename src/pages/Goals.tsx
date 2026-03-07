@@ -3,6 +3,8 @@ import { useFinanceStore } from "@/stores/financeStore";
 import { Target, Plus, ArrowRight, Check, X, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DolphinEffect } from "@/components/DolphinEffect";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
