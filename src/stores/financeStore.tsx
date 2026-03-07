@@ -71,7 +71,7 @@ export interface FinanceStore {
 }
 
 function useFinanceStoreInternal(): FinanceStore {
-  const [banks, setBanks] = useState<Bank[]>(initialBanks);
+  const [banksRaw, setBanks] = useState<Bank[]>(initialBanks);
   const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(initialCashflow);
   const [creditors, setCreditors] = useState<Creditor[]>(initialCreditors);
   const [goals, setGoals] = useState<Goal[]>(initialGoals);
@@ -81,6 +81,14 @@ function useFinanceStoreInternal(): FinanceStore {
   const [salary, setSalary] = useState(1900);
   const [monthlyHours, setMonthlyHours] = useState(220);
   const [safetyMargin, setSafetyMargin] = useState(300);
+
+  // Derive limitUsed and debtFinal from installments
+  const banks = banksRaw.map((b) => {
+    const usedFromInstallments = b.installments
+      .filter((inst) => inst.status !== "pago")
+      .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+    return { ...b, limitUsed: usedFromInstallments, debtFinal: usedFromInstallments };
+  });
 
   const currentCashflow = cashflowMonths[selectedMonth];
   const hourlyRate = monthlyHours > 0 ? salary / monthlyHours : 0;
@@ -97,7 +105,6 @@ function useFinanceStoreInternal(): FinanceStore {
   const phantomBalance = expectedBalance - safetyMargin;
   const avgDailyExpense = totalExpense / 30;
   const survivalDays = avgDailyExpense > 0 ? Math.floor(expectedBalance / avgDailyExpense) : 0;
-
 
   const allInstallments = banks
     .flatMap((b) =>
