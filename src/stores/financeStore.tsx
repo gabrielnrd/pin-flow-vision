@@ -121,12 +121,9 @@ function useFinanceStoreInternal(): FinanceStore {
     setSelectedMonth((m) => Math.max(m - 1, 0));
   }, []);
 
-  const updateBankBalance = useCallback((bankId: BankId, newUsed: number) => {
-    setBanks((prev) =>
-      prev.map((b) =>
-        b.id === bankId ? { ...b, limitUsed: newUsed, debtFinal: newUsed } : b
-      )
-    );
+  // updateBankBalance is now a no-op since limitUsed is derived from installments
+  const updateBankBalance = useCallback((_bankId: BankId, _newUsed: number) => {
+    // limitUsed is now auto-calculated from installments
   }, []);
 
   const toggleCashflowPaid = useCallback(
