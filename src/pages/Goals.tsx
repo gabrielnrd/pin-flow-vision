@@ -101,6 +101,10 @@ export default function GoalsPage() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <DolphinEffect />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {goals.map((goal, i) => {
           const pct = goal.targetAmount > 0 ? (goal.savedAmount / goal.targetAmount) * 100 : 0;
