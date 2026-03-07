@@ -268,6 +268,9 @@ function useFinanceStoreInternal(): FinanceStore {
     addGoal, removeGoal, updateGoal,
     updateBank, addBank, addInstallment, removeInstallment, updateInstallment,
     setSavingsGoalMonth,
+    salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
+    phantomBalance, survivalDays,
+    setSalary, setMonthlyHours, setSafetyMargin,
   };
 }
 
