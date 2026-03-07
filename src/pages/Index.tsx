@@ -94,6 +94,8 @@ const Index = () => {
         />
 
         <SnowballCalculator creditors={store.creditors} />
+
+        <BrainInsightsPanel />
       </div>
 
       <BankDetailSheet
