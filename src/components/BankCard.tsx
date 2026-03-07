@@ -9,7 +9,6 @@ interface BankCardProps {
   bank: Bank;
   index: number;
   onClick: () => void;
-  onUpdateBalance: (bankId: BankId, newUsed: number) => void;
   onUpdateBank?: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => void;
 }
 
@@ -51,9 +50,7 @@ const bankProgressColor: Record<string, string> = {
 
 const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial"];
 
-export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }: BankCardProps) {
-  const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState("");
+export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) {
   const [editingName, setEditingName] = useState(false);
   const [editName, setEditName] = useState("");
   const [editingLimit, setEditingLimit] = useState(false);
@@ -67,21 +64,6 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
   const textColor = bankTextColor[bank.color] || "text-white";
   const progressColor = bankProgressColor[bank.color] || "[&>div]:bg-white/80";
 
-  const handleStartEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditValue(String(bank.limitUsed));
-    setEditing(true);
-  };
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const val = parseFloat(editValue);
-    if (!isNaN(val) && val >= 0) onUpdateBalance(bank.id, val);
-    setEditing(false);
-  };
-
-  const handleCancel = (e: React.MouseEvent) => { e.stopPropagation(); setEditing(false); };
-
   const cycleStatus = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!onUpdateBank) return;
@@ -89,24 +71,22 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
     onUpdateBank(bank.id, { status: statusOptions[(idx + 1) % statusOptions.length] });
   };
 
-  // Last 4 digits visual
   const cardNumber = `•••• •••• •••• ${String(Math.abs(bank.name.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % 10000)).padStart(4, "0")}`;
 
   return (
     <div
-      onClick={editing || editingName || editingLimit ? undefined : onClick}
-      className={`masonry-item w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""}`}
+      onClick={editingName || editingLimit ? undefined : onClick}
+      className={`w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""}`}
       style={{ animationDelay: `${index * 80}ms`, aspectRatio: "1.586/1" }}
     >
-      {/* Credit card body */}
       <div className={`relative w-full h-full bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between ${textColor}`}>
-        {/* Subtle pattern overlay */}
+        {/* Subtle pattern */}
         <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{
           backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
           backgroundSize: "60px 60px",
         }} />
 
-        {/* Top row: Bank name + status + contactless */}
+        {/* Top: name + status */}
         <div className="relative z-10 flex items-start justify-between">
           <div className="flex-1">
             {editingName ? (
@@ -133,7 +113,7 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
                 {onUpdateBank && <Pencil className="w-3 h-3 opacity-0 group-hover/name:opacity-60 transition-opacity" />}
               </div>
             )}
-            <p className="text-[10px] opacity-60 mt-0.5">{bank.installments.length} parcelas ativas</p>
+            <p className="text-[10px] opacity-60 mt-0.5">{bank.installments.filter(i => i.status !== "pago").length} parcelas ativas</p>
           </div>
           <div className="flex items-center gap-2">
             <Badge
@@ -193,23 +173,12 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
               )}
             </div>
 
-            <div className="text-right">
+            <div className="text-center">
               <p className="text-[10px] opacity-60">Usado</p>
-              {editing ? (
-                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                  <Input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="h-6 text-xs rounded w-20 bg-black/20 border-white/20 text-white" autoFocus />
-                  <button onClick={handleSave} className="p-0.5"><Check className="w-3 h-3" /></button>
-                  <button onClick={handleCancel} className="p-0.5"><X className="w-3 h-3" /></button>
-                </div>
-              ) : (
-                <p
-                  className="text-sm font-bold tabular-nums cursor-pointer group/used flex items-center gap-1"
-                  onClick={handleStartEdit}
-                >
-                  R$ {bank.limitUsed.toLocaleString("pt-BR")}
-                  <Pencil className="w-2.5 h-2.5 opacity-0 group-hover/used:opacity-60 transition-opacity" />
-                </p>
-              )}
+              <p className="text-sm font-bold tabular-nums">
+                R$ {bank.limitUsed.toLocaleString("pt-BR")}
+              </p>
+              <p className="text-[8px] opacity-40">soma das parcelas</p>
             </div>
 
             <div className="text-right">
@@ -237,7 +206,7 @@ export function BankCard({ bank, index, onClick, onUpdateBalance, onUpdateBank }
           </div>
         </div>
 
-        {/* Brand icon bottom-right */}
+        {/* Brand icon */}
         <div className="absolute bottom-4 right-5 opacity-20">
           <CreditCard className="w-10 h-10" />
         </div>
