@@ -50,7 +50,7 @@ export function AddBankCard({ onAdd }: AddBankCardProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="masonry-item w-full rounded-2xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 cursor-pointer flex items-center justify-center gap-3 text-muted-foreground hover:text-primary transition-colors p-8" style={{ aspectRatio: "1.586/1" }}>
+        <div className="w-full rounded-2xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 cursor-pointer flex items-center justify-center gap-3 text-muted-foreground hover:text-primary transition-colors p-8" style={{ aspectRatio: "1.586/1" }}>
           <Plus className="w-6 h-6" />
           <span className="text-sm font-medium">Novo Cartão</span>
         </div>
