@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Car, Plus, Trash2, Pencil, Check, X, Wallet, TrendingDown, DollarSign } from "lucide-react";
 
+type TripDirection = "ida" | "volta";
+
 interface TransportEntry {
   id: string;
   service: string;
+  direction: TripDirection;
   amount: number;
   date: string;
 }
