@@ -102,6 +102,12 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Section: Dívida */}
+      <section>
+        <SectionTitle icon={TrendingDown} title="Dívida" subtitle="Evolução e abatimento mensal da dívida total" />
+        <DebtTrackingChart />
+      </section>
+
       {/* Section: Timeline + Calendar - 2 column */}
       <section>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5">
