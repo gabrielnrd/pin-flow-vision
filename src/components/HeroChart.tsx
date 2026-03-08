@@ -41,6 +41,7 @@ function DebtTrendBadge({ current, previous }: { current: number; previous: numb
 export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth }: HeroChartProps) {
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
+  const [balanceHidden, setBalanceHidden] = useState(false);
 
   const handleSaveGoal = () => {
     const val = parseFloat(goalValue);
