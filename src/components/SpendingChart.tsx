@@ -15,6 +15,8 @@ const BANK_COLORS: Record<string, string> = {
 };
 
 export function SpendingChart({ banks }: SpendingChartProps) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const data = banks.map((b) => ({
     name: b.name,
     value: b.debtFinal,
