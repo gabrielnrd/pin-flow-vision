@@ -3,13 +3,13 @@ import { useFinanceStore } from "@/stores/financeStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  Bar,
   ComposedChart,
 } from "recharts";
 import { TrendingUp } from "lucide-react";
@@ -135,12 +135,13 @@ export function DebtTrackingChart() {
                 dot={false}
                 activeDot={{ r: 5, fill: "hsl(var(--chart-2))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
               />
-              <Bar
+              <Line
+                type="monotone"
                 dataKey="abatimento"
-                fill="hsl(var(--destructive))"
-                opacity={0.4}
-                radius={[4, 4, 0, 0]}
-                barSize={18}
+                stroke="hsl(var(--destructive))"
+                strokeWidth={2}
+                dot={{ r: 3, fill: "hsl(var(--destructive))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: "hsl(var(--destructive))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
               />
             </ComposedChart>
           </ResponsiveContainer>
