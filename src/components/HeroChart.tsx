@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { type CashflowMonth } from "@/data/financialData";
-import { TrendingDown, TrendingUp, Wallet, Target, Pencil, Check, X, Eye, EyeOff } from "lucide-react";
+import { TrendingDown, TrendingUp, Target, Pencil, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useTheme } from "@/hooks/use-theme";
 
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
