@@ -1,4 +1,4 @@
-import { useState, useCallback, createContext, useContext, type ReactNode } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from "react";
 import {
   banks as initialBanks,
   cashflowMonths as initialCashflow,
