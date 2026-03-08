@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -65,6 +65,20 @@ export function AppNav() {
         >
           <Car className="w-4 h-4" />
           Transporte
+        </NavLink>
+        <NavLink
+          to="/divida"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+              isActive
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )
+          }
+        >
+          <TrendingDown className="w-4 h-4" />
+          Dívida
         </NavLink>
         <NavLink
           to="/trade"
