@@ -144,7 +144,7 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
                 <YAxis tick={{ fill: isLight ? "hsl(240 5% 40%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
-                    const labels: Record<string, string> = { entradas: "Entradas", saidas: "Saídas", projected_entradas: "Entradas (Projeção)", projected_saidas: "Saídas (Projeção)" };
+                    const labels: Record<string, string> = { entradas: "Entradas", saidas: "Saídas", future_entradas: "Entradas (Projeção)", future_saidas: "Saídas (Projeção)" };
                     return [`R$ ${value?.toLocaleString("pt-BR") ?? "—"}`, labels[name] || name];
                   }}
                   contentStyle={{
