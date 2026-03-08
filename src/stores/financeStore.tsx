@@ -97,7 +97,7 @@ function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.Set
 
 function useFinanceStoreInternal(): FinanceStore {
   const [banksRaw, setBanks] = usePersisted<Bank[]>("fin_banks", initialBanks);
-  const [cashflowMonths, setCashflowMonths] = usePersisted<CashflowMonth[]>("fin_cashflow", initialCashflow);
+  const [cashflowMonths, setCashflowMonths] = usePersisted<CashflowMonth[]>("fin_cashflow_v2", initialCashflow);
   const [creditors, setCreditors] = usePersisted<Creditor[]>("fin_creditors", initialCreditors);
   const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
