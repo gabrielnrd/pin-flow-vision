@@ -13,12 +13,19 @@ import {
   type MonthlySnapshot,
 } from "@/data/financialData";
 
+export interface IncomeSource {
+  id: string;
+  label: string;
+  amount: number;
+}
+
 export interface FinanceStore {
   banks: Bank[];
   cashflowMonths: CashflowMonth[];
   creditors: Creditor[];
   goals: Goal[];
   monthlySnapshots: MonthlySnapshot[];
+  incomeSources: IncomeSource[];
   selectedMonth: number;
   selectedBank: Bank | null;
   currentCashflow: CashflowMonth;
