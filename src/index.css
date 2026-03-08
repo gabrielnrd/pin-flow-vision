@@ -274,6 +274,24 @@
     animation: fab-breathe 3s ease-in-out infinite;
   }
 
+  /* Wave animation for goal cards */
+  @keyframes wave-drift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-wave {
+    animation: wave-drift 8s linear infinite;
+  }
+
+  /* Shimmer bar for overall progress */
+  @keyframes shimmer-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+  .animate-shimmer-bar {
+    animation: shimmer-slide 3s ease-in-out infinite;
+  }
+
   /* Stagger children */
   .stagger-children > * {
     opacity: 0;
