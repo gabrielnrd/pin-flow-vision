@@ -22,6 +22,7 @@ export default function TransportePage() {
 
   // Add form
   const [service, setService] = useState("99");
+  const [direction, setDirection] = useState<TripDirection>("ida");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
 
