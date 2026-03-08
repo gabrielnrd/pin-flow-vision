@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FinanceProvider } from "@/stores/financeStore";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { AppNav } from "@/components/AppNav";
 import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
@@ -14,21 +15,23 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <FinanceProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppNav />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/objetivos" element={<GoalsPage />} />
-            <Route path="/transporte" element={<TransportePage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </FinanceProvider>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <FinanceProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppNav />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/objetivos" element={<GoalsPage />} />
+              <Route path="/transporte" element={<TransportePage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </FinanceProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

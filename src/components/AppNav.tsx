@@ -1,8 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, Car } from "lucide-react";
+import { LayoutDashboard, Target, Car, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/hooks/use-theme";
 
 export function AppNav() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <nav className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 h-12">
@@ -49,6 +52,19 @@ export function AppNav() {
           <Car className="w-4 h-4" />
           Transporte
         </NavLink>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="ml-auto p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 group"
+          title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+        >
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
+          ) : (
+            <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
+          )}
+        </button>
       </div>
     </nav>
   );
