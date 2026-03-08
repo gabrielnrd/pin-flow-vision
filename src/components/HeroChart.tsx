@@ -89,7 +89,8 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
     });
 
     // Bridge: last past month should also appear in future series for continuity
-    const lastPastIdx = result.findLastIndex((r) => r.entradas !== undefined);
+    let lastPastIdx = -1;
+    for (let i = result.length - 1; i >= 0; i--) { if (result[i].entradas !== undefined) { lastPastIdx = i; break; } }
     if (lastPastIdx >= 0 && lastPastIdx < result.length - 1) {
       result[lastPastIdx].future_entradas = result[lastPastIdx].entradas;
       result[lastPastIdx].future_saidas = result[lastPastIdx].saidas;
