@@ -121,6 +121,10 @@ function useFinanceStoreInternal(): FinanceStore {
   const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
+  const [incomeSources, setIncomeSources] = usePersisted<IncomeSource[]>("fin_incomeSources", [
+    { id: "inc-1", label: "Salário", amount: 8500 },
+    { id: "inc-2", label: "Freelance", amount: 2000 },
+  ]);
   const [savingsGoalMonth, setSavingsGoalMonth] = usePersisted("fin_savingsGoal", 2000);
   const [salary, setSalary] = usePersisted("fin_salary", 1900);
   const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
