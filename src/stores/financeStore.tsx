@@ -336,7 +336,7 @@ function useFinanceStoreInternal(): FinanceStore {
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
     updateBank, addBank, addInstallment, removeInstallment, updateInstallment,
-    setSavingsGoalMonth,
+    setSavingsGoalMonth, addIncomeSource, removeIncomeSource, updateIncomeSource,
     salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
