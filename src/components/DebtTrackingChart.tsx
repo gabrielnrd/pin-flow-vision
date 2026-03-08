@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useFinanceStore } from "@/stores/financeStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  AreaChart,
   Area,
   XAxis,
   YAxis,
@@ -11,11 +10,9 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Bar,
-  BarChart,
   ComposedChart,
-  Legend,
 } from "recharts";
-import { TrendingDown } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 const MONTH_MAP: Record<string, number> = {
   Janeiro: 0, Fevereiro: 1, Março: 2, Abril: 3, Maio: 4, Junho: 5,
@@ -27,12 +24,11 @@ const SHORT_MONTH = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Se
 export function DebtTrackingChart() {
   const store = useFinanceStore();
 
-  const chartData = useMemo(() => {
+  const { chartData, initialDebt } = useMemo(() => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
-    // Calculate initial total debt (bank installments not paid + creditors remaining)
     const initialBankDebt = store.banks.reduce((sum, b) => {
       return sum + b.installments
         .filter((inst) => inst.status !== "pago")
@@ -40,52 +36,51 @@ export function DebtTrackingChart() {
     }, 0);
 
     const creditorsRemaining = store.totalCreditorsDebt - store.totalCreditorsPaid;
-    let runningDebt = initialBankDebt + creditorsRemaining;
+    const totalInitial = initialBankDebt + creditorsRemaining;
+    let cumulativePaid = 0;
 
-    return store.cashflowMonths.map((m, idx) => {
+    const data = store.cashflowMonths.map((m, idx) => {
       const mIdx = MONTH_MAP[m.month] ?? idx;
       const isPast = m.year < currentYear || (m.year === currentYear && mIdx <= currentMonth);
 
-      // Sum paid expenses for this month (represents debt payments / abatements)
-      const paidExpenses = m.expenses
-        .filter((e) => e.paid)
-        .reduce((s, e) => s + e.amount, 0);
-
-      // Sum all expenses for projection
+      const paidExpenses = m.expenses.filter((e) => e.paid).reduce((s, e) => s + e.amount, 0);
       const totalExpenses = m.expenses.reduce((s, e) => s + e.amount, 0);
-
       const abatimento = isPast ? paidExpenses : totalExpenses;
 
-      runningDebt = Math.max(runningDebt - abatimento, 0);
+      cumulativePaid += abatimento;
 
-      const label = `${SHORT_MONTH[mIdx] ?? m.month.slice(0, 3)}`;
+      // Inverted: progress goes UP. Shows how much has been paid off (positive = good)
+      const progresso = cumulativePaid;
+      const remaining = Math.max(totalInitial - cumulativePaid, 0);
 
       return {
-        name: label,
-        saldoDevedor: runningDebt,
+        name: SHORT_MONTH[mIdx] ?? m.month.slice(0, 3),
+        progresso,
         abatimento,
+        remaining,
         isPast,
-        isNegative: runningDebt > 0,
       };
     });
+
+    return { chartData: data, initialDebt: totalInitial };
   }, [store.cashflowMonths, store.banks, store.totalCreditorsDebt, store.totalCreditorsPaid]);
 
   const totalDebt = store.totalDebt;
-  const lastDebt = chartData.length > 0 ? chartData[chartData.length - 1].saldoDevedor : 0;
-  const reductionPercent = totalDebt > 0 ? Math.round(((totalDebt - lastDebt) / totalDebt) * 100) : 0;
+  const totalPaid = chartData.length > 0 ? chartData[chartData.length - 1].progresso : 0;
+  const reductionPercent = initialDebt > 0 ? Math.round((totalPaid / initialDebt) * 100) : 0;
 
   return (
     <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-destructive/10 flex items-center justify-center">
-              <TrendingDown className="w-4.5 h-4.5 text-destructive" />
+            <div className="w-9 h-9 rounded-xl bg-chart-2/10 flex items-center justify-center">
+              <TrendingUp className="w-4.5 h-4.5 text-chart-2" />
             </div>
             <div>
-              <CardTitle className="text-lg font-bold tracking-tight">Evolução da Dívida</CardTitle>
+              <CardTitle className="text-lg font-bold tracking-tight">Progresso de Quitação</CardTitle>
               <p className="text-xs text-muted-foreground">
-                Acompanhe a redução mês a mês
+                Quanto mais alto, mais perto da liberdade
               </p>
             </div>
           </div>
@@ -94,23 +89,18 @@ export function DebtTrackingChart() {
               R$ {totalDebt.toLocaleString("pt-BR")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Projeção: <span className="text-chart-2 font-semibold">-{reductionPercent}%</span> até dez
+              Quitado: <span className="text-chart-2 font-semibold">{reductionPercent}%</span>
             </p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="pt-2">
-        {/* Debt balance area chart */}
-        <div className="h-[280px] w-full">
+        <div className="h-[340px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
-                <linearGradient id="debtGradientRed" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="debtGradientGreen" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                <linearGradient id="progressGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--chart-2))" stopOpacity={0.35} />
                   <stop offset="100%" stopColor="hsl(var(--chart-2))" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
@@ -127,21 +117,28 @@ export function DebtTrackingChart() {
                 tickLine={false}
                 tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
               />
-              <Tooltip content={<DebtTooltip />} />
-              <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" opacity={0.5} />
+              <Tooltip content={<DebtTooltip initialDebt={initialDebt} />} />
+              {/* Target line: full debt paid */}
+              <ReferenceLine
+                y={initialDebt}
+                stroke="hsl(var(--chart-2))"
+                strokeDasharray="6 4"
+                opacity={0.5}
+                label={{ value: "Meta: Dívida Zero", position: "insideTopRight", fill: "hsl(var(--chart-2))", fontSize: 10 }}
+              />
               <Area
                 type="monotone"
-                dataKey="saldoDevedor"
-                stroke="hsl(var(--destructive))"
+                dataKey="progresso"
+                stroke="hsl(var(--chart-2))"
                 strokeWidth={2.5}
-                fill="url(#debtGradientRed)"
+                fill="url(#progressGradient)"
                 dot={false}
-                activeDot={{ r: 5, fill: "hsl(var(--destructive))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: "hsl(var(--chart-2))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
               />
               <Bar
                 dataKey="abatimento"
-                fill="hsl(var(--chart-2))"
-                opacity={0.6}
+                fill="hsl(var(--destructive))"
+                opacity={0.4}
                 radius={[4, 4, 0, 0]}
                 barSize={18}
               />
@@ -149,15 +146,18 @@ export function DebtTrackingChart() {
           </ResponsiveContainer>
         </div>
 
-        {/* Legend */}
         <div className="flex items-center justify-center gap-6 mt-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-destructive/70" />
-            <span>Saldo Devedor</span>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "hsl(var(--chart-2))" }} />
+            <span>Progresso Acumulado</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "hsl(var(--chart-2))" }} />
-            <span>Abatimento Mensal</span>
+            <div className="w-3 h-3 rounded-sm bg-destructive/60" />
+            <span>Pagamento Mensal</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-0 border-t-2 border-dashed" style={{ borderColor: "hsl(var(--chart-2))" }} />
+            <span>Meta</span>
           </div>
         </div>
       </CardContent>
@@ -165,28 +165,35 @@ export function DebtTrackingChart() {
   );
 }
 
-function DebtTooltip({ active, payload, label }: any) {
+function DebtTooltip({ active, payload, label, initialDebt }: any) {
   if (!active || !payload?.length) return null;
+
+  const progresso = payload.find((p: any) => p.dataKey === "progresso")?.value ?? 0;
+  const remaining = Math.max(initialDebt - progresso, 0);
 
   return (
     <div className="bg-popover/95 backdrop-blur-md border border-border rounded-xl px-4 py-3 shadow-xl">
       <p className="text-sm font-semibold text-foreground mb-2">{label}</p>
       {payload.map((entry: any, i: number) => {
-        const isDebt = entry.dataKey === "saldoDevedor";
+        const isProgress = entry.dataKey === "progresso";
         return (
           <div key={i} className="flex items-center justify-between gap-4 text-xs">
             <span className="text-muted-foreground">
-              {isDebt ? "Saldo Devedor" : "Abatimento"}
+              {isProgress ? "Total Quitado" : "Pagamento"}
             </span>
             <span
               className="font-bold"
-              style={{ color: isDebt ? "hsl(var(--destructive))" : "hsl(var(--chart-2))" }}
+              style={{ color: isProgress ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}
             >
               R$ {entry.value?.toLocaleString("pt-BR")}
             </span>
           </div>
         );
       })}
+      <div className="flex items-center justify-between gap-4 text-xs mt-1 pt-1 border-t border-border">
+        <span className="text-muted-foreground">Restante</span>
+        <span className="font-bold text-foreground">R$ {remaining.toLocaleString("pt-BR")}</span>
+      </div>
     </div>
   );
 }
