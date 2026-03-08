@@ -75,6 +75,10 @@ export interface FinanceStore {
   setSalary: (v: number) => void;
   setMonthlyHours: (v: number) => void;
   setSafetyMargin: (v: number) => void;
+  // CRUD - Income Sources
+  addIncomeSource: (label: string, amount: number) => void;
+  removeIncomeSource: (id: string) => void;
+  updateIncomeSource: (id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => void;
 }
 
 function loadFromStorage<T>(key: string, fallback: T): T {
