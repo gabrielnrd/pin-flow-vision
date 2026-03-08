@@ -70,17 +70,34 @@ export interface FinanceStore {
   setSafetyMargin: (v: number) => void;
 }
 
+function loadFromStorage<T>(key: string, fallback: T): T {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [value, setValue] = useState<T>(() => loadFromStorage(key, fallback));
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+  return [value, setValue];
+}
+
 function useFinanceStoreInternal(): FinanceStore {
-  const [banksRaw, setBanks] = useState<Bank[]>(initialBanks);
-  const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(initialCashflow);
-  const [creditors, setCreditors] = useState<Creditor[]>(initialCreditors);
-  const [goals, setGoals] = useState<Goal[]>(initialGoals);
+  const [banksRaw, setBanks] = usePersisted<Bank[]>("fin_banks", initialBanks);
+  const [cashflowMonths, setCashflowMonths] = usePersisted<CashflowMonth[]>("fin_cashflow", initialCashflow);
+  const [creditors, setCreditors] = usePersisted<Creditor[]>("fin_creditors", initialCreditors);
+  const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
-  const [savingsGoalMonth, setSavingsGoalMonth] = useState(2000);
-  const [salary, setSalary] = useState(1900);
-  const [monthlyHours, setMonthlyHours] = useState(220);
-  const [safetyMargin, setSafetyMargin] = useState(300);
+  const [savingsGoalMonth, setSavingsGoalMonth] = usePersisted("fin_savingsGoal", 2000);
+  const [salary, setSalary] = usePersisted("fin_salary", 1900);
+  const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
+  const [safetyMargin, setSafetyMargin] = usePersisted("fin_safetyMargin", 300);
 
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
