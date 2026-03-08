@@ -5,6 +5,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
+  /* Dark theme (default) */
   :root {
     --background: 240 10% 4%;
     --foreground: 0 0% 95%;
@@ -62,6 +63,53 @@
     --sidebar-accent: 240 5% 16%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 240 5% 18%;
+    --sidebar-ring: 265 80% 50%;
+  }
+
+  /* Light theme */
+  .light {
+    --background: 0 0% 97%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 265 80% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 92%;
+    --secondary-foreground: 240 5% 30%;
+
+    --muted: 240 5% 92%;
+    --muted-foreground: 240 5% 45%;
+
+    --accent: 265 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 5% 87%;
+    --input: 240 5% 87%;
+    --ring: 265 80% 50%;
+
+    --income: 145 63% 35%;
+    --expense: 0 72% 48%;
+
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 240 5% 80% / 0.5;
+    --glass-blur: 20px;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 10% 10%;
+    --sidebar-primary: 265 80% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 92%;
+    --sidebar-accent-foreground: 240 10% 10%;
+    --sidebar-border: 240 5% 87%;
     --sidebar-ring: 265 80% 50%;
   }
 }
