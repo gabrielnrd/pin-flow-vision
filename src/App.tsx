@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
 import RendaPage from "./pages/Renda";
 import TransportePage from "./pages/Transporte";
+import TradePage from "./pages/Trade";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
