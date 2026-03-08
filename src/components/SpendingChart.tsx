@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { type Bank } from "@/data/financialData";
+import { useTheme } from "@/hooks/use-theme";
 
 interface SpendingChartProps {
   banks: Bank[];
