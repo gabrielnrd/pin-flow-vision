@@ -138,6 +138,14 @@ export default function TransportePage() {
               <option value="Uber">Uber</option>
               <option value="Outro">Outro</option>
             </select>
+            <select
+              value={direction}
+              onChange={(e) => setDirection(e.target.value as TripDirection)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="ida">🚗 Ida</option>
+              <option value="volta">🔙 Volta</option>
+            </select>
             <Input
               type="number"
               placeholder="Valor (R$)"
