@@ -3,13 +3,13 @@ import { useFinanceStore } from "@/stores/financeStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  Bar,
   ComposedChart,
 } from "recharts";
 import { TrendingUp } from "lucide-react";
