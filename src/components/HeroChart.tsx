@@ -60,42 +60,73 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
     return inc - exp;
   }, [cashflowMonths, selectedMonth]);
 
-  // Build chart data with projection
+  // Build chart data with solid lines for past months & dashed for future
   const chartData = useMemo(() => {
-    const real = cashflowMonths.map((m, i) => ({
-      month: `${m.month.slice(0, 3)}/${m.year}`,
-      entradas: m.incomes.reduce((s, i) => s + i.amount, 0),
-      saidas: m.expenses.reduce((s, e) => s + e.amount, 0),
-      projected_entradas: undefined as number | undefined,
-      projected_saidas: undefined as number | undefined,
-    }));
+    const monthNameToIndex: Record<string, number> = {
+      "Janeiro": 0, "Fevereiro": 1, "Março": 2, "Abril": 3,
+      "Maio": 4, "Junho": 5, "Julho": 6, "Agosto": 7,
+      "Setembro": 8, "Outubro": 9, "Novembro": 10, "Dezembro": 11,
+    };
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-based
+    const currentYear = now.getFullYear();
 
-    // Add projection based on averages
-    if (real.length >= 2) {
-      const last = real[real.length - 1];
-      const avgEntradas = real.reduce((s, r) => s + r.entradas, 0) / real.length;
-      const avgSaidas = real.reduce((s, r) => s + r.saidas, 0) / real.length;
-      // Bridge: last real point also starts projection
-      last.projected_entradas = last.entradas;
-      last.projected_saidas = last.saidas;
+    const monthNames3 = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-      const lastMonth = cashflowMonths[cashflowMonths.length - 1];
-      const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-      const monthIdx = monthNames.indexOf(lastMonth.month.slice(0, 3));
-      
+    const result = cashflowMonths.map((m) => {
+      const mIdx = monthNameToIndex[m.month] ?? 0;
+      const isPast = m.year < currentYear || (m.year === currentYear && mIdx < currentMonth);
+      const entradas = m.incomes.reduce((s, i) => s + i.amount, 0);
+      const saidas = m.expenses.reduce((s, e) => s + e.amount, 0);
+
+      return {
+        month: `${m.month.slice(0, 3)}/${m.year}`,
+        entradas: isPast ? entradas : undefined as number | undefined,
+        saidas: isPast ? saidas : undefined as number | undefined,
+        future_entradas: !isPast ? entradas : undefined as number | undefined,
+        future_saidas: !isPast ? saidas : undefined as number | undefined,
+      };
+    });
+
+    // Bridge: last past month should also appear in future series for continuity
+    let lastPastIdx = -1;
+    for (let i = result.length - 1; i >= 0; i--) { if (result[i].entradas !== undefined) { lastPastIdx = i; break; } }
+    if (lastPastIdx >= 0 && lastPastIdx < result.length - 1) {
+      result[lastPastIdx].future_entradas = result[lastPastIdx].entradas;
+      result[lastPastIdx].future_saidas = result[lastPastIdx].saidas;
+    }
+
+    // Add projected months beyond data
+    if (result.length >= 2) {
+      const allEntradas = cashflowMonths.map((m) => m.incomes.reduce((s, i) => s + i.amount, 0));
+      const allSaidas = cashflowMonths.map((m) => m.expenses.reduce((s, e) => s + e.amount, 0));
+      const avgEntradas = allEntradas.reduce((s, v) => s + v, 0) / allEntradas.length;
+      const avgSaidas = allSaidas.reduce((s, v) => s + v, 0) / allSaidas.length;
+
+      const last = cashflowMonths[cashflowMonths.length - 1];
+      const lastIdx = monthNameToIndex[last.month] ?? 0;
+
+      // Bridge for projection
+      const lastResult = result[result.length - 1];
+      if (lastResult.future_entradas === undefined) {
+        lastResult.future_entradas = lastResult.entradas;
+        lastResult.future_saidas = lastResult.saidas;
+      }
+
       for (let i = 1; i <= 2; i++) {
-        const nextIdx = (monthIdx + i) % 12;
-        const nextYear = lastMonth.year + Math.floor((monthIdx + i) / 12);
-        real.push({
-          month: `${monthNames[nextIdx]}/${nextYear}`,
-          entradas: undefined as any,
-          saidas: undefined as any,
-          projected_entradas: Math.round(avgEntradas * (1 + (Math.random() - 0.5) * 0.05)),
-          projected_saidas: Math.round(avgSaidas * (1 + (Math.random() - 0.5) * 0.05)),
+        const nextIdx = (lastIdx + i) % 12;
+        const nextYear = last.year + Math.floor((lastIdx + i) / 12);
+        result.push({
+          month: `${monthNames3[nextIdx]}/${nextYear}`,
+          entradas: undefined,
+          saidas: undefined,
+          future_entradas: Math.round(avgEntradas * (1 + (Math.random() - 0.5) * 0.05)),
+          future_saidas: Math.round(avgSaidas * (1 + (Math.random() - 0.5) * 0.05)),
         });
       }
     }
-    return real;
+
+    return result;
   }, [cashflowMonths]);
 
   return (
@@ -113,7 +144,7 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
                 <YAxis tick={{ fill: isLight ? "hsl(240 5% 40%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
-                    const labels: Record<string, string> = { entradas: "Entradas", saidas: "Saídas", projected_entradas: "Entradas (Projeção)", projected_saidas: "Saídas (Projeção)" };
+                    const labels: Record<string, string> = { entradas: "Entradas", saidas: "Saídas", future_entradas: "Entradas (Projeção)", future_saidas: "Saídas (Projeção)" };
                     return [`R$ ${value?.toLocaleString("pt-BR") ?? "—"}`, labels[name] || name];
                   }}
                   contentStyle={{
@@ -126,9 +157,9 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
                 />
                 <Line type="monotone" dataKey="entradas" stroke="hsl(145 63% 42%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} />
                 <Line type="monotone" dataKey="saidas" stroke="hsl(0 72% 51%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} />
-                {/* Projection lines */}
-                <Line type="monotone" dataKey="projected_entradas" stroke="hsl(145 63% 42%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(145 63% 42%)", strokeDasharray: "" }} name="projected_entradas" connectNulls={false} />
-                <Line type="monotone" dataKey="projected_saidas" stroke="hsl(0 72% 51%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(0 72% 51%)", strokeDasharray: "" }} name="projected_saidas" connectNulls={false} />
+                {/* Future/dashed lines */}
+                <Line type="monotone" dataKey="future_entradas" stroke="hsl(145 63% 42%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(145 63% 42%)", strokeDasharray: "" }} name="future_entradas" connectNulls={false} />
+                <Line type="monotone" dataKey="future_saidas" stroke="hsl(0 72% 51%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(0 72% 51%)", strokeDasharray: "" }} name="future_saidas" connectNulls={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
