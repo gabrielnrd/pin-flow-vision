@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { type CashflowMonth } from "@/data/financialData";
-import { TrendingDown, TrendingUp, Wallet, Target, Pencil, Check, X, Eye, EyeOff } from "lucide-react";
+import { TrendingDown, TrendingUp, Target, Pencil, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useTheme } from "@/hooks/use-theme";
 
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
@@ -39,9 +40,10 @@ function DebtTrendBadge({ current, previous }: { current: number; previous: numb
 }
 
 export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth }: HeroChartProps) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
-  const [balanceHidden, setBalanceHidden] = useState(false);
 
   const handleSaveGoal = () => {
     const val = parseFloat(goalValue);
@@ -106,15 +108,21 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 5% 18% / 0.5)" />
-                <XAxis dataKey="month" tick={{ fill: "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "hsl(240 5% 90%)" : "hsl(240 5% 18% / 0.5)"} />
+                <XAxis dataKey="month" tick={{ fill: isLight ? "hsl(240 5% 40%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: isLight ? "hsl(240 5% 40%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     const labels: Record<string, string> = { entradas: "Entradas", saidas: "Saídas", projected_entradas: "Entradas (Projeção)", projected_saidas: "Saídas (Projeção)" };
                     return [`R$ ${value?.toLocaleString("pt-BR") ?? "—"}`, labels[name] || name];
                   }}
-                  contentStyle={{ background: "hsl(240 6% 10% / 0.95)", border: "1px solid hsl(240 5% 25% / 0.4)", borderRadius: "12px", fontSize: "12px", color: "hsl(0 0% 95%)" }}
+                  contentStyle={{
+                    background: isLight ? "hsl(0 0% 100% / 0.95)" : "hsl(240 6% 10% / 0.95)",
+                    border: `1px solid ${isLight ? "hsl(240 5% 87%)" : "hsl(240 5% 25% / 0.4)"}`,
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    color: isLight ? "hsl(240 10% 10%)" : "hsl(0 0% 95%)",
+                  }}
                 />
                 <Line type="monotone" dataKey="entradas" stroke="hsl(145 63% 42%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} />
                 <Line type="monotone" dataKey="saidas" stroke="hsl(0 72% 51%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} />

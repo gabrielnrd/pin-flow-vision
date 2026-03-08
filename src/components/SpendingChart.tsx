@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { type Bank } from "@/data/financialData";
+import { useTheme } from "@/hooks/use-theme";
 
 interface SpendingChartProps {
   banks: Bank[];
@@ -14,6 +15,8 @@ const BANK_COLORS: Record<string, string> = {
 };
 
 export function SpendingChart({ banks }: SpendingChartProps) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const data = banks.map((b) => ({
     name: b.name,
     value: b.debtFinal,
@@ -49,11 +52,11 @@ export function SpendingChart({ banks }: SpendingChartProps) {
               <Tooltip
                 formatter={(value: number) => `R$ ${value.toLocaleString("pt-BR")}`}
                 contentStyle={{
-                  background: "hsl(240 6% 10% / 0.95)",
-                  border: "1px solid hsl(240 5% 25% / 0.4)",
+                  background: isLight ? "hsl(0 0% 100% / 0.95)" : "hsl(240 6% 10% / 0.95)",
+                  border: `1px solid ${isLight ? "hsl(240 5% 87%)" : "hsl(240 5% 25% / 0.4)"}`,
                   borderRadius: "12px",
                   fontSize: "12px",
-                  color: "hsl(0 0% 95%)",
+                  color: isLight ? "hsl(240 10% 10%)" : "hsl(0 0% 95%)",
                 }}
               />
             </PieChart>
