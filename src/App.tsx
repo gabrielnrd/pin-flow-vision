@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import { AppNav } from "@/components/AppNav";
 import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
+import RendaPage from "./pages/Renda";
 import TransportePage from "./pages/Transporte";
 import NotFound from "./pages/NotFound";
 
