@@ -157,9 +157,9 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
                 />
                 <Line type="monotone" dataKey="entradas" stroke="hsl(145 63% 42%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} />
                 <Line type="monotone" dataKey="saidas" stroke="hsl(0 72% 51%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} />
-                {/* Projection lines */}
-                <Line type="monotone" dataKey="projected_entradas" stroke="hsl(145 63% 42%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(145 63% 42%)", strokeDasharray: "" }} name="projected_entradas" connectNulls={false} />
-                <Line type="monotone" dataKey="projected_saidas" stroke="hsl(0 72% 51%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(0 72% 51%)", strokeDasharray: "" }} name="projected_saidas" connectNulls={false} />
+                {/* Future/dashed lines */}
+                <Line type="monotone" dataKey="future_entradas" stroke="hsl(145 63% 42%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(145 63% 42%)", strokeDasharray: "" }} name="future_entradas" connectNulls={false} />
+                <Line type="monotone" dataKey="future_saidas" stroke="hsl(0 72% 51%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(0 72% 51%)", strokeDasharray: "" }} name="future_saidas" connectNulls={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
