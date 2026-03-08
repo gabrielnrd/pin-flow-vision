@@ -79,6 +79,22 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   }
 }
 
+function loadCashflowFromStorage(key: string, fallback: CashflowMonth[]): CashflowMonth[] {
+  const stored = loadFromStorage<CashflowMonth[]>(key, fallback);
+  // Merge: keep stored data for existing months, add any new months from fallback
+  const storedKeys = new Set(stored.map((m) => `${m.month}-${m.year}`));
+  const newMonths = fallback.filter((m) => !storedKeys.has(`${m.month}-${m.year}`));
+  return newMonths.length > 0 ? [...stored, ...newMonths] : stored;
+}
+
+function usePersistedCashflow(key: string, fallback: CashflowMonth[]): [CashflowMonth[], React.Dispatch<React.SetStateAction<CashflowMonth[]>>] {
+  const [value, setValue] = useState<CashflowMonth[]>(() => loadCashflowFromStorage(key, fallback));
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+  return [value, setValue];
+}
+
 function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => loadFromStorage(key, fallback));
   useEffect(() => {
@@ -89,7 +105,7 @@ function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.Set
 
 function useFinanceStoreInternal(): FinanceStore {
   const [banksRaw, setBanks] = usePersisted<Bank[]>("fin_banks", initialBanks);
-  const [cashflowMonths, setCashflowMonths] = usePersisted<CashflowMonth[]>("fin_cashflow", initialCashflow);
+  const [cashflowMonths, setCashflowMonths] = usePersistedCashflow("fin_cashflow", initialCashflow);
   const [creditors, setCreditors] = usePersisted<Creditor[]>("fin_creditors", initialCreditors);
   const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
