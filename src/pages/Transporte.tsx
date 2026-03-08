@@ -189,6 +189,10 @@ export default function TransportePage() {
                     <span className="text-sm font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary">
                       {entry.service}
                     </span>
+                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded flex items-center gap-1 ${entry.direction === "ida" ? "bg-accent/50 text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {entry.direction === "ida" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
+                      {entry.direction === "ida" ? "Ida" : "Volta"}
+                    </span>
                     <span className="text-sm text-muted-foreground">
                       {new Date(entry.date + "T12:00:00").toLocaleDateString("pt-BR")}
                     </span>
