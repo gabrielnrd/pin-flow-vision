@@ -311,8 +311,21 @@ function useFinanceStoreInternal(): FinanceStore {
     }));
   }, []);
 
+  // CRUD - Income Sources
+  const addIncomeSource = useCallback((label: string, amount: number) => {
+    setIncomeSources((prev) => [...prev, { id: `inc-${Date.now()}`, label, amount }]);
+  }, []);
+
+  const removeIncomeSource = useCallback((id: string) => {
+    setIncomeSources((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
+  const updateIncomeSource = useCallback((id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => {
+    setIncomeSources((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
+  }, []);
+
   return {
-    banks, cashflowMonths, creditors, goals, monthlySnapshots,
+    banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
     totalDebt, totalIncome, totalExpense, expectedBalance,
     totalCreditorsDebt, totalCreditorsPaid, savingsGoalMonth,
