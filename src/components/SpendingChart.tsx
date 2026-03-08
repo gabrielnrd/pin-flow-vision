@@ -73,7 +73,8 @@ export function SpendingChart({ banks }: SpendingChartProps) {
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-border/50 text-center">
+      <div className="mt-4 pt-3 border-t border-border/50 text-center relative overflow-hidden group/total">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-expense/[0.04] to-transparent opacity-0 group-hover/total:opacity-100 transition-opacity duration-500" />
         <p className="text-xs text-muted-foreground">Dívida Total em Cartões</p>
         <p className="text-xl text-money text-expense">R$ {total.toLocaleString("pt-BR")}</p>
       </div>

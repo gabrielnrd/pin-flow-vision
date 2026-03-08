@@ -58,7 +58,7 @@ const Index = () => {
       {/* Section: Cards */}
       <section>
         <SectionTitle icon={CreditCard} title="Cartões de Crédito" subtitle="Saldo usado é calculado automaticamente pelas parcelas" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 stagger-children">
           {store.banks.map((bank, i) => (
             <BankCard
               key={bank.id}

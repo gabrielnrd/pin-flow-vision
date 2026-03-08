@@ -131,7 +131,7 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 stagger-children">
 
           <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-1">
             <div className="w-11 h-11 rounded-xl bg-expense/15 flex items-center justify-center">
