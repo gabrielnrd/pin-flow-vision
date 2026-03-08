@@ -2,11 +2,14 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, Trash2, Pencil, Check, X, Wallet, TrendingDown, DollarSign } from "lucide-react";
+import { Car, Plus, Trash2, Pencil, Check, X, Wallet, TrendingDown, DollarSign, ArrowRight, ArrowLeft } from "lucide-react";
+
+type TripDirection = "ida" | "volta";
 
 interface TransportEntry {
   id: string;
   service: string;
+  direction: TripDirection;
   amount: number;
   date: string;
 }
@@ -19,6 +22,7 @@ export default function TransportePage() {
 
   // Add form
   const [service, setService] = useState("99");
+  const [direction, setDirection] = useState<TripDirection>("ida");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
 
@@ -29,11 +33,11 @@ export default function TransportePage() {
     const val = parseFloat(amount);
     if (!val || val <= 0) return;
     setEntries((prev) => [
-      { id: `t-${Date.now()}`, service, amount: val, date },
+      { id: `t-${Date.now()}`, service, direction, amount: val, date },
       ...prev,
     ]);
     setAmount("");
-  }, [service, amount, date]);
+  }, [service, direction, amount, date]);
 
   const handleRemove = useCallback((id: string) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -134,6 +138,14 @@ export default function TransportePage() {
               <option value="Uber">Uber</option>
               <option value="Outro">Outro</option>
             </select>
+            <select
+              value={direction}
+              onChange={(e) => setDirection(e.target.value as TripDirection)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="ida">🚗 Ida</option>
+              <option value="volta">🔙 Volta</option>
+            </select>
             <Input
               type="number"
               placeholder="Valor (R$)"
@@ -176,6 +188,10 @@ export default function TransportePage() {
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary">
                       {entry.service}
+                    </span>
+                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded flex items-center gap-1 ${entry.direction === "ida" ? "bg-accent/50 text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {entry.direction === "ida" ? <ArrowRight className="w-3 h-3" /> : <ArrowLeft className="w-3 h-3" />}
+                      {entry.direction === "ida" ? "Ida" : "Volta"}
                     </span>
                     <span className="text-sm text-muted-foreground">
                       {new Date(entry.date + "T12:00:00").toLocaleDateString("pt-BR")}
