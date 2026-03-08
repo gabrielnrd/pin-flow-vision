@@ -22,8 +22,8 @@ export function DashboardHeader({
     <header className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">FinanceFlow</h1>
-          <p className="text-muted-foreground text-sm mt-1">Sua visão financeira completa</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Olá, Gabriel 👋</h1>
+          <p className="text-muted-foreground text-sm mt-1">Bem-vindo de volta à sua visão financeira</p>
         </div>
 
         {/* Month/year filter */}
