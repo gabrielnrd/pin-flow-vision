@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import { AppNav } from "@/components/AppNav";
 import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
+import RendaPage from "./pages/Renda";
 import TransportePage from "./pages/Transporte";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/objetivos" element={<GoalsPage />} />
+              <Route path="/renda" element={<RendaPage />} />
               <Route path="/transporte" element={<TransportePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

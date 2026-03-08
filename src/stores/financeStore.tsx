@@ -13,12 +13,19 @@ import {
   type MonthlySnapshot,
 } from "@/data/financialData";
 
+export interface IncomeSource {
+  id: string;
+  label: string;
+  amount: number;
+}
+
 export interface FinanceStore {
   banks: Bank[];
   cashflowMonths: CashflowMonth[];
   creditors: Creditor[];
   goals: Goal[];
   monthlySnapshots: MonthlySnapshot[];
+  incomeSources: IncomeSource[];
   selectedMonth: number;
   selectedBank: Bank | null;
   currentCashflow: CashflowMonth;
@@ -68,6 +75,10 @@ export interface FinanceStore {
   setSalary: (v: number) => void;
   setMonthlyHours: (v: number) => void;
   setSafetyMargin: (v: number) => void;
+  // CRUD - Income Sources
+  addIncomeSource: (label: string, amount: number) => void;
+  removeIncomeSource: (id: string) => void;
+  updateIncomeSource: (id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => void;
 }
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -110,6 +121,10 @@ function useFinanceStoreInternal(): FinanceStore {
   const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
+  const [incomeSources, setIncomeSources] = usePersisted<IncomeSource[]>("fin_incomeSources", [
+    { id: "inc-1", label: "Salário", amount: 8500 },
+    { id: "inc-2", label: "Freelance", amount: 2000 },
+  ]);
   const [savingsGoalMonth, setSavingsGoalMonth] = usePersisted("fin_savingsGoal", 2000);
   const [salary, setSalary] = usePersisted("fin_salary", 1900);
   const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
@@ -296,8 +311,21 @@ function useFinanceStoreInternal(): FinanceStore {
     }));
   }, []);
 
+  // CRUD - Income Sources
+  const addIncomeSource = useCallback((label: string, amount: number) => {
+    setIncomeSources((prev) => [...prev, { id: `inc-${Date.now()}`, label, amount }]);
+  }, []);
+
+  const removeIncomeSource = useCallback((id: string) => {
+    setIncomeSources((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
+  const updateIncomeSource = useCallback((id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => {
+    setIncomeSources((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
+  }, []);
+
   return {
-    banks, cashflowMonths, creditors, goals, monthlySnapshots,
+    banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
     totalDebt, totalIncome, totalExpense, expectedBalance,
     totalCreditorsDebt, totalCreditorsPaid, savingsGoalMonth,
@@ -308,7 +336,7 @@ function useFinanceStoreInternal(): FinanceStore {
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
     updateBank, addBank, addInstallment, removeInstallment, updateInstallment,
-    setSavingsGoalMonth,
+    setSavingsGoalMonth, addIncomeSource, removeIncomeSource, updateIncomeSource,
     salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
