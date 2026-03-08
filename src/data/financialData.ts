@@ -196,6 +196,111 @@ export const cashflowMonths: CashflowMonth[] = [
       { label: "IPVA", amount: 1800, paid: false },
     ],
   },
+  {
+    month: "Junho",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 2000, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 3800, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+    ],
+  },
+  {
+    month: "Julho",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 1800, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 3500, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+      { label: "Lazer", amount: 700, paid: false },
+    ],
+  },
+  {
+    month: "Agosto",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 2200, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 3200, paid: false },
+      { label: "Alimentação", amount: 1250, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+    ],
+  },
+  {
+    month: "Setembro",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 1500, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 2900, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+      { label: "Lazer", amount: 500, paid: false },
+    ],
+  },
+  {
+    month: "Outubro",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 2000, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 2600, paid: false },
+      { label: "Alimentação", amount: 1200, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+    ],
+  },
+  {
+    month: "Novembro",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 2500, paid: false },
+      { label: "13º (parcela)", amount: 4250, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 2300, paid: false },
+      { label: "Alimentação", amount: 1300, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+      { label: "Lazer", amount: 800, paid: false },
+    ],
+  },
+  {
+    month: "Dezembro",
+    year: 2026,
+    incomes: [
+      { label: "Salário", amount: 8500, paid: false },
+      { label: "Freelance", amount: 1800, paid: false },
+      { label: "13º (parcela)", amount: 4250, paid: false },
+    ],
+    expenses: [
+      { label: "Aluguel", amount: 2800, paid: false },
+      { label: "Parcelas Cartões", amount: 2000, paid: false },
+      { label: "Alimentação", amount: 1500, paid: false },
+      { label: "Transporte", amount: 450, paid: false },
+      { label: "Presentes Natal", amount: 1500, paid: false },
+      { label: "Lazer", amount: 1000, paid: false },
+    ],
+  },
 ];
 
 export const creditors: Creditor[] = [
