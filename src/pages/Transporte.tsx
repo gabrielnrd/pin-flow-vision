@@ -33,11 +33,11 @@ export default function TransportePage() {
     const val = parseFloat(amount);
     if (!val || val <= 0) return;
     setEntries((prev) => [
-      { id: `t-${Date.now()}`, service, amount: val, date },
+      { id: `t-${Date.now()}`, service, direction, amount: val, date },
       ...prev,
     ]);
     setAmount("");
-  }, [service, amount, date]);
+  }, [service, direction, amount, date]);
 
   const handleRemove = useCallback((id: string) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
