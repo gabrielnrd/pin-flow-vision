@@ -87,6 +87,14 @@ function loadCashflowFromStorage(key: string, fallback: CashflowMonth[]): Cashfl
   return newMonths.length > 0 ? [...stored, ...newMonths] : stored;
 }
 
+function usePersistedCashflow(key: string, fallback: CashflowMonth[]): [CashflowMonth[], React.Dispatch<React.SetStateAction<CashflowMonth[]>>] {
+  const [value, setValue] = useState<CashflowMonth[]>(() => loadCashflowFromStorage(key, fallback));
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+  return [value, setValue];
+}
+
 function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => loadFromStorage(key, fallback));
   useEffect(() => {
@@ -97,11 +105,7 @@ function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.Set
 
 function useFinanceStoreInternal(): FinanceStore {
   const [banksRaw, setBanks] = usePersisted<Bank[]>("fin_banks", initialBanks);
-  const [cashflowMonths, setCashflowMonths] = (() => {
-    const [value, setValue] = useState<CashflowMonth[]>(() => loadCashflowFromStorage("fin_cashflow", initialCashflow));
-    useEffect(() => { localStorage.setItem("fin_cashflow", JSON.stringify(value)); }, [value]);
-    return [value, setValue] as const;
-  })();
+  const [cashflowMonths, setCashflowMonths] = usePersistedCashflow("fin_cashflow", initialCashflow);
   const [creditors, setCreditors] = usePersisted<Creditor[]>("fin_creditors", initialCreditors);
   const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
