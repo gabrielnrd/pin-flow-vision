@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Car, Plus, Trash2, Pencil, Check, X, Wallet, TrendingDown, DollarSign } from "lucide-react";
+import { Car, Plus, Trash2, Pencil, Check, X, Wallet, TrendingDown, DollarSign, ArrowRight, ArrowLeft } from "lucide-react";
 
 type TripDirection = "ida" | "volta";
 
