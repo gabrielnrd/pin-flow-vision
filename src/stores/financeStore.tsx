@@ -79,6 +79,14 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   }
 }
 
+function loadCashflowFromStorage(key: string, fallback: CashflowMonth[]): CashflowMonth[] {
+  const stored = loadFromStorage<CashflowMonth[]>(key, fallback);
+  // Merge: keep stored data for existing months, add any new months from fallback
+  const storedKeys = new Set(stored.map((m) => `${m.month}-${m.year}`));
+  const newMonths = fallback.filter((m) => !storedKeys.has(`${m.month}-${m.year}`));
+  return newMonths.length > 0 ? [...stored, ...newMonths] : stored;
+}
+
 function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => loadFromStorage(key, fallback));
   useEffect(() => {
