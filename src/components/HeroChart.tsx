@@ -75,7 +75,7 @@ export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsG
 
     const result = cashflowMonths.map((m) => {
       const mIdx = monthNameToIndex[m.month] ?? 0;
-      const isPast = m.year < currentYear || (m.year === currentYear && mIdx < currentMonth);
+      const isPast = m.year < currentYear || (m.year === currentYear && mIdx <= currentMonth);
       const entradas = m.incomes.reduce((s, i) => s + i.amount, 0);
       const saidas = m.expenses.reduce((s, e) => s + e.amount, 0);
 
