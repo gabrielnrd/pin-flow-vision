@@ -33,8 +33,8 @@ export function ExpenseFAB() {
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
-        <button className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform">
-          <Plus className="w-6 h-6" />
+        <button className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl bg-primary text-primary-foreground animate-fab-breathe flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-200 group">
+          <Plus className="w-6 h-6 transition-transform duration-300 group-hover:rotate-90" />
         </button>
       </DialogTrigger>
       <DialogContent className="glass-card border-border/30 sm:max-w-md">

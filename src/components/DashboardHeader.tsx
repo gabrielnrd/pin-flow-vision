@@ -1,4 +1,5 @@
-import { Filter } from "lucide-react";
+import { useMemo } from "react";
+import { Filter, Sun, Moon, Sunrise, Sunset } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
 
 interface DashboardHeaderProps {
@@ -11,6 +12,14 @@ interface DashboardHeaderProps {
   cashflowMonths: CashflowMonth[];
 }
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return { text: "Bom dia", icon: Sunrise, emoji: "☀️" };
+  if (h >= 12 && h < 18) return { text: "Boa tarde", icon: Sun, emoji: "🌤️" };
+  if (h >= 18 && h < 22) return { text: "Boa noite", icon: Sunset, emoji: "🌙" };
+  return { text: "Boa noite", icon: Moon, emoji: "🌙" };
+}
+
 export function DashboardHeader({
   monthLabel,
   selectedMonth,
@@ -18,26 +27,35 @@ export function DashboardHeader({
   onMonthChange,
   cashflowMonths,
 }: DashboardHeaderProps) {
+  const greeting = useMemo(() => getGreeting(), []);
+
   return (
-    <header className="mb-6">
+    <header className="mb-6 animate-float-in">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Olá, Gabriel 👋</h1>
-          <p className="text-muted-foreground text-sm mt-1">Bem-vindo de volta à sua visão financeira</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1.5">
+            {greeting.emoji} {greeting.text}
+          </p>
+          <h1 className="text-3xl font-bold text-gradient tracking-tight">
+            Gabriel
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1.5">
+            Sua visão financeira atualizada
+          </p>
         </div>
 
         {/* Month/year filter */}
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <div className="flex gap-1">
+          <div className="flex gap-1 bg-secondary/40 rounded-xl p-1">
             {cashflowMonths.map((m, i) => (
               <button
                 key={i}
                 onClick={() => onMonthChange(i)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   i === selectedMonth
-                    ? "bg-primary/15 text-primary"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    ? "bg-primary/20 text-primary shadow-sm shadow-primary/10 pill-active"
+                    : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                 }`}
               >
                 {m.month.slice(0, 3)}

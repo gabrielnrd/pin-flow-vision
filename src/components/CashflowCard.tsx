@@ -227,7 +227,8 @@ export function CashflowCard({
         </div>
       </div>
 
-      <div className="text-center mb-5 py-4 rounded-xl bg-secondary/50">
+      <div className="text-center mb-5 py-4 rounded-xl bg-secondary/50 relative overflow-hidden group/balance">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent opacity-0 group-hover/balance:opacity-100 transition-opacity duration-500" />
         <p className="text-xs text-muted-foreground mb-1">Saldo Esperado</p>
         <p className={`text-3xl text-money ${expectedBalance >= 0 ? "text-income" : "text-expense"}`}>
           R$ {expectedBalance.toLocaleString("pt-BR")}
