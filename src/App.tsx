@@ -31,6 +31,7 @@ const App = () => (
               <Route path="/renda" element={<RendaPage />} />
               <Route path="/transporte" element={<TransportePage />} />
               <Route path="/trade" element={<TradePage />} />
+              <Route path="/divida" element={<DividaPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
