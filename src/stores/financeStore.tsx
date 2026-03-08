@@ -109,7 +109,7 @@ function useFinanceStoreInternal(): FinanceStore {
   const [creditors, setCreditors] = usePersisted<Creditor[]>("fin_creditors", initialCreditors);
   const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
   const [selectedMonth, setSelectedMonth] = useState(0);
-  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
+  const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
   const [savingsGoalMonth, setSavingsGoalMonth] = usePersisted("fin_savingsGoal", 2000);
   const [salary, setSalary] = usePersisted("fin_salary", 1900);
   const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
@@ -122,6 +122,10 @@ function useFinanceStoreInternal(): FinanceStore {
       .reduce((sum, inst) => sum + inst.installmentAmount, 0);
     return { ...b, limitUsed: usedFromInstallments, debtFinal: usedFromInstallments };
   });
+
+  // Always derive selectedBank from the latest banks state
+  const selectedBank = selectedBankId ? banks.find((b) => b.id === selectedBankId) ?? null : null;
+  const setSelectedBank = useCallback((b: Bank | null) => setSelectedBankId(b?.id ?? null), []);
 
   const currentCashflow = cashflowMonths[selectedMonth];
   const hourlyRate = monthlyHours > 0 ? salary / monthlyHours : 0;
