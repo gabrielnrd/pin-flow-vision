@@ -69,7 +69,10 @@ export default function DividaPage() {
         />
       </div>
 
-      <DebtTrackingChart />
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5">
+        <DebtTrackingChart />
+        <FinancialFearGreedGauge />
+      </div>
     </div>
   );
 }
