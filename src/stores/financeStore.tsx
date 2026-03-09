@@ -19,6 +19,13 @@ export interface IncomeSource {
   amount: number;
 }
 
+export interface LifeTask {
+  id: string;
+  title: string;
+  xpReward: number;
+  completedThisWeek: boolean;
+}
+
 export interface FinanceStore {
   banks: Bank[];
   cashflowMonths: CashflowMonth[];
