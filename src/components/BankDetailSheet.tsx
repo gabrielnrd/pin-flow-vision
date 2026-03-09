@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, AlertTriangle, Pencil, Check, X, Trash2, Plus } from "lucide-react";
+import { CreditCard, AlertTriangle, Pencil, Check, X, Trash2, Plus, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { type Bank, type Installment, type BankId } from "@/data/financialData";
 
@@ -22,11 +22,12 @@ const statusStyles = {
 
 const statusCycle: Installment["status"][] = ["pendente", "pago", "atrasado"];
 
-function EditableInstallment({ inst, bankId, onUpdate, onRemove }: {
+function EditableInstallment({ inst, bankId, onUpdate, onRemove, onDuplicate }: {
   inst: Installment;
   bankId: BankId;
   onUpdate: BankDetailSheetProps["onUpdateInstallment"];
   onRemove: BankDetailSheetProps["onRemoveInstallment"];
+  onDuplicate: (inst: Installment) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [desc, setDesc] = useState(inst.description);
@@ -93,6 +94,13 @@ function EditableInstallment({ inst, bankId, onUpdate, onRemove }: {
           >
             {inst.status === "pago" ? "Pago" : inst.status === "atrasado" ? "Atrasado" : "Pendente"}
           </Badge>
+          <button
+            onClick={() => onDuplicate(inst)}
+            className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-primary/20 text-muted-foreground hover:text-primary transition-all"
+            title="Duplicar fatura"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
           <button onClick={() => onRemove(bankId, inst.id)} className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-expense/20 text-muted-foreground hover:text-expense transition-all">
             <Trash2 className="w-3 h-3" />
           </button>
@@ -176,6 +184,19 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
   if (!bank) return null;
 
   const isOverLimit = bank.limitUsed > bank.limitTotal;
+  const freeAmount = bank.limitTotal - bank.limitUsed;
+
+  const handleDuplicate = (inst: Installment) => {
+    onAddInstallment(bank.id, {
+      description: `${inst.description} (cópia)`,
+      installmentAmount: inst.installmentAmount,
+      totalAmount: inst.totalAmount,
+      currentInstallment: inst.currentInstallment,
+      totalInstallments: inst.totalInstallments,
+      dueDate: inst.dueDate,
+      status: "pendente",
+    });
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -192,15 +213,21 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
           </div>
         </SheetHeader>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="p-3 rounded-xl bg-secondary/50">
             <p className="text-xs text-muted-foreground">Limite Total</p>
-            <p className="text-lg text-money text-foreground">R$ {bank.limitTotal.toLocaleString("pt-BR")}</p>
+            <p className="text-base font-bold text-foreground">R$ {bank.limitTotal.toLocaleString("pt-BR")}</p>
           </div>
           <div className="p-3 rounded-xl bg-secondary/50">
             <p className="text-xs text-muted-foreground">Usado</p>
-            <p className={`text-lg text-money ${isOverLimit ? "text-expense" : "text-foreground"}`}>
+            <p className={`text-base font-bold ${isOverLimit ? "text-expense" : "text-foreground"}`}>
               R$ {bank.limitUsed.toLocaleString("pt-BR")}
+            </p>
+          </div>
+          <div className={`p-3 rounded-xl ${isOverLimit ? "bg-expense/10 border border-expense/20" : "bg-income/10 border border-income/20"}`}>
+            <p className="text-xs text-muted-foreground">{isOverLimit ? "Excedido" : "Livre"}</p>
+            <p className={`text-base font-bold ${isOverLimit ? "text-expense" : "text-income"}`}>
+              R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}
             </p>
           </div>
         </div>
@@ -219,7 +246,14 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
         </h4>
         <div className="space-y-2">
           {bank.installments.map((inst) => (
-            <EditableInstallment key={inst.id} inst={inst} bankId={bank.id} onUpdate={onUpdateInstallment} onRemove={onRemoveInstallment} />
+            <EditableInstallment
+              key={inst.id}
+              inst={inst}
+              bankId={bank.id}
+              onUpdate={onUpdateInstallment}
+              onRemove={onRemoveInstallment}
+              onDuplicate={handleDuplicate}
+            />
           ))}
         </div>
 
