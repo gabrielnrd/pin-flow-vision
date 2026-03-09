@@ -86,6 +86,13 @@ export interface FinanceStore {
   addIncomeSource: (label: string, amount: number) => void;
   removeIncomeSource: (id: string) => void;
   updateIncomeSource: (id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => void;
+  // LifeGame
+  lifeXp: number;
+  lifeTasks: LifeTask[];
+  addLifeTask: (title: string, xpReward: number) => void;
+  removeLifeTask: (id: string) => void;
+  completeLifeTask: (id: string) => void;
+  resetWeeklyTasks: () => void;
 }
 
 function loadFromStorage<T>(key: string, fallback: T): T {
