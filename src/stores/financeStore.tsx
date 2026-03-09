@@ -344,6 +344,28 @@ function useFinanceStoreInternal(): FinanceStore {
     setIncomeSources((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
   }, []);
 
+  const addLifeTask = useCallback((title: string, xpReward: number) => {
+    setLifeTasks((prev) => [...prev, { id: `lt-${Date.now()}`, title, xpReward, completedThisWeek: false }]);
+  }, [setLifeTasks]);
+
+  const removeLifeTask = useCallback((id: string) => {
+    setLifeTasks((prev) => prev.filter((t) => t.id !== id));
+  }, [setLifeTasks]);
+
+  const completeLifeTask = useCallback((id: string) => {
+    setLifeTasks((prev) => prev.map((t) => {
+      if (t.id === id && !t.completedThisWeek) {
+        setLifeXp((xp) => xp + t.xpReward);
+        return { ...t, completedThisWeek: true };
+      }
+      return t;
+    }));
+  }, [setLifeTasks, setLifeXp]);
+
+  const resetWeeklyTasks = useCallback(() => {
+    setLifeTasks((prev) => prev.map((t) => ({ ...t, completedThisWeek: false })));
+  }, [setLifeTasks]);
+
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
