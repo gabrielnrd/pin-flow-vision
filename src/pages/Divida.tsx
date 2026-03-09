@@ -1,4 +1,5 @@
 import { DebtTrackingChart } from "@/components/DebtTrackingChart";
+import { FinancialFearGreedGauge } from "@/components/FinancialFearGreedGauge";
 import { useFinanceStore } from "@/stores/financeStore";
 import { TrendingDown, TrendingUp, Percent, CalendarDays } from "lucide-react";
 
