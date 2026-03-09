@@ -19,6 +19,13 @@ export interface IncomeSource {
   amount: number;
 }
 
+export interface LifeTask {
+  id: string;
+  title: string;
+  xpReward: number;
+  completedThisWeek: boolean;
+}
+
 export interface FinanceStore {
   banks: Bank[];
   cashflowMonths: CashflowMonth[];
@@ -79,6 +86,13 @@ export interface FinanceStore {
   addIncomeSource: (label: string, amount: number) => void;
   removeIncomeSource: (id: string) => void;
   updateIncomeSource: (id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => void;
+  // LifeGame
+  lifeXp: number;
+  lifeTasks: LifeTask[];
+  addLifeTask: (title: string, xpReward: number) => void;
+  removeLifeTask: (id: string) => void;
+  completeLifeTask: (id: string) => void;
+  resetWeeklyTasks: () => void;
 }
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -129,6 +143,12 @@ function useFinanceStoreInternal(): FinanceStore {
   const [salary, setSalary] = usePersisted("fin_salary", 1900);
   const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
   const [safetyMargin, setSafetyMargin] = usePersisted("fin_safetyMargin", 300);
+
+  const [lifeXp, setLifeXp] = usePersisted("fin_lifeXp", 0);
+  const [lifeTasks, setLifeTasks] = usePersisted<LifeTask[]>("fin_lifeTasks", [
+    { id: "task-1", title: "Ler 1 livro", xpReward: 100, completedThisWeek: false },
+    { id: "task-2", title: "Ir para a academia 3x", xpReward: 50, completedThisWeek: false }
+  ]);
 
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
@@ -324,6 +344,28 @@ function useFinanceStoreInternal(): FinanceStore {
     setIncomeSources((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
   }, []);
 
+  const addLifeTask = useCallback((title: string, xpReward: number) => {
+    setLifeTasks((prev) => [...prev, { id: `lt-${Date.now()}`, title, xpReward, completedThisWeek: false }]);
+  }, [setLifeTasks]);
+
+  const removeLifeTask = useCallback((id: string) => {
+    setLifeTasks((prev) => prev.filter((t) => t.id !== id));
+  }, [setLifeTasks]);
+
+  const completeLifeTask = useCallback((id: string) => {
+    setLifeTasks((prev) => prev.map((t) => {
+      if (t.id === id && !t.completedThisWeek) {
+        setLifeXp((xp) => xp + t.xpReward);
+        return { ...t, completedThisWeek: true };
+      }
+      return t;
+    }));
+  }, [setLifeTasks, setLifeXp]);
+
+  const resetWeeklyTasks = useCallback(() => {
+    setLifeTasks((prev) => prev.map((t) => ({ ...t, completedThisWeek: false })));
+  }, [setLifeTasks]);
+
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
@@ -340,6 +382,7 @@ function useFinanceStoreInternal(): FinanceStore {
     salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
+    lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
   };
 }
 

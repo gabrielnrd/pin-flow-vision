@@ -12,6 +12,7 @@ import RendaPage from "./pages/Renda";
 import TransportePage from "./pages/Transporte";
 import TradePage from "./pages/Trade";
 import DividaPage from "./pages/Divida";
+import LifeGamePage from "./pages/LifeGame";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/transporte" element={<TransportePage />} />
               <Route path="/trade" element={<TradePage />} />
               <Route path="/divida" element={<DividaPage />} />
+              <Route path="/lifegame" element={<LifeGamePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
