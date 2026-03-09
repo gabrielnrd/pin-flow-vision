@@ -94,6 +94,20 @@ export function AppNav() {
           <TrendingUp className="w-4 h-4" />
           Trade
         </NavLink>
+        <NavLink
+          to="/lifegame"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+              isActive
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )
+          }
+        >
+          <Gamepad2 className="w-4 h-4" />
+          LifeGame
+        </NavLink>
 
         {/* Theme toggle */}
         <button

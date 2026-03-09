@@ -382,6 +382,7 @@ function useFinanceStoreInternal(): FinanceStore {
     salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
+    lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
   };
 }
 
