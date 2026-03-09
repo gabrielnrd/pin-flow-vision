@@ -1,4 +1,5 @@
 import { DebtTrackingChart } from "@/components/DebtTrackingChart";
+import { FinancialFearGreedGauge } from "@/components/FinancialFearGreedGauge";
 import { useFinanceStore } from "@/stores/financeStore";
 import { TrendingDown, TrendingUp, Percent, CalendarDays } from "lucide-react";
 
@@ -68,7 +69,10 @@ export default function DividaPage() {
         />
       </div>
 
-      <DebtTrackingChart />
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5">
+        <DebtTrackingChart />
+        <FinancialFearGreedGauge />
+      </div>
     </div>
   );
 }
