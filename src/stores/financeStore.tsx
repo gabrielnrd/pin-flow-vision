@@ -144,6 +144,12 @@ function useFinanceStoreInternal(): FinanceStore {
   const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
   const [safetyMargin, setSafetyMargin] = usePersisted("fin_safetyMargin", 300);
 
+  const [lifeXp, setLifeXp] = usePersisted("fin_lifeXp", 0);
+  const [lifeTasks, setLifeTasks] = usePersisted<LifeTask[]>("fin_lifeTasks", [
+    { id: "task-1", title: "Ler 1 livro", xpReward: 100, completedThisWeek: false },
+    { id: "task-2", title: "Ir para a academia 3x", xpReward: 50, completedThisWeek: false }
+  ]);
+
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
     const usedFromInstallments = b.installments
