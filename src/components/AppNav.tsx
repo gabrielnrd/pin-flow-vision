@@ -1,7 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2 } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AppNav() {
   const { theme, toggleTheme } = useTheme();
