@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export function AppNav() {
   const { theme, toggleTheme } = useTheme();
+  const { signOut, displayName } = useAuth();
 
   return (
     <nav className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50">
