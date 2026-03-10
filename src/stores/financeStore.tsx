@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext, type ReactNode } from "react";
 import {
   banks as initialBanks,
   cashflowMonths as initialCashflow,
@@ -12,6 +12,8 @@ import {
   type Goal,
   type MonthlySnapshot,
 } from "@/data/financialData";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface IncomeSource {
   id: string;
@@ -24,6 +26,20 @@ export interface LifeTask {
   title: string;
   xpReward: number;
   completedThisWeek: boolean;
+}
+
+interface PersistedData {
+  banks: Bank[];
+  cashflowMonths: CashflowMonth[];
+  creditors: Creditor[];
+  goals: Goal[];
+  incomeSources: IncomeSource[];
+  savingsGoalMonth: number;
+  salary: number;
+  monthlyHours: number;
+  safetyMargin: number;
+  lifeXp: number;
+  lifeTasks: LifeTask[];
 }
 
 export interface FinanceStore {
@@ -51,27 +67,24 @@ export interface FinanceStore {
   updateBankBalance: (bankId: BankId, newUsed: number) => void;
   toggleCashflowPaid: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   depositToGoal: (goalId: string, amount: number) => void;
-  // CRUD - Cashflow
   addCashflowItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number) => void;
   removeCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   updateCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number) => void;
-  // CRUD - Creditors
   addCreditor: (name: string, totalDebt: number) => void;
   removeCreditor: (id: string) => void;
   updateCreditor: (id: string, updates: Partial<Pick<Creditor, "name" | "totalDebt" | "amountPaid">>) => void;
-  // CRUD - Goals
   addGoal: (title: string, targetAmount: number) => void;
   removeGoal: (id: string) => void;
   updateGoal: (id: string, updates: Partial<Pick<Goal, "title" | "targetAmount" | "image">>) => void;
-  // CRUD - Banks
   updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => void;
   addBank: (name: string, limitTotal: number, color: string, glowClass: string) => void;
   addInstallment: (bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => void;
   removeInstallment: (bankId: BankId, installmentId: string) => void;
   updateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => void;
-  // Savings goal
   setSavingsGoalMonth: (v: number) => void;
-  // Brain settings
+  addIncomeSource: (label: string, amount: number) => void;
+  removeIncomeSource: (id: string) => void;
+  updateIncomeSource: (id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => void;
   salary: number;
   monthlyHours: number;
   hourlyRate: number;
@@ -82,18 +95,34 @@ export interface FinanceStore {
   setSalary: (v: number) => void;
   setMonthlyHours: (v: number) => void;
   setSafetyMargin: (v: number) => void;
-  // CRUD - Income Sources
-  addIncomeSource: (label: string, amount: number) => void;
-  removeIncomeSource: (id: string) => void;
-  updateIncomeSource: (id: string, updates: Partial<Pick<IncomeSource, "label" | "amount">>) => void;
-  // LifeGame
   lifeXp: number;
   lifeTasks: LifeTask[];
   addLifeTask: (title: string, xpReward: number) => void;
   removeLifeTask: (id: string) => void;
   completeLifeTask: (id: string) => void;
   resetWeeklyTasks: () => void;
+  cloudLoading: boolean;
 }
+
+const DEFAULTS: PersistedData = {
+  banks: initialBanks,
+  cashflowMonths: initialCashflow,
+  creditors: initialCreditors,
+  goals: initialGoals,
+  incomeSources: [
+    { id: "inc-1", label: "Salário", amount: 8500 },
+    { id: "inc-2", label: "Freelance", amount: 2000 },
+  ],
+  savingsGoalMonth: 2000,
+  salary: 1900,
+  monthlyHours: 220,
+  safetyMargin: 300,
+  lifeXp: 0,
+  lifeTasks: [
+    { id: "task-1", title: "Ler 1 livro", xpReward: 100, completedThisWeek: false },
+    { id: "task-2", title: "Ir para a academia 3x", xpReward: 50, completedThisWeek: false },
+  ],
+};
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -104,51 +133,162 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   }
 }
 
-function loadCashflowFromStorage(key: string, fallback: CashflowMonth[]): CashflowMonth[] {
-  const stored = loadFromStorage<CashflowMonth[]>(key, fallback);
-  // Merge: keep stored data for existing months, add any new months from fallback
+function mergeCashflow(stored: CashflowMonth[], fallback: CashflowMonth[]): CashflowMonth[] {
   const storedKeys = new Set(stored.map((m) => `${m.month}-${m.year}`));
   const newMonths = fallback.filter((m) => !storedKeys.has(`${m.month}-${m.year}`));
   return newMonths.length > 0 ? [...stored, ...newMonths] : stored;
 }
 
-function usePersistedCashflow(key: string, fallback: CashflowMonth[]): [CashflowMonth[], React.Dispatch<React.SetStateAction<CashflowMonth[]>>] {
-  const [value, setValue] = useState<CashflowMonth[]>(() => loadCashflowFromStorage(key, fallback));
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-  return [value, setValue];
+function getLocalData(): PersistedData {
+  return {
+    banks: loadFromStorage("fin_banks", DEFAULTS.banks),
+    cashflowMonths: mergeCashflow(loadFromStorage("fin_cashflow", DEFAULTS.cashflowMonths), DEFAULTS.cashflowMonths),
+    creditors: loadFromStorage("fin_creditors", DEFAULTS.creditors),
+    goals: loadFromStorage("fin_goals", DEFAULTS.goals),
+    incomeSources: loadFromStorage("fin_incomeSources", DEFAULTS.incomeSources),
+    savingsGoalMonth: loadFromStorage("fin_savingsGoal", DEFAULTS.savingsGoalMonth),
+    salary: loadFromStorage("fin_salary", DEFAULTS.salary),
+    monthlyHours: loadFromStorage("fin_monthlyHours", DEFAULTS.monthlyHours),
+    safetyMargin: loadFromStorage("fin_safetyMargin", DEFAULTS.safetyMargin),
+    lifeXp: loadFromStorage("fin_lifeXp", DEFAULTS.lifeXp),
+    lifeTasks: loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks),
+  };
 }
 
-function usePersisted<T>(key: string, fallback: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [value, setValue] = useState<T>(() => loadFromStorage(key, fallback));
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-  return [value, setValue];
+function saveToLocal(data: PersistedData) {
+  localStorage.setItem("fin_banks", JSON.stringify(data.banks));
+  localStorage.setItem("fin_cashflow", JSON.stringify(data.cashflowMonths));
+  localStorage.setItem("fin_creditors", JSON.stringify(data.creditors));
+  localStorage.setItem("fin_goals", JSON.stringify(data.goals));
+  localStorage.setItem("fin_incomeSources", JSON.stringify(data.incomeSources));
+  localStorage.setItem("fin_savingsGoal", JSON.stringify(data.savingsGoalMonth));
+  localStorage.setItem("fin_salary", JSON.stringify(data.salary));
+  localStorage.setItem("fin_monthlyHours", JSON.stringify(data.monthlyHours));
+  localStorage.setItem("fin_safetyMargin", JSON.stringify(data.safetyMargin));
+  localStorage.setItem("fin_lifeXp", JSON.stringify(data.lifeXp));
+  localStorage.setItem("fin_lifeTasks", JSON.stringify(data.lifeTasks));
 }
 
 function useFinanceStoreInternal(): FinanceStore {
-  const [banksRaw, setBanks] = usePersisted<Bank[]>("fin_banks", initialBanks);
-  const [cashflowMonths, setCashflowMonths] = usePersistedCashflow("fin_cashflow", initialCashflow);
-  const [creditors, setCreditors] = usePersisted<Creditor[]>("fin_creditors", initialCreditors);
-  const [goals, setGoals] = usePersisted<Goal[]>("fin_goals", initialGoals);
+  const { user } = useAuth();
+  const [cloudLoading, setCloudLoading] = useState(!!user);
+  const [banksRaw, setBanks] = useState<Bank[]>(DEFAULTS.banks);
+  const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(DEFAULTS.cashflowMonths);
+  const [creditors, setCreditors] = useState<Creditor[]>(DEFAULTS.creditors);
+  const [goals, setGoals] = useState<Goal[]>(DEFAULTS.goals);
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
-  const [incomeSources, setIncomeSources] = usePersisted<IncomeSource[]>("fin_incomeSources", [
-    { id: "inc-1", label: "Salário", amount: 8500 },
-    { id: "inc-2", label: "Freelance", amount: 2000 },
-  ]);
-  const [savingsGoalMonth, setSavingsGoalMonth] = usePersisted("fin_savingsGoal", 2000);
-  const [salary, setSalary] = usePersisted("fin_salary", 1900);
-  const [monthlyHours, setMonthlyHours] = usePersisted("fin_monthlyHours", 220);
-  const [safetyMargin, setSafetyMargin] = usePersisted("fin_safetyMargin", 300);
+  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(DEFAULTS.incomeSources);
+  const [savingsGoalMonth, setSavingsGoalMonth] = useState(DEFAULTS.savingsGoalMonth);
+  const [salary, setSalary] = useState(DEFAULTS.salary);
+  const [monthlyHours, setMonthlyHours] = useState(DEFAULTS.monthlyHours);
+  const [safetyMargin, setSafetyMargin] = useState(DEFAULTS.safetyMargin);
+  const [lifeXp, setLifeXp] = useState(DEFAULTS.lifeXp);
+  const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(DEFAULTS.lifeTasks);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initialLoadDone = useRef(false);
 
-  const [lifeXp, setLifeXp] = usePersisted("fin_lifeXp", 0);
-  const [lifeTasks, setLifeTasks] = usePersisted<LifeTask[]>("fin_lifeTasks", [
-    { id: "task-1", title: "Ler 1 livro", xpReward: 100, completedThisWeek: false },
-    { id: "task-2", title: "Ir para a academia 3x", xpReward: 50, completedThisWeek: false }
-  ]);
+  // Load data from cloud on login
+  useEffect(() => {
+    if (!user) {
+      // Load from localStorage when not logged in
+      const local = getLocalData();
+      setBanks(local.banks);
+      setCashflowMonths(local.cashflowMonths);
+      setCreditors(local.creditors);
+      setGoals(local.goals);
+      setIncomeSources(local.incomeSources);
+      setSavingsGoalMonth(local.savingsGoalMonth);
+      setSalary(local.salary);
+      setMonthlyHours(local.monthlyHours);
+      setSafetyMargin(local.safetyMargin);
+      setLifeXp(local.lifeXp);
+      setLifeTasks(local.lifeTasks);
+      initialLoadDone.current = true;
+      setCloudLoading(false);
+      return;
+    }
+
+    setCloudLoading(true);
+    (async () => {
+      const { data } = await supabase
+        .from("user_financial_data")
+        .select("data")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data?.data && typeof data.data === "object") {
+        const d = data.data as any as PersistedData;
+        setBanks(d.banks ?? DEFAULTS.banks);
+        setCashflowMonths(d.cashflowMonths ? mergeCashflow(d.cashflowMonths, DEFAULTS.cashflowMonths) : DEFAULTS.cashflowMonths);
+        setCreditors(d.creditors ?? DEFAULTS.creditors);
+        setGoals(d.goals ?? DEFAULTS.goals);
+        setIncomeSources(d.incomeSources ?? DEFAULTS.incomeSources);
+        setSavingsGoalMonth(d.savingsGoalMonth ?? DEFAULTS.savingsGoalMonth);
+        setSalary(d.salary ?? DEFAULTS.salary);
+        setMonthlyHours(d.monthlyHours ?? DEFAULTS.monthlyHours);
+        setSafetyMargin(d.safetyMargin ?? DEFAULTS.safetyMargin);
+        setLifeXp(d.lifeXp ?? DEFAULTS.lifeXp);
+        setLifeTasks(d.lifeTasks ?? DEFAULTS.lifeTasks);
+      } else {
+        // First login - migrate localStorage data to cloud
+        const local = getLocalData();
+        setBanks(local.banks);
+        setCashflowMonths(local.cashflowMonths);
+        setCreditors(local.creditors);
+        setGoals(local.goals);
+        setIncomeSources(local.incomeSources);
+        setSavingsGoalMonth(local.savingsGoalMonth);
+        setSalary(local.salary);
+        setMonthlyHours(local.monthlyHours);
+        setSafetyMargin(local.safetyMargin);
+        setLifeXp(local.lifeXp);
+        setLifeTasks(local.lifeTasks);
+
+        // Save local data to cloud
+        await supabase.from("user_financial_data").upsert({
+          user_id: user.id,
+          data: local as any,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "user_id" });
+      }
+      initialLoadDone.current = true;
+      setCloudLoading(false);
+    })();
+  }, [user]);
+
+  // Debounced save to cloud + localStorage
+  const getPersistedData = useCallback((): PersistedData => ({
+    banks: banksRaw,
+    cashflowMonths,
+    creditors,
+    goals,
+    incomeSources,
+    savingsGoalMonth,
+    salary,
+    monthlyHours,
+    safetyMargin,
+    lifeXp,
+    lifeTasks,
+  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks]);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) return;
+
+    const data = getPersistedData();
+    saveToLocal(data);
+
+    if (!user) return;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      await supabase.from("user_financial_data").upsert({
+        user_id: user.id,
+        data: data as any,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+    }, 1500);
+  }, [getPersistedData, user]);
 
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
@@ -158,7 +298,6 @@ function useFinanceStoreInternal(): FinanceStore {
     return { ...b, limitUsed: usedFromInstallments, debtFinal: usedFromInstallments };
   });
 
-  // Always derive selectedBank from the latest banks state
   const selectedBank = selectedBankId ? banks.find((b) => b.id === selectedBankId) ?? null : null;
   const setSelectedBank = useCallback((b: Bank | null) => setSelectedBankId(b?.id ?? null), []);
 
@@ -193,10 +332,7 @@ function useFinanceStoreInternal(): FinanceStore {
     setSelectedMonth((m) => Math.max(m - 1, 0));
   }, []);
 
-  // updateBankBalance is now a no-op since limitUsed is derived from installments
-  const updateBankBalance = useCallback((_bankId: BankId, _newUsed: number) => {
-    // limitUsed is now auto-calculated from installments
-  }, []);
+  const updateBankBalance = useCallback((_bankId: BankId, _newUsed: number) => {}, []);
 
   const toggleCashflowPaid = useCallback(
     (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => {
@@ -222,7 +358,6 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  // CRUD - Cashflow
   const addCashflowItem = useCallback((monthIdx: number, type: "incomes" | "expenses", label: string, amount: number) => {
     setCashflowMonths((prev) =>
       prev.map((m, mi) => {
@@ -253,7 +388,6 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  // CRUD - Creditors
   const addCreditor = useCallback((name: string, totalDebt: number) => {
     setCreditors((prev) => [...prev, { id: `cr-${Date.now()}`, name, totalDebt, amountPaid: 0 }]);
   }, []);
@@ -268,7 +402,6 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  // CRUD - Goals
   const addGoal = useCallback((title: string, targetAmount: number) => {
     const colors = ["265 80% 50%", "145 63% 42%", "45 100% 50%", "27 100% 50%", "200 80% 50%"];
     const emojis = ["🎯", "💰", "🌟", "🏆", "🚀"];
@@ -289,7 +422,6 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  // CRUD - Banks
   const updateBank = useCallback((bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => {
     setBanks((prev) => prev.map((b) => (b.id === bankId ? { ...b, ...updates } : b)));
   }, []);
@@ -297,15 +429,8 @@ function useFinanceStoreInternal(): FinanceStore {
   const addBank = useCallback((name: string, limitTotal: number, color: string, glowClass: string) => {
     const id = `bank-${Date.now()}` as BankId;
     setBanks((prev) => [...prev, {
-      id,
-      name,
-      color,
-      glowClass,
-      limitTotal,
-      limitUsed: 0,
-      debtFinal: 0,
-      status: "pendente" as const,
-      installments: [],
+      id, name, color, glowClass, limitTotal, limitUsed: 0, debtFinal: 0,
+      status: "pendente" as const, installments: [],
     }]);
   }, []);
 
@@ -331,7 +456,6 @@ function useFinanceStoreInternal(): FinanceStore {
     }));
   }, []);
 
-  // CRUD - Income Sources
   const addIncomeSource = useCallback((label: string, amount: number) => {
     setIncomeSources((prev) => [...prev, { id: `inc-${Date.now()}`, label, amount }]);
   }, []);
@@ -346,11 +470,11 @@ function useFinanceStoreInternal(): FinanceStore {
 
   const addLifeTask = useCallback((title: string, xpReward: number) => {
     setLifeTasks((prev) => [...prev, { id: `lt-${Date.now()}`, title, xpReward, completedThisWeek: false }]);
-  }, [setLifeTasks]);
+  }, []);
 
   const removeLifeTask = useCallback((id: string) => {
     setLifeTasks((prev) => prev.filter((t) => t.id !== id));
-  }, [setLifeTasks]);
+  }, []);
 
   const completeLifeTask = useCallback((id: string) => {
     setLifeTasks((prev) => prev.map((t) => {
@@ -360,11 +484,11 @@ function useFinanceStoreInternal(): FinanceStore {
       }
       return t;
     }));
-  }, [setLifeTasks, setLifeXp]);
+  }, []);
 
   const resetWeeklyTasks = useCallback(() => {
     setLifeTasks((prev) => prev.map((t) => ({ ...t, completedThisWeek: false })));
-  }, [setLifeTasks]);
+  }, []);
 
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
@@ -383,6 +507,7 @@ function useFinanceStoreInternal(): FinanceStore {
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
     lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
+    cloudLoading,
   };
 }
 
