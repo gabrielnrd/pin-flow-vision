@@ -111,18 +111,32 @@ export function AppNav() {
           LifeGame
         </NavLink>
 
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="ml-auto p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 group"
-          title={theme === "dark" ? "Modo claro" : "Modo escuro"}
-        >
-          {theme === "dark" ? (
-            <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
-          ) : (
-            <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
+        {/* Spacer + user actions */}
+        <div className="ml-auto flex items-center gap-1">
+          {displayName && (
+            <span className="text-xs text-muted-foreground hidden sm:inline mr-2">
+              {displayName}
+            </span>
           )}
-        </button>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 group"
+            title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+          >
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
+            ) : (
+              <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
+            )}
+          </button>
+          <button
+            onClick={signOut}
+            className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            title="Sair"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </nav>
   );
