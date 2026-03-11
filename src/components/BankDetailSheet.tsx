@@ -3,7 +3,18 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, AlertTriangle, Pencil, Check, X, Trash2, Plus, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { type Bank, type Installment, type BankId } from "@/data/financialData";
+
+const BANK_CATEGORIES = [
+  { label: "Nubank", color: "bank-nubank", glow: "glow-nubank" },
+  { label: "Inter", color: "bank-inter", glow: "glow-inter" },
+  { label: "C6 Bank", color: "bank-c6", glow: "glow-c6" },
+  { label: "Itaú", color: "bank-itau", glow: "glow-itau" },
+  { label: "Banco do Brasil", color: "bank-bb", glow: "glow-bb" },
+  { label: "Outro", color: "bank-other", glow: "glow-other" },
+];
 
 interface BankDetailSheetProps {
   bank: Bank | null;
@@ -12,6 +23,8 @@ interface BankDetailSheetProps {
   onUpdateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<Installment, "id">>) => void;
   onRemoveInstallment: (bankId: BankId, installmentId: string) => void;
   onAddInstallment: (bankId: BankId, inst: Omit<Installment, "id">) => void;
+  onUpdateBank?: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status" | "color" | "glowClass">>) => void;
+  onRemoveBank?: (bankId: BankId) => void;
 }
 
 const statusStyles = {
