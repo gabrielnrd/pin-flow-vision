@@ -423,8 +423,12 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  const updateBank = useCallback((bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => {
+  const updateBank = useCallback((bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status" | "color" | "glowClass">>) => {
     setBanks((prev) => prev.map((b) => (b.id === bankId ? { ...b, ...updates } : b)));
+  }, []);
+
+  const removeBank = useCallback((bankId: BankId) => {
+    setBanks((prev) => prev.filter((b) => b.id !== bankId));
   }, []);
 
   const addBank = useCallback((name: string, limitTotal: number, color: string, glowClass: string) => {
