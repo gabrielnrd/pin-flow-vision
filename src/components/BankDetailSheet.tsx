@@ -193,11 +193,12 @@ function AddInstallmentRow({ bankId, onAdd }: { bankId: BankId; onAdd: BankDetai
   );
 }
 
-export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment, onRemoveInstallment, onAddInstallment }: BankDetailSheetProps) {
+export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment, onRemoveInstallment, onAddInstallment, onUpdateBank, onRemoveBank }: BankDetailSheetProps) {
   if (!bank) return null;
 
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
+  const currentCategory = BANK_CATEGORIES.find((c) => c.color === bank.color) || BANK_CATEGORIES[BANK_CATEGORIES.length - 1];
 
   const handleDuplicate = (inst: Installment) => {
     onAddInstallment(bank.id, {
@@ -211,6 +212,20 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
     });
   };
 
+  const handleCategoryChange = (colorValue: string) => {
+    const cat = BANK_CATEGORIES.find((c) => c.color === colorValue);
+    if (cat && onUpdateBank) {
+      onUpdateBank(bank.id, { color: cat.color, glowClass: cat.glow });
+    }
+  };
+
+  const handleDeleteBank = () => {
+    if (onRemoveBank) {
+      onRemoveBank(bank.id);
+      onOpenChange(false);
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="glass-card border-l-border/30 w-full sm:max-w-lg overflow-y-auto">
@@ -219,12 +234,29 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
             <div className={`w-12 h-12 rounded-xl bg-${bank.color}/20 flex items-center justify-center`}>
               <CreditCard className={`w-6 h-6 text-${bank.color}`} />
             </div>
-            <div>
+            <div className="flex-1">
               <SheetTitle className="text-foreground text-lg">{bank.name}</SheetTitle>
               <p className="text-sm text-muted-foreground">{bank.installments.length} parcelas registradas</p>
             </div>
           </div>
         </SheetHeader>
+
+        {/* Category selector */}
+        {onUpdateBank && (
+          <div className="mb-4">
+            <label className="text-xs text-muted-foreground mb-1 block">Categoria do cartão</label>
+            <Select value={bank.color} onValueChange={handleCategoryChange}>
+              <SelectTrigger className="bg-secondary border-border h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {BANK_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.color} value={cat.color}>{cat.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="p-3 rounded-xl bg-secondary/50">
@@ -271,6 +303,16 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
         </div>
 
         <AddInstallmentRow bankId={bank.id} onAdd={onAddInstallment} />
+
+        {/* Delete bank button */}
+        {onRemoveBank && (
+          <div className="mt-8 pt-4 border-t border-border/30">
+            <Button variant="destructive" className="w-full" onClick={handleDeleteBank}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir Cartão
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
