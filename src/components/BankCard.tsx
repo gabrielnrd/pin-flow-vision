@@ -30,6 +30,7 @@ const bankGradients: Record<string, string> = {
   "bank-c6": "from-[hsl(220,10%,20%)] to-[hsl(220,15%,12%)]",
   "bank-itau": "from-[hsl(27,85%,47%)] to-[hsl(220,50%,30%)]",
   "bank-bb": "from-[hsl(45,100%,45%)] to-[hsl(45,80%,30%)]",
+  "bank-other": "from-[hsl(190,65%,31%)] to-[hsl(190,70%,22%)]",
 };
 
 const bankTextColor: Record<string, string> = {
@@ -38,6 +39,7 @@ const bankTextColor: Record<string, string> = {
   "bank-c6": "text-gray-300",
   "bank-itau": "text-white",
   "bank-bb": "text-gray-900",
+  "bank-other": "text-white",
 };
 
 const bankProgressColor: Record<string, string> = {
@@ -46,6 +48,7 @@ const bankProgressColor: Record<string, string> = {
   "bank-c6": "[&>div]:bg-white/60",
   "bank-itau": "[&>div]:bg-white/80",
   "bank-bb": "[&>div]:bg-gray-900/60",
+  "bank-other": "[&>div]:bg-white/80",
 };
 
 const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial"];
