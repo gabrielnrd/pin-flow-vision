@@ -76,7 +76,8 @@ export interface FinanceStore {
   addGoal: (title: string, targetAmount: number) => void;
   removeGoal: (id: string) => void;
   updateGoal: (id: string, updates: Partial<Pick<Goal, "title" | "targetAmount" | "image">>) => void;
-  updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => void;
+  updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status" | "color" | "glowClass">>) => void;
+  removeBank: (bankId: BankId) => void;
   addBank: (name: string, limitTotal: number, color: string, glowClass: string) => void;
   addInstallment: (bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => void;
   removeInstallment: (bankId: BankId, installmentId: string) => void;
