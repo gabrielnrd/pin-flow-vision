@@ -67,6 +67,7 @@ export default {
           c6: "hsl(var(--bank-c6))",
           itau: "hsl(var(--bank-itau))",
           bb: "hsl(var(--bank-bb))",
+          other: "hsl(var(--bank-other))",
         },
         income: "hsl(var(--income))",
         expense: "hsl(var(--expense))",

@@ -76,7 +76,8 @@ export interface FinanceStore {
   addGoal: (title: string, targetAmount: number) => void;
   removeGoal: (id: string) => void;
   updateGoal: (id: string, updates: Partial<Pick<Goal, "title" | "targetAmount" | "image">>) => void;
-  updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => void;
+  updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status" | "color" | "glowClass">>) => void;
+  removeBank: (bankId: BankId) => void;
   addBank: (name: string, limitTotal: number, color: string, glowClass: string) => void;
   addInstallment: (bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => void;
   removeInstallment: (bankId: BankId, installmentId: string) => void;
@@ -422,8 +423,12 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  const updateBank = useCallback((bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status">>) => {
+  const updateBank = useCallback((bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status" | "color" | "glowClass">>) => {
     setBanks((prev) => prev.map((b) => (b.id === bankId ? { ...b, ...updates } : b)));
+  }, []);
+
+  const removeBank = useCallback((bankId: BankId) => {
+    setBanks((prev) => prev.filter((b) => b.id !== bankId));
   }, []);
 
   const addBank = useCallback((name: string, limitTotal: number, color: string, glowClass: string) => {
@@ -501,7 +506,7 @@ function useFinanceStoreInternal(): FinanceStore {
     addCashflowItem, removeCashflowItem, updateCashflowItem,
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
-    updateBank, addBank, addInstallment, removeInstallment, updateInstallment,
+    updateBank, removeBank, addBank, addInstallment, removeInstallment, updateInstallment,
     setSavingsGoalMonth, addIncomeSource, removeIncomeSource, updateIncomeSource,
     salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
     phantomBalance, survivalDays,

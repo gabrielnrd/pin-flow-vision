@@ -144,6 +144,8 @@ const Index = () => {
         onUpdateInstallment={store.updateInstallment}
         onRemoveInstallment={store.removeInstallment}
         onAddInstallment={store.addInstallment}
+        onUpdateBank={store.updateBank}
+        onRemoveBank={store.removeBank}
       />
 
       <ExpenseFAB />

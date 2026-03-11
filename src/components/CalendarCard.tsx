@@ -19,6 +19,7 @@ const bankDotColor: Record<string, string> = {
   "bank-c6": "bg-muted-foreground",
   "bank-itau": "bg-bank-itau",
   "bank-bb": "bg-bank-bb",
+  "bank-other": "bg-bank-other",
 };
 
 function getWeekDues(items: CalendarItem[]) {

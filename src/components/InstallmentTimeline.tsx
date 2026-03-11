@@ -30,11 +30,22 @@ const bankDotColor: Record<string, string> = {
   "bank-c6": "bg-muted-foreground",
   "bank-itau": "bg-bank-itau",
   "bank-bb": "bg-bank-bb",
+  "bank-other": "bg-bank-other",
 };
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
+function filterCurrentMonth(items: InstallmentItem[]) {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  return items.filter((item) => {
+    const d = new Date(item.dueDate + "T00:00:00");
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
 }
 
 function groupByMonth(items: InstallmentItem[]) {
@@ -163,7 +174,8 @@ function AddInstallmentRow({ banks, onAdd }: { banks: { id: BankId; name: string
 }
 
 export function InstallmentTimeline({ installments, onUpdate, onRemove, onAdd, banks }: InstallmentTimelineProps) {
-  const grouped = groupByMonth(installments);
+  const currentMonthItems = filterCurrentMonth(installments);
+  const grouped = groupByMonth(currentMonthItems);
 
   return (
     <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "200ms" }}>

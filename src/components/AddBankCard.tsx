@@ -23,7 +23,7 @@ const BANK_PRESETS = [
   { label: "C6 Bank", color: "bank-c6", glow: "glow-c6" },
   { label: "Itaú", color: "bank-itau", glow: "glow-itau" },
   { label: "Banco do Brasil", color: "bank-bb", glow: "glow-bb" },
-  { label: "Outro", color: "bank-nubank", glow: "glow-nubank" },
+  { label: "Outro", color: "bank-other", glow: "glow-other" },
 ];
 
 interface AddBankCardProps {
