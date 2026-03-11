@@ -38,6 +38,16 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 }
 
+function filterCurrentMonth(items: InstallmentItem[]) {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  return items.filter((item) => {
+    const d = new Date(item.dueDate + "T00:00:00");
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+}
+
 function groupByMonth(items: InstallmentItem[]) {
   const groups: Record<string, InstallmentItem[]> = {};
   items.forEach((item) => {
