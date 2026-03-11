@@ -174,7 +174,8 @@ function AddInstallmentRow({ banks, onAdd }: { banks: { id: BankId; name: string
 }
 
 export function InstallmentTimeline({ installments, onUpdate, onRemove, onAdd, banks }: InstallmentTimelineProps) {
-  const grouped = groupByMonth(installments);
+  const currentMonthItems = filterCurrentMonth(installments);
+  const grouped = groupByMonth(currentMonthItems);
 
   return (
     <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "200ms" }}>
