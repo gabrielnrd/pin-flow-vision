@@ -49,6 +49,7 @@ const Index = () => {
       <HeroChart
         cashflowMonths={store.cashflowMonths}
         totalDebt={store.totalDebt}
+        totalExpense={store.totalExpense}
         expectedBalance={store.expectedBalance}
         savingsGoalMonth={store.savingsGoalMonth}
         onSavingsGoalChange={store.setSavingsGoalMonth}
