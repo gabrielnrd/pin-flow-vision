@@ -40,7 +40,7 @@ function DebtTrendBadge({ current, previous }: { current: number; previous: numb
   );
 }
 
-export function HeroChart({ cashflowMonths, totalDebt, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth }: HeroChartProps) {
+export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth }: HeroChartProps) {
   const { theme } = useTheme();
   const isLight = theme === "light";
   const [editingGoal, setEditingGoal] = useState(false);
