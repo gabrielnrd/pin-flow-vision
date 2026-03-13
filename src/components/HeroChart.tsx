@@ -8,6 +8,7 @@ import { useTheme } from "@/hooks/use-theme";
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
   totalDebt: number;
+  totalExpense: number;
   expectedBalance: number;
   savingsGoalMonth: number;
   onSavingsGoalChange: (v: number) => void;
