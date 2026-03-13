@@ -202,7 +202,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
             </div>
           </div>
 
-            <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center">
+            <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-1 group">
               <Target className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1">
