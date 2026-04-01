@@ -14,6 +14,9 @@ interface HeroChartProps {
   savingsGoalMonth: number;
   onSavingsGoalChange: (v: number) => void;
   selectedMonth: number;
+  banks: Bank[];
+  creditors: Creditor[];
+  cardExpensesForMonth: number;
 }
 
 function TrendBadge({ current, previous }: { current: number; previous: number }) {
