@@ -54,6 +54,9 @@ const Index = () => {
         savingsGoalMonth={store.savingsGoalMonth}
         onSavingsGoalChange={store.setSavingsGoalMonth}
         selectedMonth={store.selectedMonth}
+        banks={store.banks}
+        creditors={store.creditors}
+        cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
       {/* Section: Cards */}
