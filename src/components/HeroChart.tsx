@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { type CashflowMonth } from "@/data/financialData";
-import { TrendingDown, TrendingUp, Target, Pencil, Check, X } from "lucide-react";
+import { type CashflowMonth, type Bank } from "@/data/financialData";
+import { TrendingDown, TrendingUp, Target, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/hooks/use-theme";
+import { type Creditor } from "@/data/financialData";
 
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
@@ -13,6 +14,9 @@ interface HeroChartProps {
   savingsGoalMonth: number;
   onSavingsGoalChange: (v: number) => void;
   selectedMonth: number;
+  banks: Bank[];
+  creditors: Creditor[];
+  cardExpensesForMonth: number;
 }
 
 function TrendBadge({ current, previous }: { current: number; previous: number }) {
@@ -40,11 +44,37 @@ function DebtTrendBadge({ current, previous }: { current: number; previous: numb
   );
 }
 
-export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth }: HeroChartProps) {
+export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth, banks, creditors, cardExpensesForMonth }: HeroChartProps) {
   const { theme } = useTheme();
   const isLight = theme === "light";
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  // Build breakdown items
+  const breakdownItems = useMemo(() => {
+    const items: { label: string; value: number; type: "debt" | "payment"; icon: "card" | "creditor" }[] = [];
+    
+    // Bank debts
+    banks.forEach((b) => {
+      const used = b.installments
+        .filter((inst) => inst.status !== "pago")
+        .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+      if (used > 0) {
+        items.push({ label: b.name, value: used, type: "debt", icon: "card" });
+      }
+    });
+    
+    // Creditor debts
+    creditors.forEach((c) => {
+      const remaining = c.totalDebt - c.amountPaid;
+      if (remaining > 0) {
+        items.push({ label: c.name, value: remaining, type: "debt", icon: "creditor" });
+      }
+    });
+    
+    return items;
+  }, [banks, creditors]);
 
   const handleSaveGoal = () => {
     const val = parseFloat(goalValue);
@@ -187,19 +217,62 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
             </div>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-1">
-            <div className="w-11 h-11 rounded-xl bg-chart-2/15 flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-chart-2" />
+          <div className="glass-card rounded-2xl p-4 flex-1">
+            <div
+              className="flex items-center gap-4 cursor-pointer"
+              onClick={() => setShowBreakdown(!showBreakdown)}
+            >
+              <div className="w-11 h-11 rounded-xl bg-chart-2/15 flex items-center justify-center shrink-0">
+                <TrendingDown className="w-5 h-5 text-chart-2" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Próximo Total</p>
+                <p className="text-2xl text-money text-chart-2">
+                  R$ {Math.max(totalDebt - cardExpensesForMonth, 0).toLocaleString("pt-BR")}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  Após pagamentos do mês (−R$ {cardExpensesForMonth.toLocaleString("pt-BR")})
+                </p>
+              </div>
+              <div className="text-muted-foreground">
+                {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Próximo Total</p>
-              <p className="text-2xl text-money text-chart-2">
-                R$ {Math.max(totalDebt - totalExpense, 0).toLocaleString("pt-BR")}
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                Após pagamentos do mês (−R$ {totalExpense.toLocaleString("pt-BR")})
-              </p>
-            </div>
+
+            {showBreakdown && (
+              <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5 animate-float-in">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Composição da Dívida</p>
+                {breakdownItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm">
+                    <div className="w-5 h-5 rounded-md bg-secondary/80 flex items-center justify-center shrink-0">
+                      {item.icon === "card" ? (
+                        <CreditCard className="w-3 h-3 text-muted-foreground" />
+                      ) : (
+                        <Users className="w-3 h-3 text-muted-foreground" />
+                      )}
+                    </div>
+                    <span className="flex-1 text-muted-foreground truncate">{item.label}</span>
+                    <span className="text-expense font-medium tabular-nums">
+                      R$ {item.value.toLocaleString("pt-BR")}
+                    </span>
+                  </div>
+                ))}
+                {cardExpensesForMonth > 0 && (
+                  <>
+                    <div className="border-t border-dashed border-border/50 my-2" />
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-5 h-5 rounded-md bg-income/10 flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 text-income" />
+                      </div>
+                      <span className="flex-1 text-income">Pagamentos este mês</span>
+                      <span className="text-income font-medium tabular-nums">
+                        −R$ {cardExpensesForMonth.toLocaleString("pt-BR")}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-1 group">
