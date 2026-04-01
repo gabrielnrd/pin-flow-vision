@@ -219,13 +219,35 @@ function useFinanceStoreInternal(): FinanceStore {
   const hourlyRate = monthlyHours > 0 ? salary / monthlyHours : 0;
   const dailySavings = savingsGoalMonth > 0 ? savingsGoalMonth / 30 : 0;
 
+  // Map Portuguese month names to month numbers
+  const MONTH_MAP: Record<string, number> = {
+    "Janeiro": 1, "Fevereiro": 2, "Março": 3, "Abril": 4, "Maio": 5, "Junho": 6,
+    "Julho": 7, "Agosto": 8, "Setembro": 9, "Outubro": 10, "Novembro": 11, "Dezembro": 12,
+  };
+
+  // Compute card installments total for the current cashflow month
+  const cardExpensesForMonth = useMemo(() => {
+    const monthNum = MONTH_MAP[currentCashflow.month];
+    const year = currentCashflow.year;
+    if (!monthNum) return 0;
+    return banks.reduce((total, bank) => {
+      return total + bank.installments
+        .filter((inst) => {
+          const d = new Date(inst.dueDate + "T00:00:00");
+          return d.getMonth() + 1 === monthNum && d.getFullYear() === year;
+        })
+        .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+    }, 0);
+  }, [banks, currentCashflow.month, currentCashflow.year]);
+
   const totalBankDebt = banks.reduce((sum, b) => sum + b.limitUsed, 0);
   const totalCreditorsDebt = creditors.reduce((s, c) => s + c.totalDebt, 0);
   const totalCreditorsPaid = creditors.reduce((s, c) => s + c.amountPaid, 0);
   const totalCreditorsRemaining = totalCreditorsDebt - totalCreditorsPaid;
   const totalDebt = totalBankDebt + totalCreditorsRemaining;
   const totalIncome = currentCashflow.incomes.reduce((s, i) => s + i.amount, 0);
-  const totalExpense = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
+  const manualExpenses = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
+  const totalExpense = manualExpenses + cardExpensesForMonth;
   const expectedBalance = totalIncome - totalExpense;
   const phantomBalance = expectedBalance - safetyMargin;
   const avgDailyExpense = totalExpense / 30;
