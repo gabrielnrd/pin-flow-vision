@@ -9,6 +9,7 @@ interface CashflowCardProps {
   cashflow: CashflowMonth;
   totalIncome: number;
   totalExpense: number;
+  cardExpensesForMonth: number;
   expectedBalance: number;
   onPrev: () => void;
   onNext: () => void;
