@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, createContext, useContext, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext, type ReactNode, useMemo } from "react";
 import {
   banks as initialBanks,
   cashflowMonths as initialCashflow,
@@ -12,8 +12,6 @@ import {
   type Goal,
   type MonthlySnapshot,
 } from "@/data/financialData";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
 export interface IncomeSource {
   id: string;
@@ -55,6 +53,7 @@ export interface FinanceStore {
   totalDebt: number;
   totalIncome: number;
   totalExpense: number;
+  cardExpensesForMonth: number;
   expectedBalance: number;
   totalCreditorsDebt: number;
   totalCreditorsPaid: number;
@@ -171,94 +170,23 @@ function saveToLocal(data: PersistedData) {
 }
 
 function useFinanceStoreInternal(): FinanceStore {
-  const { user } = useAuth();
-  const [cloudLoading, setCloudLoading] = useState(!!user);
-  const [banksRaw, setBanks] = useState<Bank[]>(DEFAULTS.banks);
-  const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(DEFAULTS.cashflowMonths);
-  const [creditors, setCreditors] = useState<Creditor[]>(DEFAULTS.creditors);
-  const [goals, setGoals] = useState<Goal[]>(DEFAULTS.goals);
+  const [cloudLoading] = useState(false);
+  const [banksRaw, setBanks] = useState<Bank[]>(() => loadFromStorage("fin_banks", DEFAULTS.banks));
+  const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(() => mergeCashflow(loadFromStorage("fin_cashflow", DEFAULTS.cashflowMonths), DEFAULTS.cashflowMonths));
+  const [creditors, setCreditors] = useState<Creditor[]>(() => loadFromStorage("fin_creditors", DEFAULTS.creditors));
+  const [goals, setGoals] = useState<Goal[]>(() => loadFromStorage("fin_goals", DEFAULTS.goals));
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
-  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(DEFAULTS.incomeSources);
-  const [savingsGoalMonth, setSavingsGoalMonth] = useState(DEFAULTS.savingsGoalMonth);
-  const [salary, setSalary] = useState(DEFAULTS.salary);
-  const [monthlyHours, setMonthlyHours] = useState(DEFAULTS.monthlyHours);
-  const [safetyMargin, setSafetyMargin] = useState(DEFAULTS.safetyMargin);
-  const [lifeXp, setLifeXp] = useState(DEFAULTS.lifeXp);
-  const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(DEFAULTS.lifeTasks);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const initialLoadDone = useRef(false);
+  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(() => loadFromStorage("fin_incomeSources", DEFAULTS.incomeSources));
+  const [savingsGoalMonth, setSavingsGoalMonth] = useState(() => loadFromStorage("fin_savingsGoal", DEFAULTS.savingsGoalMonth));
+  const [salary, setSalary] = useState(() => loadFromStorage("fin_salary", DEFAULTS.salary));
+  const [monthlyHours, setMonthlyHours] = useState(() => loadFromStorage("fin_monthlyHours", DEFAULTS.monthlyHours));
+  const [safetyMargin, setSafetyMargin] = useState(() => loadFromStorage("fin_safetyMargin", DEFAULTS.safetyMargin));
+  const [lifeXp, setLifeXp] = useState(() => loadFromStorage("fin_lifeXp", DEFAULTS.lifeXp));
+  const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(() => loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks));
+  const initialLoadDone = useRef(true);
 
-  // Load data from cloud on login
-  useEffect(() => {
-    if (!user) {
-      // Load from localStorage when not logged in
-      const local = getLocalData();
-      setBanks(local.banks);
-      setCashflowMonths(local.cashflowMonths);
-      setCreditors(local.creditors);
-      setGoals(local.goals);
-      setIncomeSources(local.incomeSources);
-      setSavingsGoalMonth(local.savingsGoalMonth);
-      setSalary(local.salary);
-      setMonthlyHours(local.monthlyHours);
-      setSafetyMargin(local.safetyMargin);
-      setLifeXp(local.lifeXp);
-      setLifeTasks(local.lifeTasks);
-      initialLoadDone.current = true;
-      setCloudLoading(false);
-      return;
-    }
-
-    setCloudLoading(true);
-    (async () => {
-      const { data } = await supabase
-        .from("user_financial_data")
-        .select("data")
-        .eq("user_id", user.id)
-        .single();
-
-      if (data?.data && typeof data.data === "object") {
-        const d = data.data as any as PersistedData;
-        setBanks(d.banks ?? DEFAULTS.banks);
-        setCashflowMonths(d.cashflowMonths ? mergeCashflow(d.cashflowMonths, DEFAULTS.cashflowMonths) : DEFAULTS.cashflowMonths);
-        setCreditors(d.creditors ?? DEFAULTS.creditors);
-        setGoals(d.goals ?? DEFAULTS.goals);
-        setIncomeSources(d.incomeSources ?? DEFAULTS.incomeSources);
-        setSavingsGoalMonth(d.savingsGoalMonth ?? DEFAULTS.savingsGoalMonth);
-        setSalary(d.salary ?? DEFAULTS.salary);
-        setMonthlyHours(d.monthlyHours ?? DEFAULTS.monthlyHours);
-        setSafetyMargin(d.safetyMargin ?? DEFAULTS.safetyMargin);
-        setLifeXp(d.lifeXp ?? DEFAULTS.lifeXp);
-        setLifeTasks(d.lifeTasks ?? DEFAULTS.lifeTasks);
-      } else {
-        // First login - migrate localStorage data to cloud
-        const local = getLocalData();
-        setBanks(local.banks);
-        setCashflowMonths(local.cashflowMonths);
-        setCreditors(local.creditors);
-        setGoals(local.goals);
-        setIncomeSources(local.incomeSources);
-        setSavingsGoalMonth(local.savingsGoalMonth);
-        setSalary(local.salary);
-        setMonthlyHours(local.monthlyHours);
-        setSafetyMargin(local.safetyMargin);
-        setLifeXp(local.lifeXp);
-        setLifeTasks(local.lifeTasks);
-
-        // Save local data to cloud
-        await supabase.from("user_financial_data").upsert({
-          user_id: user.id,
-          data: local as any,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" });
-      }
-      initialLoadDone.current = true;
-      setCloudLoading(false);
-    })();
-  }, [user]);
-
-  // Debounced save to cloud + localStorage
+  // Save to localStorage on changes
   const getPersistedData = useCallback((): PersistedData => ({
     banks: banksRaw,
     cashflowMonths,
@@ -274,22 +202,8 @@ function useFinanceStoreInternal(): FinanceStore {
   }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks]);
 
   useEffect(() => {
-    if (!initialLoadDone.current) return;
-
-    const data = getPersistedData();
-    saveToLocal(data);
-
-    if (!user) return;
-
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
-      await supabase.from("user_financial_data").upsert({
-        user_id: user.id,
-        data: data as any,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id" });
-    }, 1500);
-  }, [getPersistedData, user]);
+    saveToLocal(getPersistedData());
+  }, [getPersistedData]);
 
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
@@ -306,13 +220,35 @@ function useFinanceStoreInternal(): FinanceStore {
   const hourlyRate = monthlyHours > 0 ? salary / monthlyHours : 0;
   const dailySavings = savingsGoalMonth > 0 ? savingsGoalMonth / 30 : 0;
 
+  // Map Portuguese month names to month numbers
+  const MONTH_MAP: Record<string, number> = {
+    "Janeiro": 1, "Fevereiro": 2, "Março": 3, "Abril": 4, "Maio": 5, "Junho": 6,
+    "Julho": 7, "Agosto": 8, "Setembro": 9, "Outubro": 10, "Novembro": 11, "Dezembro": 12,
+  };
+
+  // Compute card installments total for the current cashflow month
+  const cardExpensesForMonth = useMemo(() => {
+    const monthNum = MONTH_MAP[currentCashflow.month];
+    const year = currentCashflow.year;
+    if (!monthNum) return 0;
+    return banks.reduce((total, bank) => {
+      return total + bank.installments
+        .filter((inst) => {
+          const d = new Date(inst.dueDate + "T00:00:00");
+          return d.getMonth() + 1 === monthNum && d.getFullYear() === year;
+        })
+        .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+    }, 0);
+  }, [banks, currentCashflow.month, currentCashflow.year]);
+
   const totalBankDebt = banks.reduce((sum, b) => sum + b.limitUsed, 0);
   const totalCreditorsDebt = creditors.reduce((s, c) => s + c.totalDebt, 0);
   const totalCreditorsPaid = creditors.reduce((s, c) => s + c.amountPaid, 0);
   const totalCreditorsRemaining = totalCreditorsDebt - totalCreditorsPaid;
   const totalDebt = totalBankDebt + totalCreditorsRemaining;
   const totalIncome = currentCashflow.incomes.reduce((s, i) => s + i.amount, 0);
-  const totalExpense = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
+  const manualExpenses = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
+  const totalExpense = manualExpenses + cardExpensesForMonth;
   const expectedBalance = totalIncome - totalExpense;
   const phantomBalance = expectedBalance - safetyMargin;
   const avgDailyExpense = totalExpense / 30;
@@ -498,7 +434,7 @@ function useFinanceStoreInternal(): FinanceStore {
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
-    totalDebt, totalIncome, totalExpense, expectedBalance,
+    totalDebt, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
     totalCreditorsDebt, totalCreditorsPaid, savingsGoalMonth,
     allInstallments,
     setSelectedMonth, setSelectedBank, nextMonth, prevMonth,

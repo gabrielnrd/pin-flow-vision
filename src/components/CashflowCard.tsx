@@ -9,6 +9,7 @@ interface CashflowCardProps {
   cashflow: CashflowMonth;
   totalIncome: number;
   totalExpense: number;
+  cardExpensesForMonth: number;
   expectedBalance: number;
   onPrev: () => void;
   onNext: () => void;
@@ -206,7 +207,7 @@ function ExpenseSection({ cashflow, totalExpense, monthIndex, onTogglePaid, onRe
   );
 }
 export function CashflowCard({
-  cashflow, totalIncome, totalExpense, expectedBalance,
+  cashflow, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
   onPrev, onNext, canPrev, canNext, monthIndex,
   onTogglePaid, onAddItem, onRemoveItem, onUpdateItem,
 }: CashflowCardProps) {
@@ -250,7 +251,20 @@ export function CashflowCard({
         </div>
       </div>
 
-      {/* Expenses with filters */}
+      {/* Card-based expenses */}
+      {cardExpensesForMonth > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-expense/5 border border-expense/10">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground flex items-center gap-2">
+              <ArrowDownRight className="w-3.5 h-3.5 text-expense" />
+              Parcelas dos Cartões (automático)
+            </span>
+            <span className="text-expense font-medium">R$ {cardExpensesForMonth.toLocaleString("pt-BR")}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Expenses with filters */}
       <ExpenseSection
         cashflow={cashflow}
         totalExpense={totalExpense}
