@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { type CashflowMonth } from "@/data/financialData";
-import { TrendingDown, TrendingUp, Target, Pencil, Check, X } from "lucide-react";
+import { type CashflowMonth, type Bank } from "@/data/financialData";
+import { TrendingDown, TrendingUp, Target, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/hooks/use-theme";
+import { type Creditor } from "@/data/financialData";
 
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
