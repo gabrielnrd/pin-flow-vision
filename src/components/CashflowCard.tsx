@@ -207,7 +207,7 @@ function ExpenseSection({ cashflow, totalExpense, monthIndex, onTogglePaid, onRe
   );
 }
 export function CashflowCard({
-  cashflow, totalIncome, totalExpense, expectedBalance,
+  cashflow, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
   onPrev, onNext, canPrev, canNext, monthIndex,
   onTogglePaid, onAddItem, onRemoveItem, onUpdateItem,
 }: CashflowCardProps) {
