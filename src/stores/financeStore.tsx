@@ -434,7 +434,7 @@ function useFinanceStoreInternal(): FinanceStore {
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
-    totalDebt, totalIncome, totalExpense, expectedBalance,
+    totalDebt, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
     totalCreditorsDebt, totalCreditorsPaid, savingsGoalMonth,
     allInstallments,
     setSelectedMonth, setSelectedBank, nextMonth, prevMonth,
