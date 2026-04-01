@@ -44,11 +44,37 @@ function DebtTrendBadge({ current, previous }: { current: number; previous: numb
   );
 }
 
-export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth }: HeroChartProps) {
+export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth, banks, creditors, cardExpensesForMonth }: HeroChartProps) {
   const { theme } = useTheme();
   const isLight = theme === "light";
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  // Build breakdown items
+  const breakdownItems = useMemo(() => {
+    const items: { label: string; value: number; type: "debt" | "payment"; icon: "card" | "creditor" }[] = [];
+    
+    // Bank debts
+    banks.forEach((b) => {
+      const used = b.installments
+        .filter((inst) => inst.status !== "pago")
+        .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+      if (used > 0) {
+        items.push({ label: b.name, value: used, type: "debt", icon: "card" });
+      }
+    });
+    
+    // Creditor debts
+    creditors.forEach((c) => {
+      const remaining = c.totalDebt - c.amountPaid;
+      if (remaining > 0) {
+        items.push({ label: c.name, value: remaining, type: "debt", icon: "creditor" });
+      }
+    });
+    
+    return items;
+  }, [banks, creditors]);
 
   const handleSaveGoal = () => {
     const val = parseFloat(goalValue);
