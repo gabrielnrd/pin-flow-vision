@@ -81,6 +81,7 @@ const Index = () => {
             cashflow={store.currentCashflow}
             totalIncome={store.totalIncome}
             totalExpense={store.totalExpense}
+            cardExpensesForMonth={store.cardExpensesForMonth}
             expectedBalance={store.expectedBalance}
             onPrev={store.prevMonth}
             onNext={store.nextMonth}
