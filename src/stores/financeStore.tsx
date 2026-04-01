@@ -53,6 +53,7 @@ export interface FinanceStore {
   totalDebt: number;
   totalIncome: number;
   totalExpense: number;
+  cardExpensesForMonth: number;
   expectedBalance: number;
   totalCreditorsDebt: number;
   totalCreditorsPaid: number;
