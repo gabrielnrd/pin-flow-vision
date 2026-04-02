@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2 } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 
