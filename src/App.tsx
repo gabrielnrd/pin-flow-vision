@@ -12,6 +12,7 @@ import RendaPage from "./pages/Renda";
 import TransportePage from "./pages/Transporte";
 import TradePage from "./pages/Trade";
 import DividaPage from "./pages/Divida";
+import CarteiraPage from "./pages/Carteira";
 import LifeGamePage from "./pages/LifeGame";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/transporte" element={<TransportePage />} />
               <Route path="/trade" element={<TradePage />} />
               <Route path="/divida" element={<DividaPage />} />
+              <Route path="/carteira" element={<CarteiraPage />} />
               <Route path="/lifegame" element={<LifeGamePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
