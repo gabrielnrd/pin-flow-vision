@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useFinance } from "@/stores/financeStore";
+import { useFinanceStore } from "@/stores/financeStore";
 import { CreditCard, AlertTriangle, ChevronLeft, ChevronRight, Wallet } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
