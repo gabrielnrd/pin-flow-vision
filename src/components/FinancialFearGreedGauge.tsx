@@ -29,10 +29,14 @@ export function FinancialFearGreedGauge() {
       : 1;
     const debtScore = (1 - debtRatio) * 100;
 
-    // Factor 3: Payment consistency (% of expenses paid)
-    const allExpenses = store.currentCashflow.expenses;
-    const paidCount = allExpenses.filter((e) => e.paid).length;
-    const paymentScore = allExpenses.length > 0 ? (paidCount / allExpenses.length) * 100 : 50;
+    // Factor 3: Payment consistency (% of expenses paid + card installments paid)
+    const manualExpenses = store.currentCashflow.expenses;
+    const manualPaid = manualExpenses.filter((e) => e.paid).length;
+    const allInstallments = store.banks.flatMap((b) => b.installments);
+    const installmentsPaid = allInstallments.filter((i) => i.status === "pago").length;
+    const totalItems = manualExpenses.length + allInstallments.length;
+    const totalPaid = manualPaid + installmentsPaid;
+    const paymentScore = totalItems > 0 ? (totalPaid / totalItems) * 100 : 50;
 
     // Factor 4: Credit utilization (lower is better)
     const totalLimit = store.banks.reduce((s, b) => s + b.limitTotal, 0);
