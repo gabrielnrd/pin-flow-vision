@@ -126,7 +126,7 @@ function CarteiraCard({ bank, isActive }: { bank: any; isActive: boolean }) {
 }
 
 export default function CarteiraPage() {
-  const { banks } = useFinance();
+  const { banks } = useFinanceStore();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
