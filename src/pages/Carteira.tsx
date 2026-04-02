@@ -1,17 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFinanceStore } from "@/stores/financeStore";
-import { CreditCard, AlertTriangle, ChevronLeft, ChevronRight, Wallet } from "lucide-react";
+import { CreditCard, AlertTriangle, ChevronUp, ChevronDown, Wallet } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
   pendente: "Pendente",
   pago: "Pago",
   parcial: "Parcial",
 };
 
-const statusStyles = {
+const statusStyles: Record<string, string> = {
   pendente: "bg-expense/20 text-expense border-expense/30",
   pago: "bg-income/20 text-income border-income/30",
   parcial: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -35,7 +35,7 @@ const bankTextColor: Record<string, string> = {
   "bank-other": "text-white",
 };
 
-function CarteiraCard({ bank, isActive }: { bank: any; isActive: boolean }) {
+function CarteiraCard({ bank, isActive, scale = 1 }: { bank: any; isActive: boolean; scale?: number }) {
   const usagePercent = Math.min((bank.limitUsed / bank.limitTotal) * 100, 100);
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
@@ -46,79 +46,71 @@ function CarteiraCard({ bank, isActive }: { bank: any; isActive: boolean }) {
   return (
     <div
       className={cn(
-        "w-[380px] h-[240px] rounded-2xl overflow-hidden transition-all duration-500 select-none",
+        "w-[320px] h-[200px] rounded-2xl overflow-hidden transition-all duration-500 select-none shrink-0",
         textColor,
-        isActive ? "shadow-2xl shadow-primary/30" : "opacity-60"
+        isActive ? "shadow-2xl shadow-primary/40" : "opacity-40 blur-[1px]"
       )}
-      style={{ background: gradient }}
+      style={{ background: gradient, transform: `scale(${scale})` }}
     >
-      <div className="relative w-full h-full p-5 flex flex-col justify-between">
-        {/* Pattern */}
+      <div className="relative w-full h-full p-4 flex flex-col justify-between">
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{
           backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
           backgroundSize: "60px 60px",
         }} />
 
-        {/* Top */}
         <div className="relative z-10 flex items-start justify-between">
           <div>
-            <h3 className="font-bold text-xl tracking-wide">{bank.name}</h3>
-            <p className="text-xs opacity-60 mt-0.5">{bank.installments.filter((i: any) => i.status !== "pago").length} parcelas ativas</p>
+            <h3 className="font-bold text-lg tracking-wide">{bank.name}</h3>
+            <p className="text-[10px] opacity-60 mt-0.5">{bank.installments.filter((i: any) => i.status !== "pago").length} parcelas ativas</p>
           </div>
-          <Badge variant="outline" className={cn("text-[10px] border-white/30", statusStyles[bank.status as keyof typeof statusStyles])}>
-            {statusLabels[bank.status as keyof typeof statusLabels]}
+          <Badge variant="outline" className={cn("text-[9px] border-white/30", statusStyles[bank.status] || "")}>
+            {statusLabels[bank.status] || bank.status}
           </Badge>
         </div>
 
-        {/* Chip + Number */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-11 h-8 rounded-md bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
-          <span className="text-sm font-mono tracking-[0.2em] opacity-80">{cardNumber}</span>
+        <div className="relative z-10 flex items-center gap-2">
+          <div className="w-9 h-6 rounded bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
+          <span className="text-xs font-mono tracking-[0.18em] opacity-80">{cardNumber}</span>
         </div>
 
-        {/* Bottom */}
-        <div className="relative z-10 space-y-2">
+        <div className="relative z-10 space-y-1.5">
           <div>
-            <div className="flex justify-between text-[10px] opacity-70 mb-1">
+            <div className="flex justify-between text-[9px] opacity-70 mb-0.5">
               <span>Limite usado</span>
               <span>{usagePercent.toFixed(0)}%</span>
             </div>
-            <Progress value={usagePercent} className="h-1.5 bg-white/20 [&>div]:bg-white/80" />
+            <Progress value={usagePercent} className="h-1 bg-white/20 [&>div]:bg-white/80" />
           </div>
-          <div className="flex justify-between items-end text-sm">
+          <div className="flex justify-between items-end text-xs">
             <div>
-              <p className="text-[10px] opacity-60">Limite</p>
+              <p className="text-[9px] opacity-60">Limite</p>
               <p className="font-bold tabular-nums">R$ {bank.limitTotal.toLocaleString("pt-BR")}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] opacity-60">Usado</p>
+              <p className="text-[9px] opacity-60">Usado</p>
               <p className="font-bold tabular-nums">R$ {bank.limitUsed.toLocaleString("pt-BR")}</p>
             </div>
             <div className="text-right">
               {isOverLimit ? (
                 <div className="flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <AlertTriangle className="w-3 h-3" />
                   <div>
-                    <p className="text-[10px] opacity-60">Excedido</p>
+                    <p className="text-[9px] opacity-60">Excedido</p>
                     <p className="font-bold tabular-nums">R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}</p>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <p className="text-[10px] opacity-60">Livre</p>
+                  <p className="text-[9px] opacity-60">Livre</p>
                   <p className="font-bold tabular-nums">R$ {freeAmount.toLocaleString("pt-BR")}</p>
                 </div>
               )}
             </div>
           </div>
-          <div className="flex justify-between items-center pt-1 border-t border-white/10">
-            <span className="text-[10px] opacity-60">Dívida Total</span>
-            <span className="text-base font-bold tabular-nums">R$ {bank.debtFinal.toLocaleString("pt-BR")}</span>
-          </div>
         </div>
 
-        <div className="absolute bottom-4 right-5 opacity-15">
-          <CreditCard className="w-12 h-12" />
+        <div className="absolute bottom-3 right-4 opacity-10">
+          <CreditCard className="w-10 h-10" />
         </div>
       </div>
     </div>
@@ -128,49 +120,22 @@ function CarteiraCard({ bank, isActive }: { bank: any; isActive: boolean }) {
 export default function CarteiraPage() {
   const { banks } = useFinanceStore();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [rotation, setRotation] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const count = banks.length;
-  const angleStep = count > 0 ? 360 / count : 360;
-  const radius = count <= 2 ? 250 : count <= 4 ? 320 : 380;
 
-  useEffect(() => {
-    setRotation(-activeIndex * angleStep);
-  }, [activeIndex, angleStep]);
-
-  const prev = () => setActiveIndex((p) => (p - 1 + count) % count);
-  const next = () => setActiveIndex((p) => (p + 1) % count);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    const diff = e.clientX - startX;
-    if (Math.abs(diff) > 80) {
-      if (diff > 0) prev(); else next();
-      setIsDragging(false);
-    }
-  };
-
-  const handlePointerUp = () => setIsDragging(false);
+  const prev = useCallback(() => setActiveIndex((p) => (p - 1 + count) % count), [count]);
+  const next = useCallback(() => setActiveIndex((p) => (p + 1) % count), [count]);
 
   // Keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowUp") prev();
+      if (e.key === "ArrowDown") next();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [count]);
+  }, [prev, next]);
 
-  // Summary
   const totalDebt = banks.reduce((s, b) => s + b.debtFinal, 0);
   const totalLimit = banks.reduce((s, b) => s + b.limitTotal, 0);
   const totalUsed = banks.reduce((s, b) => s + b.limitUsed, 0);
@@ -183,144 +148,159 @@ export default function CarteiraPage() {
     );
   }
 
+  // Ferris wheel: each card positioned on a vertical circle
+  const wheelRadius = 220;
+  const angleStep = count > 0 ? 360 / count : 360;
+
+  // Build positions for each card relative to active
+  const getCardStyle = (index: number) => {
+    const offset = index - activeIndex;
+    // Normalize to -count/2 .. count/2
+    let normalizedOffset = offset;
+    if (normalizedOffset > count / 2) normalizedOffset -= count;
+    if (normalizedOffset < -count / 2) normalizedOffset += count;
+
+    const angle = (normalizedOffset * angleStep * Math.PI) / 180;
+    // Clockwise: positive offset goes down-right, negative goes up-left
+    const x = Math.sin(angle) * wheelRadius * 0.3;
+    const y = -Math.cos(angle) * wheelRadius + wheelRadius;
+    const scale = Math.cos(angle) * 0.3 + 0.7; // 0.4 to 1.0
+    const zIndex = Math.round(scale * 100);
+    const opacity = Math.abs(normalizedOffset) <= 2 ? 1 : 0;
+
+    return {
+      transform: `translate(${x}px, ${y}px) scale(${scale})`,
+      zIndex,
+      opacity,
+      transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+    };
+  };
+
+  const activeBank = banks[activeIndex];
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-4 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
         {/* Header */}
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <Wallet className="w-6 h-6 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">Carteira Digital</h1>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 mb-1">
+            <Wallet className="w-5 h-5 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">Carteira Digital</h1>
           </div>
-          <p className="text-muted-foreground text-sm">Seus cartões em visão imersiva 3D</p>
+          <p className="text-muted-foreground text-xs">Roda-gigante de cartões</p>
         </div>
 
-        {/* 3D Carousel */}
-        <div
-          ref={containerRef}
-          className="relative mx-auto flex items-center justify-center select-none"
-          style={{ height: "420px", perspective: "1200px" }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        >
-          <div
-            className="relative w-[380px] h-[240px] transition-transform duration-700 ease-out"
-            style={{
-              transformStyle: "preserve-3d",
-              transform: `rotateY(${rotation}deg)`,
-            }}
-          >
-            {banks.map((bank, i) => {
-              const angle = i * angleStep;
-              return (
+        {/* Main layout: wheel left, details right */}
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 justify-center">
+          {/* Ferris Wheel */}
+          <div className="relative flex-shrink-0" style={{ width: 360, height: wheelRadius * 2 + 220 }}>
+            {/* Navigation */}
+            <button
+              onClick={prev}
+              className="absolute top-0 left-1/2 -translate-x-1/2 z-30 w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
+            >
+              <ChevronUp className="w-5 h-5" />
+            </button>
+            <button
+              onClick={next}
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 z-30 w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
+            >
+              <ChevronDown className="w-5 h-5" />
+            </button>
+
+            {/* Cards container */}
+            <div className="absolute inset-0 flex items-start justify-center" style={{ top: 50 }}>
+              {banks.map((bank, i) => (
                 <div
                   key={bank.id}
-                  className="absolute top-0 left-0 w-full h-full cursor-pointer"
-                  style={{
-                    transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-                    backfaceVisibility: "hidden",
-                  }}
+                  className="absolute cursor-pointer"
+                  style={getCardStyle(i)}
                   onClick={() => setActiveIndex(i)}
                 >
                   <CarteiraCard bank={bank} isActive={i === activeIndex} />
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Nav arrows */}
-          <button
-            onClick={prev}
-            className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Dots */}
-        <div className="flex justify-center gap-2 mt-2">
-          {banks.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveIndex(i)}
-              className={cn(
-                "w-2.5 h-2.5 rounded-full transition-all duration-300",
-                i === activeIndex ? "bg-primary scale-125" : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              )}
-            />
-          ))}
-        </div>
-
-        {/* Active card detail */}
-        <div className="mt-8 max-w-2xl mx-auto animate-fade-in">
-          <div className="rounded-2xl bg-card/60 backdrop-blur border border-border/50 p-6 space-y-4">
-            <h2 className="text-xl font-bold text-foreground">{banks[activeIndex]?.name}</h2>
-
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="rounded-xl bg-background/50 p-3">
-                <p className="text-[10px] text-muted-foreground">Limite</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">
-                  R$ {banks[activeIndex]?.limitTotal.toLocaleString("pt-BR")}
-                </p>
-              </div>
-              <div className="rounded-xl bg-background/50 p-3">
-                <p className="text-[10px] text-muted-foreground">Usado</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">
-                  R$ {banks[activeIndex]?.limitUsed.toLocaleString("pt-BR")}
-                </p>
-              </div>
-              <div className="rounded-xl bg-background/50 p-3">
-                <p className="text-[10px] text-muted-foreground">Dívida</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">
-                  R$ {banks[activeIndex]?.debtFinal.toLocaleString("pt-BR")}
-                </p>
-              </div>
+              ))}
             </div>
 
-            {/* Installments list */}
-            {banks[activeIndex]?.installments.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-muted-foreground">Parcelas</h3>
-                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-                  {banks[activeIndex].installments.map((inst) => (
-                    <div key={inst.id} className="flex items-center justify-between rounded-lg bg-background/40 px-3 py-2 text-sm">
-                      <span className="text-foreground truncate flex-1">{inst.description}</span>
-                      <span className="text-muted-foreground text-xs mx-2">{inst.currentInstallment}/{inst.totalInstallments}</span>
-                      <span className="font-semibold text-foreground tabular-nums">
-                        R$ {inst.installmentAmount.toLocaleString("pt-BR")}
-                      </span>
-                      <Badge variant="outline" className={cn("ml-2 text-[9px]", statusStyles[inst.status as keyof typeof statusStyles] || "")}>
-                        {inst.status}
-                      </Badge>
-                    </div>
-                  ))}
+            {/* Dots */}
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {banks.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all duration-300",
+                    i === activeIndex ? "bg-primary scale-125" : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Detail Panel */}
+          <div className="flex-1 max-w-xl w-full space-y-4">
+            {activeBank && (
+              <div className="rounded-2xl bg-card/60 backdrop-blur border border-border/50 p-5 space-y-4 animate-fade-in">
+                <h2 className="text-xl font-bold text-foreground">{activeBank.name}</h2>
+
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="rounded-xl bg-background/50 p-3">
+                    <p className="text-[10px] text-muted-foreground">Limite</p>
+                    <p className="text-base font-bold text-foreground tabular-nums">
+                      R$ {activeBank.limitTotal.toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-background/50 p-3">
+                    <p className="text-[10px] text-muted-foreground">Usado</p>
+                    <p className="text-base font-bold text-foreground tabular-nums">
+                      R$ {activeBank.limitUsed.toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-background/50 p-3">
+                    <p className="text-[10px] text-muted-foreground">Dívida</p>
+                    <p className="text-base font-bold text-foreground tabular-nums">
+                      R$ {activeBank.debtFinal.toLocaleString("pt-BR")}
+                    </p>
+                  </div>
                 </div>
+
+                {activeBank.installments.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Parcelas</h3>
+                    <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+                      {activeBank.installments.map((inst) => (
+                        <div key={inst.id} className="flex items-center justify-between rounded-lg bg-background/40 px-3 py-2 text-sm">
+                          <span className="text-foreground truncate flex-1">{inst.description}</span>
+                          <span className="text-muted-foreground text-xs mx-2">{inst.currentInstallment}/{inst.totalInstallments}</span>
+                          <span className="font-semibold text-foreground tabular-nums">
+                            R$ {inst.installmentAmount.toLocaleString("pt-BR")}
+                          </span>
+                          <Badge variant="outline" className={cn("ml-2 text-[9px]", statusStyles[inst.status] || "")}>
+                            {inst.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Summary footer */}
-        <div className="mt-6 max-w-2xl mx-auto grid grid-cols-3 gap-4">
-          <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-4 text-center">
-            <p className="text-xs text-muted-foreground">Limite Total</p>
-            <p className="text-xl font-bold text-foreground tabular-nums">R$ {totalLimit.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-4 text-center">
-            <p className="text-xs text-muted-foreground">Total Usado</p>
-            <p className="text-xl font-bold text-foreground tabular-nums">R$ {totalUsed.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-4 text-center">
-            <p className="text-xs text-muted-foreground">Dívida Total</p>
-            <p className="text-xl font-bold text-expense tabular-nums">R$ {totalDebt.toLocaleString("pt-BR")}</p>
+            {/* Summary */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground">Limite Total</p>
+                <p className="text-lg font-bold text-foreground tabular-nums">R$ {totalLimit.toLocaleString("pt-BR")}</p>
+              </div>
+              <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground">Total Usado</p>
+                <p className="text-lg font-bold text-foreground tabular-nums">R$ {totalUsed.toLocaleString("pt-BR")}</p>
+              </div>
+              <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground">Dívida Total</p>
+                <p className="text-lg font-bold text-expense tabular-nums">R$ {totalDebt.toLocaleString("pt-BR")}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
