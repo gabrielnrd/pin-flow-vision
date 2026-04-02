@@ -28,7 +28,7 @@ const bankGradients: Record<string, string> = {
   "bank-nubank": "from-[hsl(280,97%,38%)] to-[hsl(300,80%,25%)]",
   "bank-inter": "from-[hsl(27,100%,50%)] to-[hsl(15,90%,40%)]",
   "bank-c6": "from-[hsl(220,10%,20%)] to-[hsl(220,15%,12%)]",
-  "bank-itau": "from-[hsl(27,85%,47%)] to-[hsl(220,50%,30%)]",
+  "bank-itau": "from-[#F88104] to-[hsl(25,90%,35%)]",
   "bank-bb": "from-[hsl(45,100%,45%)] to-[hsl(45,80%,30%)]",
   "bank-other": "from-[hsl(190,65%,31%)] to-[hsl(190,70%,22%)]",
 };
