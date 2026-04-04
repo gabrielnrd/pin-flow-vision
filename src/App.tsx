@@ -25,23 +25,25 @@ const App = () => (
     <ThemeProvider>
       <TooltipProvider>
         <FinanceProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppNav />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/objetivos" element={<GoalsPage />} />
-              <Route path="/renda" element={<RendaPage />} />
-              <Route path="/transporte" element={<TransportePage />} />
-              <Route path="/trade" element={<TradePage />} />
-              <Route path="/divida" element={<DividaPage />} />
-              <Route path="/carteira" element={<CarteiraPage />} />
-              <Route path="/lifegame" element={<LifeGamePage />} />
-              <Route path="/rotina" element={<RotinaPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <RoutineProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppNav />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/objetivos" element={<GoalsPage />} />
+                <Route path="/renda" element={<RendaPage />} />
+                <Route path="/transporte" element={<TransportePage />} />
+                <Route path="/trade" element={<TradePage />} />
+                <Route path="/divida" element={<DividaPage />} />
+                <Route path="/carteira" element={<CarteiraPage />} />
+                <Route path="/lifegame" element={<LifeGamePage />} />
+                <Route path="/rotina" element={<RotinaPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </RoutineProvider>
         </FinanceProvider>
       </TooltipProvider>
     </ThemeProvider>
