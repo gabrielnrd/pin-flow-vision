@@ -14,6 +14,7 @@ import TradePage from "./pages/Trade";
 import DividaPage from "./pages/Divida";
 import CarteiraPage from "./pages/Carteira";
 import LifeGamePage from "./pages/LifeGame";
+import RotinaPage from "./pages/Rotina";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
