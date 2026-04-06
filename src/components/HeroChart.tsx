@@ -236,10 +236,10 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">Próximo Total</p>
                 <p className="text-2xl text-money text-chart-2">
-                  R$ {Math.max(totalDebt - cardExpensesForMonth, 0).toLocaleString("pt-BR")}
+                  R$ {Math.max(totalDebt - cumulativeCardPayments, 0).toLocaleString("pt-BR")}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  Após pagamentos do mês (−R$ {cardExpensesForMonth.toLocaleString("pt-BR")})
+                  Até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year} (−R$ {cumulativeCardPayments.toLocaleString("pt-BR")})
                 </p>
               </div>
               <div className="text-muted-foreground">
