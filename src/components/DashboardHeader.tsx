@@ -47,14 +47,14 @@ export function DashboardHeader({
         {/* Month/year filter */}
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <div className="flex gap-1 glass-pill rounded-xl p-1">
+          <div className="flex gap-1 bg-secondary/40 rounded-xl p-1">
             {cashflowMonths.map((m, i) => (
               <button
                 key={i}
                 onClick={() => onMonthChange(i)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   i === selectedMonth
-                    ? "glass-active text-primary shadow-sm shadow-primary/10 pill-active"
+                    ? "bg-primary/20 text-primary shadow-sm shadow-primary/10 pill-active"
                     : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                 }`}
               >

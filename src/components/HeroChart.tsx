@@ -51,6 +51,31 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
   const [showBreakdown, setShowBreakdown] = useState(false);
 
+  const monthNameToIndex: Record<string, number> = {
+    "Janeiro": 0, "Fevereiro": 1, "Março": 2, "Abril": 3,
+    "Maio": 4, "Junho": 5, "Julho": 6, "Agosto": 7,
+    "Setembro": 8, "Outubro": 9, "Novembro": 10, "Dezembro": 11,
+  };
+
+  // Calculate cumulative card payments from month 0 through selectedMonth
+  const cumulativeCardPayments = useMemo(() => {
+    let total = 0;
+    for (let i = 0; i <= selectedMonth && i < cashflowMonths.length; i++) {
+      const m = cashflowMonths[i];
+      const mIdx = monthNameToIndex[m.month] ?? 0;
+      const monthNum = mIdx + 1;
+      total += banks.reduce((bankTotal, bank) => {
+        return bankTotal + bank.installments
+          .filter((inst) => {
+            const d = new Date(inst.dueDate + "T00:00:00");
+            return d.getMonth() + 1 === monthNum && d.getFullYear() === m.year;
+          })
+          .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+      }, 0);
+    }
+    return total;
+  }, [banks, cashflowMonths, selectedMonth]);
+
   // Build breakdown items
   const breakdownItems = useMemo(() => {
     const items: { label: string; value: number; type: "debt" | "payment"; icon: "card" | "creditor" }[] = [];
@@ -211,10 +236,10 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">Próximo Total</p>
                 <p className="text-2xl text-money text-chart-2">
-                  R$ {Math.max(totalDebt - cardExpensesForMonth, 0).toLocaleString("pt-BR")}
+                  R$ {Math.max(totalDebt - cumulativeCardPayments, 0).toLocaleString("pt-BR")}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  Após pagamentos do mês (−R$ {cardExpensesForMonth.toLocaleString("pt-BR")})
+                  Até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year} (−R$ {cumulativeCardPayments.toLocaleString("pt-BR")})
                 </p>
               </div>
               <div className="text-muted-foreground">
@@ -240,16 +265,16 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
                     </span>
                   </div>
                 ))}
-                {cardExpensesForMonth > 0 && (
+                {cumulativeCardPayments > 0 && (
                   <>
                     <div className="border-t border-dashed border-border/50 my-2" />
                     <div className="flex items-center gap-2 text-sm">
                       <div className="w-5 h-5 rounded-md bg-income/10 flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 text-income" />
                       </div>
-                      <span className="flex-1 text-income">Pagamentos este mês</span>
+                      <span className="flex-1 text-income">Pagamentos até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}</span>
                       <span className="text-income font-medium tabular-nums">
-                        −R$ {cardExpensesForMonth.toLocaleString("pt-BR")}
+                        −R$ {cumulativeCardPayments.toLocaleString("pt-BR")}
                       </span>
                     </div>
                   </>
