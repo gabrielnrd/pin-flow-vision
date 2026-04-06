@@ -108,7 +108,19 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
       const mIdx = monthNameToIndex[m.month] ?? 0;
       const isPast = m.year < currentYear || (m.year === currentYear && mIdx <= currentMonth);
       const entradas = m.incomes.reduce((s, i) => s + i.amount, 0);
-      const saidas = m.expenses.reduce((s, e) => s + e.amount, 0);
+      const manualSaidas = m.expenses.reduce((s, e) => s + e.amount, 0);
+
+      // Add card installments for this month
+      const monthNum = mIdx + 1;
+      const cardSaidas = banks.reduce((total, bank) => {
+        return total + bank.installments
+          .filter((inst) => {
+            const d = new Date(inst.dueDate + "T00:00:00");
+            return d.getMonth() + 1 === monthNum && d.getFullYear() === m.year;
+          })
+          .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+      }, 0);
+      const saidas = manualSaidas + cardSaidas;
 
       return {
         month: `${m.month.slice(0, 3)}/${m.year}`,
@@ -158,7 +170,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
     }
 
     return result;
-  }, [cashflowMonths]);
+  }, [cashflowMonths, banks]);
 
   return (
     <section className="mb-8 animate-float-in">
