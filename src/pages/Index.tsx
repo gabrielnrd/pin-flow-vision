@@ -18,8 +18,9 @@ import { CreditCard, BarChart3, Brain, Users } from "lucide-react";
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
     <div className="flex items-center gap-3 mb-5">
-      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-        <Icon className="w-4.5 h-4.5 text-primary" />
+      <div className="w-9 h-9 rounded-xl glass-pill flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10 rounded-xl" />
+        <Icon className="w-4.5 h-4.5 text-primary relative z-10" />
       </div>
       <div>
         <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
@@ -33,7 +34,12 @@ const Index = () => {
   const store = useFinanceStore();
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10">
+    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10 relative overflow-hidden">
+      {/* Liquid Glass Orbs - decorative background */}
+      <div className="liquid-orb w-[500px] h-[500px] bg-primary top-[-100px] right-[-150px] z-0" />
+      <div className="liquid-orb w-[400px] h-[400px] bg-accent top-[600px] left-[-200px] z-0" style={{ animationDelay: '3s' }} />
+      <div className="liquid-orb w-[300px] h-[300px] bg-income top-[1400px] right-[-100px] z-0" style={{ animationDelay: '5s' }} />
+
       {/* Header */}
       <DashboardHeader
         totalDebt={store.totalDebt}
