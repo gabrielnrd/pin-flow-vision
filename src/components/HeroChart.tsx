@@ -170,7 +170,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
     }
 
     return result;
-  }, [cashflowMonths]);
+  }, [cashflowMonths, banks]);
 
   return (
     <section className="mb-8 animate-float-in">
