@@ -54,7 +54,7 @@ export function DashboardHeader({
                 onClick={() => onMonthChange(i)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   i === selectedMonth
-                    ? "bg-primary/20 text-primary shadow-sm shadow-primary/10 pill-active"
+                    ? "glass-active text-primary shadow-sm shadow-primary/10 pill-active"
                     : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                 }`}
               >
