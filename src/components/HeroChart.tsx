@@ -51,6 +51,31 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
   const [showBreakdown, setShowBreakdown] = useState(false);
 
+  const monthNameToIndex: Record<string, number> = {
+    "Janeiro": 0, "Fevereiro": 1, "Março": 2, "Abril": 3,
+    "Maio": 4, "Junho": 5, "Julho": 6, "Agosto": 7,
+    "Setembro": 8, "Outubro": 9, "Novembro": 10, "Dezembro": 11,
+  };
+
+  // Calculate cumulative card payments from month 0 through selectedMonth
+  const cumulativeCardPayments = useMemo(() => {
+    let total = 0;
+    for (let i = 0; i <= selectedMonth && i < cashflowMonths.length; i++) {
+      const m = cashflowMonths[i];
+      const mIdx = monthNameToIndex[m.month] ?? 0;
+      const monthNum = mIdx + 1;
+      total += banks.reduce((bankTotal, bank) => {
+        return bankTotal + bank.installments
+          .filter((inst) => {
+            const d = new Date(inst.dueDate + "T00:00:00");
+            return d.getMonth() + 1 === monthNum && d.getFullYear() === m.year;
+          })
+          .reduce((sum, inst) => sum + inst.installmentAmount, 0);
+      }, 0);
+    }
+    return total;
+  }, [banks, cashflowMonths, selectedMonth]);
+
   // Build breakdown items
   const breakdownItems = useMemo(() => {
     const items: { label: string; value: number; type: "debt" | "payment"; icon: "card" | "creditor" }[] = [];
