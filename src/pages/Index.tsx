@@ -34,12 +34,7 @@ const Index = () => {
   const store = useFinanceStore();
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10 relative overflow-hidden">
-      {/* Liquid Glass Orbs - decorative background */}
-      <div className="liquid-orb w-[500px] h-[500px] bg-primary top-[-100px] right-[-150px] z-0" />
-      <div className="liquid-orb w-[400px] h-[400px] bg-accent top-[600px] left-[-200px] z-0" style={{ animationDelay: '3s' }} />
-      <div className="liquid-orb w-[300px] h-[300px] bg-income top-[1400px] right-[-100px] z-0" style={{ animationDelay: '5s' }} />
-
+    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10">
       {/* Header */}
       <DashboardHeader
         totalDebt={store.totalDebt}
