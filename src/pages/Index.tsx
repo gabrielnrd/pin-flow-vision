@@ -18,8 +18,9 @@ import { CreditCard, BarChart3, Brain, Users } from "lucide-react";
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
     <div className="flex items-center gap-3 mb-5">
-      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-        <Icon className="w-4.5 h-4.5 text-primary" />
+      <div className="w-9 h-9 rounded-xl glass-pill flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10 rounded-xl" />
+        <Icon className="w-4.5 h-4.5 text-primary relative z-10" />
       </div>
       <div>
         <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
