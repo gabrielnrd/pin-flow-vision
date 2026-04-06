@@ -47,7 +47,7 @@ export function DashboardHeader({
         {/* Month/year filter */}
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <div className="flex gap-1 glass-pill rounded-xl p-1">
+          <div className="flex gap-1 bg-secondary/40 rounded-xl p-1">
             {cashflowMonths.map((m, i) => (
               <button
                 key={i}
