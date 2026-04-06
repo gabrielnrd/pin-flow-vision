@@ -149,28 +149,123 @@
 }
 
 @layer utilities {
+  /* ── Liquid Glass Base ── */
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border shadow-xl;
-    border-color: hsl(var(--border) / 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply backdrop-blur-xl border shadow-xl;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card) / 0.55) 0%,
+      hsl(var(--card) / 0.35) 50%,
+      hsl(var(--card) / 0.55) 100%
+    );
+    border-color: hsl(0 0% 100% / 0.08);
+    box-shadow:
+      0 8px 32px -8px hsl(var(--primary) / 0.06),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.06),
+      inset 0 -1px 0 0 hsl(0 0% 0% / 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 100% / 0.06) 0%,
+      transparent 100%
+    );
+    pointer-events: none;
+    border-radius: inherit;
   }
 
   .glass-card:hover {
-    border-color: hsl(var(--border) / 0.5);
-    box-shadow: 0 8px 32px -8px hsl(var(--primary) / 0.08), 0 20px 40px -12px hsl(var(--foreground) / 0.08);
+    border-color: hsl(0 0% 100% / 0.14);
+    box-shadow:
+      0 12px 40px -8px hsl(var(--primary) / 0.12),
+      0 24px 48px -16px hsl(var(--foreground) / 0.08),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.1),
+      inset 0 -1px 0 0 hsl(0 0% 0% / 0.12);
+    transform: translateY(-1px);
   }
 
   .light .glass-card {
-    @apply bg-card/80 shadow-lg;
-    border-color: hsl(var(--border) / 0.6);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card) / 0.75) 0%,
+      hsl(var(--card) / 0.6) 50%,
+      hsl(var(--card) / 0.75) 100%
+    );
+    border-color: hsl(0 0% 100% / 0.5);
+    box-shadow:
+      0 8px 24px -8px hsl(var(--primary) / 0.08),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.6),
+      inset 0 -1px 0 0 hsl(0 0% 0% / 0.04);
+  }
+  .light .glass-card::before {
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 100% / 0.4) 0%,
+      transparent 100%
+    );
   }
   .light .glass-card:hover {
-    border-color: hsl(var(--border));
-    box-shadow: 0 8px 24px -8px hsl(var(--primary) / 0.1), 0 12px 32px -12px hsl(var(--foreground) / 0.06);
+    border-color: hsl(0 0% 100% / 0.7);
+    box-shadow:
+      0 12px 32px -8px hsl(var(--primary) / 0.12),
+      0 16px 40px -16px hsl(var(--foreground) / 0.06),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.7),
+      inset 0 -1px 0 0 hsl(0 0% 0% / 0.06);
   }
 
   .glass-card-hover {
-    @apply glass-card hover:bg-card/80 hover:shadow-2xl hover:-translate-y-0.5;
+    @apply glass-card hover:shadow-2xl;
+  }
+
+  /* ── Liquid Glass Orb (decorative floating element) ── */
+  .liquid-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+    pointer-events: none;
+    animation: orb-float 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes orb-float {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(10px, -15px) scale(1.1); }
+    100% { transform: translate(-5px, 10px) scale(0.95); }
+  }
+
+  /* ── Liquid Glass Pill (for badges, filters) ── */
+  .glass-pill {
+    @apply backdrop-blur-md;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--secondary) / 0.5) 0%,
+      hsl(var(--secondary) / 0.3) 100%
+    );
+    border: 1px solid hsl(0 0% 100% / 0.08);
+    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.05);
+  }
+
+  /* ── Liquid Highlight (inner glow for active states) ── */
+  .glass-active {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.2) 0%,
+      hsl(var(--primary) / 0.08) 100%
+    );
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow:
+      0 0 20px -4px hsl(var(--primary) / 0.15),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.08);
   }
 
   .glow-nubank {
