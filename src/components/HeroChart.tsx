@@ -265,16 +265,16 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
                     </span>
                   </div>
                 ))}
-                {cardExpensesForMonth > 0 && (
+                {cumulativeCardPayments > 0 && (
                   <>
                     <div className="border-t border-dashed border-border/50 my-2" />
                     <div className="flex items-center gap-2 text-sm">
                       <div className="w-5 h-5 rounded-md bg-income/10 flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 text-income" />
                       </div>
-                      <span className="flex-1 text-income">Pagamentos este mês</span>
+                      <span className="flex-1 text-income">Pagamentos até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}</span>
                       <span className="text-income font-medium tabular-nums">
-                        −R$ {cardExpensesForMonth.toLocaleString("pt-BR")}
+                        −R$ {cumulativeCardPayments.toLocaleString("pt-BR")}
                       </span>
                     </div>
                   </>
