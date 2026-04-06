@@ -139,35 +139,6 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
       result[lastPastIdx].future_saidas = result[lastPastIdx].saidas;
     }
 
-    // Add projected months beyond data
-    if (result.length >= 2) {
-      const allEntradas = cashflowMonths.map((m) => m.incomes.reduce((s, i) => s + i.amount, 0));
-      const allSaidas = cashflowMonths.map((m) => m.expenses.reduce((s, e) => s + e.amount, 0));
-      const avgEntradas = allEntradas.reduce((s, v) => s + v, 0) / allEntradas.length;
-      const avgSaidas = allSaidas.reduce((s, v) => s + v, 0) / allSaidas.length;
-
-      const last = cashflowMonths[cashflowMonths.length - 1];
-      const lastIdx = monthNameToIndex[last.month] ?? 0;
-
-      // Bridge for projection
-      const lastResult = result[result.length - 1];
-      if (lastResult.future_entradas === undefined) {
-        lastResult.future_entradas = lastResult.entradas;
-        lastResult.future_saidas = lastResult.saidas;
-      }
-
-      for (let i = 1; i <= 2; i++) {
-        const nextIdx = (lastIdx + i) % 12;
-        const nextYear = last.year + Math.floor((lastIdx + i) / 12);
-        result.push({
-          month: `${monthNames3[nextIdx]}/${nextYear}`,
-          entradas: undefined,
-          saidas: undefined,
-          future_entradas: Math.round(avgEntradas * (1 + (Math.random() - 0.5) * 0.05)),
-          future_saidas: Math.round(avgSaidas * (1 + (Math.random() - 0.5) * 0.05)),
-        });
-      }
-    }
 
     return result;
   }, [cashflowMonths, banks]);
