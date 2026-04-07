@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useFinanceStore } from "@/stores/financeStore";
-import { CreditCard, AlertTriangle, ChevronUp, ChevronDown, Wallet } from "lucide-react";
+import { CreditCard, AlertTriangle, ChevronLeft, ChevronRight, Wallet } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -35,82 +35,130 @@ const bankTextColor: Record<string, string> = {
   "bank-other": "text-white",
 };
 
-function CarteiraCard({ bank, isActive, scale = 1 }: { bank: any; isActive: boolean; scale?: number }) {
+function WalletCard({
+  bank,
+  stackIndex,
+  isActive,
+  totalCards,
+  onClick,
+}: {
+  bank: any;
+  stackIndex: number;
+  isActive: boolean;
+  totalCards: number;
+  onClick: () => void;
+}) {
   const usagePercent = Math.min((bank.limitUsed / bank.limitTotal) * 100, 100);
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
   const gradient = bankGradients[bank.color] || bankGradients["bank-other"];
   const textColor = bankTextColor[bank.color] || "text-white";
-  const cardNumber = `•••• •••• •••• ${String(Math.abs(bank.name.split("").reduce((a: number, c: string) => a + c.charCodeAt(0), 0) % 10000)).padStart(4, "0")}`;
+  const cardNumber = `•••• •••• •••• ${String(
+    Math.abs(
+      bank.name.split("").reduce((a: number, c: string) => a + c.charCodeAt(0), 0) % 10000
+    )
+  ).padStart(4, "0")}`;
+
+  // Stack positioning: active card is fully visible, others peek from top
+  const peekOffset = isActive ? 0 : -(stackIndex * 28 + 60);
+  const scaleVal = isActive ? 1 : 1 - stackIndex * 0.03;
+  const zIndex = isActive ? 50 : totalCards - stackIndex;
+  const blurVal = isActive ? 0 : Math.min(stackIndex * 0.5, 2);
 
   return (
     <div
-      className={cn(
-        "w-[320px] h-[200px] rounded-2xl overflow-hidden transition-all duration-500 select-none shrink-0",
-        textColor,
-        isActive ? "shadow-2xl shadow-primary/40" : "opacity-40 blur-[1px]"
-      )}
-      style={{ background: gradient, transform: `scale(${scale})` }}
+      className={cn("absolute left-1/2 cursor-pointer", textColor)}
+      style={{
+        transform: `translateX(-50%) translateY(${peekOffset}px) scale(${scaleVal})`,
+        zIndex,
+        filter: `blur(${blurVal}px)`,
+        transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        width: 340,
+        height: 210,
+      }}
+      onClick={onClick}
     >
-      <div className="relative w-full h-full p-4 flex flex-col justify-between">
-        <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{
-          backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }} />
+      <div
+        className="w-full h-full rounded-2xl overflow-hidden shadow-xl"
+        style={{ background: gradient }}
+      >
+        <div className="relative w-full h-full p-4 flex flex-col justify-between">
+          {/* Pattern overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.05] pointer-events-none"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
+              backgroundSize: "60px 60px",
+            }}
+          />
 
-        <div className="relative z-10 flex items-start justify-between">
-          <div>
-            <h3 className="font-bold text-lg tracking-wide">{bank.name}</h3>
-            <p className="text-[10px] opacity-60 mt-0.5">{bank.installments.filter((i: any) => i.status !== "pago").length} parcelas ativas</p>
-          </div>
-          <Badge variant="outline" className={cn("text-[9px] border-white/30", statusStyles[bank.status] || "")}>
-            {statusLabels[bank.status] || bank.status}
-          </Badge>
-        </div>
-
-        <div className="relative z-10 flex items-center gap-2">
-          <div className="w-9 h-6 rounded bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
-          <span className="text-xs font-mono tracking-[0.18em] opacity-80">{cardNumber}</span>
-        </div>
-
-        <div className="relative z-10 space-y-1.5">
-          <div>
-            <div className="flex justify-between text-[9px] opacity-70 mb-0.5">
-              <span>Limite usado</span>
-              <span>{usagePercent.toFixed(0)}%</span>
-            </div>
-            <Progress value={usagePercent} className="h-1 bg-white/20 [&>div]:bg-white/80" />
-          </div>
-          <div className="flex justify-between items-end text-xs">
+          <div className="relative z-10 flex items-start justify-between">
             <div>
-              <p className="text-[9px] opacity-60">Limite</p>
-              <p className="font-bold tabular-nums">R$ {bank.limitTotal.toLocaleString("pt-BR")}</p>
+              <h3 className="font-bold text-lg tracking-wide">{bank.name}</h3>
+              <p className="text-[10px] opacity-60 mt-0.5">
+                {bank.installments.filter((i: any) => i.status !== "pago").length} parcelas ativas
+              </p>
             </div>
-            <div className="text-center">
-              <p className="text-[9px] opacity-60">Usado</p>
-              <p className="font-bold tabular-nums">R$ {bank.limitUsed.toLocaleString("pt-BR")}</p>
+            <Badge
+              variant="outline"
+              className={cn("text-[9px] border-white/30", statusStyles[bank.status] || "")}
+            >
+              {statusLabels[bank.status] || bank.status}
+            </Badge>
+          </div>
+
+          <div className="relative z-10 flex items-center gap-2">
+            <div className="w-9 h-6 rounded bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
+            <span className="text-xs font-mono tracking-[0.18em] opacity-80">{cardNumber}</span>
+          </div>
+
+          <div className="relative z-10 space-y-1.5">
+            <div>
+              <div className="flex justify-between text-[9px] opacity-70 mb-0.5">
+                <span>Limite usado</span>
+                <span>{usagePercent.toFixed(0)}%</span>
+              </div>
+              <Progress value={usagePercent} className="h-1 bg-white/20 [&>div]:bg-white/80" />
             </div>
-            <div className="text-right">
-              {isOverLimit ? (
-                <div className="flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
-                  <div>
-                    <p className="text-[9px] opacity-60">Excedido</p>
-                    <p className="font-bold tabular-nums">R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}</p>
+            <div className="flex justify-between items-end text-xs">
+              <div>
+                <p className="text-[9px] opacity-60">Limite</p>
+                <p className="font-bold tabular-nums">
+                  R$ {bank.limitTotal.toLocaleString("pt-BR")}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[9px] opacity-60">Usado</p>
+                <p className="font-bold tabular-nums">
+                  R$ {bank.limitUsed.toLocaleString("pt-BR")}
+                </p>
+              </div>
+              <div className="text-right">
+                {isOverLimit ? (
+                  <div className="flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    <div>
+                      <p className="text-[9px] opacity-60">Excedido</p>
+                      <p className="font-bold tabular-nums">
+                        R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-[9px] opacity-60">Livre</p>
-                  <p className="font-bold tabular-nums">R$ {freeAmount.toLocaleString("pt-BR")}</p>
-                </div>
-              )}
+                ) : (
+                  <div>
+                    <p className="text-[9px] opacity-60">Livre</p>
+                    <p className="font-bold tabular-nums">
+                      R$ {freeAmount.toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="absolute bottom-3 right-4 opacity-10">
-          <CreditCard className="w-10 h-10" />
+          <div className="absolute bottom-3 right-4 opacity-10">
+            <CreditCard className="w-10 h-10" />
+          </div>
         </div>
       </div>
     </div>
@@ -120,17 +168,17 @@ function CarteiraCard({ bank, isActive, scale = 1 }: { bank: any; isActive: bool
 export default function CarteiraPage() {
   const { banks } = useFinanceStore();
   const [activeIndex, setActiveIndex] = useState(0);
+  const touchStartRef = useRef<number | null>(null);
 
   const count = banks.length;
 
   const prev = useCallback(() => setActiveIndex((p) => (p - 1 + count) % count), [count]);
   const next = useCallback(() => setActiveIndex((p) => (p + 1) % count), [count]);
 
-  // Keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp") prev();
-      if (e.key === "ArrowDown") next();
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") prev();
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") next();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -148,99 +196,135 @@ export default function CarteiraPage() {
     );
   }
 
-  // Ferris wheel: each card positioned on a vertical circle
-  const wheelRadius = 220;
-  const angleStep = count > 0 ? 360 / count : 360;
-
-  // Build positions for each card relative to active
-  const getCardStyle = (index: number) => {
-    const offset = index - activeIndex;
-    // Normalize to -count/2 .. count/2
-    let normalizedOffset = offset;
-    if (normalizedOffset > count / 2) normalizedOffset -= count;
-    if (normalizedOffset < -count / 2) normalizedOffset += count;
-
-    const angle = (normalizedOffset * angleStep * Math.PI) / 180;
-    // Clockwise: positive offset goes down-right, negative goes up-left
-    const x = Math.sin(angle) * wheelRadius * 0.3;
-    const y = -Math.cos(angle) * wheelRadius + wheelRadius;
-    const scale = Math.cos(angle) * 0.3 + 0.7; // 0.4 to 1.0
-    const zIndex = Math.round(scale * 100);
-    const opacity = Math.abs(normalizedOffset) <= 2 ? 1 : 0;
-
-    return {
-      transform: `translate(${x}px, ${y}px) scale(${scale})`,
-      zIndex,
-      opacity,
-      transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-    };
-  };
+  // Reorder banks so active is at bottom (index 0 = closest), rest stacked above
+  const orderedBanks = banks.map((bank, i) => {
+    let stackPos = i - activeIndex;
+    if (stackPos < 0) stackPos += count;
+    return { bank, originalIndex: i, stackPos };
+  });
 
   const activeBank = banks[activeIndex];
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartRef.current === null) return;
+    const diff = e.changedTouches[0].clientX - touchStartRef.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) prev();
+      else next();
+    }
+    touchStartRef.current = null;
+  };
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <div className="max-w-[1600px] mx-auto px-4 py-6">
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-1">
             <Wallet className="w-5 h-5 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Carteira Digital</h1>
           </div>
-          <p className="text-muted-foreground text-xs">Roda-gigante de cartões</p>
+          <p className="text-muted-foreground text-xs">Seus cartões em um só lugar</p>
         </div>
 
-        {/* Main layout: wheel left, details right */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 justify-center">
-          {/* Ferris Wheel */}
-          <div className="relative flex-shrink-0" style={{ width: 360, height: wheelRadius * 2 + 220 }}>
-            {/* Navigation */}
-            <button
-              onClick={prev}
-              className="absolute top-0 left-1/2 -translate-x-1/2 z-30 w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
+        {/* Main layout */}
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 justify-center">
+          {/* Wallet pocket */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-4">
+            <div
+              className="relative"
+              style={{ width: 380, height: 380 }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
             >
-              <ChevronUp className="w-5 h-5" />
-            </button>
-            <button
-              onClick={next}
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 z-30 w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
-            >
-              <ChevronDown className="w-5 h-5" />
-            </button>
-
-            {/* Cards container */}
-            <div className="absolute inset-0 flex items-start justify-center" style={{ top: 50 }}>
-              {banks.map((bank, i) => (
-                <div
-                  key={bank.id}
-                  className="absolute cursor-pointer"
-                  style={getCardStyle(i)}
-                  onClick={() => setActiveIndex(i)}
-                >
-                  <CarteiraCard bank={bank} isActive={i === activeIndex} />
+              {/* Wallet body */}
+              <div
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-3xl border border-border/60 overflow-hidden"
+                style={{
+                  width: 360,
+                  height: 200,
+                  background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.8) 100%)",
+                  boxShadow: "0 -4px 30px -5px hsl(var(--primary) / 0.08), inset 0 2px 20px hsl(var(--background) / 0.3)",
+                }}
+              >
+                {/* Wallet stitching line */}
+                <div className="absolute top-3 inset-x-4 h-px border-t border-dashed border-border/40" />
+                {/* Total balance */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pt-6">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                    Saldo Total
+                  </p>
+                  <p className="text-2xl font-bold text-foreground tabular-nums tracking-wide">
+                    ••••••
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Total Balance</p>
                 </div>
-              ))}
+                {/* Wallet icon */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 opacity-10">
+                  <Wallet className="w-6 h-6" />
+                </div>
+              </div>
+
+              {/* Stacked cards peeking from wallet */}
+              {orderedBanks
+                .sort((a, b) => b.stackPos - a.stackPos)
+                .map(({ bank, originalIndex, stackPos }) => (
+                  <WalletCard
+                    key={bank.id}
+                    bank={bank}
+                    stackIndex={stackPos}
+                    isActive={stackPos === 0}
+                    totalCards={count}
+                    onClick={() => setActiveIndex(originalIndex)}
+                  />
+                ))}
             </div>
 
-            {/* Dots */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-              {banks.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveIndex(i)}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-all duration-300",
-                    i === activeIndex ? "bg-primary scale-125" : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                  )}
-                />
-              ))}
+            {/* Navigation */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={prev}
+                className="w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="flex gap-2">
+                {banks.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIndex(i)}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-500",
+                      i === activeIndex
+                        ? "bg-primary w-6"
+                        : "bg-muted-foreground/30 w-2 hover:bg-muted-foreground/50"
+                    )}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={next}
+                className="w-10 h-10 rounded-full bg-card/80 backdrop-blur border border-border/50 flex items-center justify-center text-foreground hover:bg-primary/20 hover:text-primary transition-all shadow-lg"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
           {/* Detail Panel */}
           <div className="flex-1 max-w-xl w-full space-y-4">
             {activeBank && (
-              <div className="rounded-2xl bg-card/60 backdrop-blur border border-border/50 p-5 space-y-4 animate-fade-in">
+              <div
+                key={activeBank.id}
+                className="rounded-2xl bg-card/60 backdrop-blur border border-border/50 p-5 space-y-4"
+                style={{ animation: "float-in 0.4s ease-out" }}
+              >
                 <h2 className="text-xl font-bold text-foreground">{activeBank.name}</h2>
 
                 <div className="grid grid-cols-3 gap-3 text-center">
@@ -269,13 +353,23 @@ export default function CarteiraPage() {
                     <h3 className="text-sm font-semibold text-muted-foreground">Parcelas</h3>
                     <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                       {activeBank.installments.map((inst) => (
-                        <div key={inst.id} className="flex items-center justify-between rounded-lg bg-background/40 px-3 py-2 text-sm">
-                          <span className="text-foreground truncate flex-1">{inst.description}</span>
-                          <span className="text-muted-foreground text-xs mx-2">{inst.currentInstallment}/{inst.totalInstallments}</span>
+                        <div
+                          key={inst.id}
+                          className="flex items-center justify-between rounded-lg bg-background/40 px-3 py-2 text-sm"
+                        >
+                          <span className="text-foreground truncate flex-1">
+                            {inst.description}
+                          </span>
+                          <span className="text-muted-foreground text-xs mx-2">
+                            {inst.currentInstallment}/{inst.totalInstallments}
+                          </span>
                           <span className="font-semibold text-foreground tabular-nums">
                             R$ {inst.installmentAmount.toLocaleString("pt-BR")}
                           </span>
-                          <Badge variant="outline" className={cn("ml-2 text-[9px]", statusStyles[inst.status] || "")}>
+                          <Badge
+                            variant="outline"
+                            className={cn("ml-2 text-[9px]", statusStyles[inst.status] || "")}
+                          >
                             {inst.status}
                           </Badge>
                         </div>
@@ -290,15 +384,21 @@ export default function CarteiraPage() {
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-3 text-center">
                 <p className="text-[10px] text-muted-foreground">Limite Total</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">R$ {totalLimit.toLocaleString("pt-BR")}</p>
+                <p className="text-lg font-bold text-foreground tabular-nums">
+                  R$ {totalLimit.toLocaleString("pt-BR")}
+                </p>
               </div>
               <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-3 text-center">
                 <p className="text-[10px] text-muted-foreground">Total Usado</p>
-                <p className="text-lg font-bold text-foreground tabular-nums">R$ {totalUsed.toLocaleString("pt-BR")}</p>
+                <p className="text-lg font-bold text-foreground tabular-nums">
+                  R$ {totalUsed.toLocaleString("pt-BR")}
+                </p>
               </div>
               <div className="rounded-xl bg-card/60 backdrop-blur border border-border/50 p-3 text-center">
                 <p className="text-[10px] text-muted-foreground">Dívida Total</p>
-                <p className="text-lg font-bold text-expense tabular-nums">R$ {totalDebt.toLocaleString("pt-BR")}</p>
+                <p className="text-lg font-bold text-expense tabular-nums">
+                  R$ {totalDebt.toLocaleString("pt-BR")}
+                </p>
               </div>
             </div>
           </div>
