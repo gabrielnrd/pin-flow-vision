@@ -4,6 +4,7 @@ import { Target, Plus, ArrowRight, Check, X, Pencil, Trash2, CalendarClock, Tren
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DolphinEffect } from "@/components/DolphinEffect";
+import { DreamBoard } from "@/components/DreamBoard";
 import {
   Dialog,
   DialogContent,
