@@ -39,7 +39,7 @@ const App = () => (
                 <Route path="/divida" element={<DividaPage />} />
                 <Route path="/carteira" element={<CarteiraPage />} />
                 <Route path="/lifegame" element={<LifeGamePage />} />
-                <Route path="/rotina" element={<RotinaPage />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
