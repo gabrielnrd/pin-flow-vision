@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2, Wallet, Brain } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -33,9 +33,7 @@ export function AppNav() {
         <NavLink to="/lifegame" className={({ isActive }) => cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
           <Gamepad2 className="w-4 h-4" /> LifeGame
         </NavLink>
-        <NavLink to="/rotina" className={({ isActive }) => cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
-          <Brain className="w-4 h-4" /> Rotina
-        </NavLink>
+
 
         <div className="ml-auto flex items-center gap-1">
           <button

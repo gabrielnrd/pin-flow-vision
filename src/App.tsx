@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FinanceProvider } from "@/stores/financeStore";
-import { RoutineProvider } from "@/stores/routineStore";
+
 import { ThemeProvider } from "@/hooks/use-theme";
 import { AppNav } from "@/components/AppNav";
 import Index from "./pages/Index";
@@ -15,7 +15,7 @@ import TradePage from "./pages/Trade";
 import DividaPage from "./pages/Divida";
 import CarteiraPage from "./pages/Carteira";
 import LifeGamePage from "./pages/LifeGame";
-import RotinaPage from "./pages/Rotina";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +25,7 @@ const App = () => (
     <ThemeProvider>
       <TooltipProvider>
         <FinanceProvider>
-          <RoutineProvider>
+          
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -39,11 +39,11 @@ const App = () => (
                 <Route path="/divida" element={<DividaPage />} />
                 <Route path="/carteira" element={<CarteiraPage />} />
                 <Route path="/lifegame" element={<LifeGamePage />} />
-                <Route path="/rotina" element={<RotinaPage />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </RoutineProvider>
+          
         </FinanceProvider>
       </TooltipProvider>
     </ThemeProvider>

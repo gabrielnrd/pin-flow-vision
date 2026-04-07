@@ -234,7 +234,15 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
                 <TrendingDown className="w-5 h-5 text-chart-2" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">Próximo Total</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">Próximo Total</p>
+                  {totalDebt > 0 && cumulativeCardPayments > 0 && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-income/10 text-[10px] font-semibold text-income">
+                      <TrendingDown className="w-3 h-3" />
+                      −{((cumulativeCardPayments / totalDebt) * 100).toFixed(1)}%
+                    </span>
+                  )}
+                </div>
                 <p className="text-2xl text-money text-chart-2">
                   R$ {Math.max(totalDebt - cumulativeCardPayments, 0).toLocaleString("pt-BR")}
                 </p>
