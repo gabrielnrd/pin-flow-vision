@@ -236,8 +236,9 @@ export default function GoalsPage() {
         <OverallProgressBar percent={overallPercent} saved={totalSaved} total={totalTarget} />
       </div>
 
-      {/* Dolphin Effect */}
-      <div className="mb-6">
+      {/* Dream Board + Dolphin Effect */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <DreamBoard />
         <DolphinEffect />
       </div>
 
