@@ -37,7 +37,7 @@ export function FinancialHealthScore() {
 
     // 4. Goals progress
     const goalsScore = store.goals.length > 0
-      ? store.goals.reduce((acc, g) => acc + Math.min((g.currentAmount / g.targetAmount) * 100, 100), 0) / store.goals.length
+      ? store.goals.reduce((acc, g) => acc + Math.min((g.savedAmount / g.targetAmount) * 100, 100), 0) / store.goals.length
       : 50;
     factors.push({ name: "Objetivos", score: goalsScore, weight: 0.15 });
 
