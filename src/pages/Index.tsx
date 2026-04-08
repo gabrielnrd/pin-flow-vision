@@ -13,7 +13,8 @@ import { CalendarCard } from "@/components/CalendarCard";
 import { BudgetRuleWidget } from "@/components/BudgetRuleWidget";
 import { SnowballCalculator } from "@/components/SnowballCalculator";
 import { BrainInsightsPanel } from "@/components/BrainInsightsPanel";
-import { CreditCard, BarChart3, Brain, Users } from "lucide-react";
+import { FinancialHealthScore } from "@/components/FinancialHealthScore";
+import { CreditCard, BarChart3, Brain, Users, Activity } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
