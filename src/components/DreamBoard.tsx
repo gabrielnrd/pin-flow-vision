@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { ImagePlus, X, Maximize2, Minimize2 } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ImagePlus, X, Maximize2, Minimize2, Link, Upload } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const STORAGE_KEY = "fin_dreamboard";
 
@@ -19,15 +20,44 @@ function loadImages(): DreamImage[] {
   }
 }
 
+function isValidUrl(str: string): boolean {
+  try {
+    const url = new URL(str.trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function DreamBoard() {
   const [images, setImages] = useState<DreamImage[]>(loadImages);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
+  const dragCounter = useRef(0);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
   }, [images]);
+
+  const addImageFromUrl = useCallback((url: string, label?: string) => {
+    const trimmed = url.trim();
+    if (!isValidUrl(trimmed)) {
+      toast.error("URL inválida");
+      return;
+    }
+    const newImg: DreamImage = {
+      id: crypto.randomUUID(),
+      src: trimmed,
+      label: label || new URL(trimmed).pathname.split("/").pop()?.replace(/\.[^/.]+$/, "") || "Imagem",
+    };
+    setImages((prev) => [...prev, newImg]);
+    toast.success("Imagem adicionada!");
+  }, []);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -46,6 +76,75 @@ export function DreamBoard() {
     });
   };
 
+  // Drag & drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+    dragCounter.current = 0;
+
+    // Check for files first
+    if (e.dataTransfer.files?.length > 0) {
+      handleFiles(e.dataTransfer.files);
+      return;
+    }
+
+    // Check for dropped URL/text
+    const url = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain");
+    if (url && isValidUrl(url)) {
+      addImageFromUrl(url);
+    }
+  }, [addImageFromUrl]);
+
+  // Paste handler
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!dropRef.current?.closest(".dream-board-root")) return;
+
+      // Check for pasted files (screenshots etc)
+      if (e.clipboardData?.files?.length) {
+        handleFiles(e.clipboardData.files);
+        return;
+      }
+
+      // Check for pasted URL
+      const text = e.clipboardData?.getData("text/plain");
+      if (text && isValidUrl(text)) {
+        addImageFromUrl(text);
+      }
+    };
+
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [addImageFromUrl]);
+
+  const handleUrlSubmit = () => {
+    if (urlInput.trim()) {
+      addImageFromUrl(urlInput);
+      setUrlInput("");
+      setShowUrlInput(false);
+    }
+  };
+
   const removeImage = (id: string) => {
     setImages((prev) => prev.filter((img) => img.id !== id));
   };
@@ -54,7 +153,22 @@ export function DreamBoard() {
   const hasMore = !expanded && images.length > 6;
 
   return (
-    <div className="glass-card rounded-2xl p-5 animate-float-in">
+    <div
+      ref={dropRef}
+      className="dream-board-root glass-card rounded-2xl p-5 animate-float-in relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {dragging && (
+        <div className="absolute inset-0 z-20 rounded-2xl border-2 border-dashed border-primary bg-primary/10 backdrop-blur-sm flex flex-col items-center justify-center gap-3 pointer-events-none">
+          <Upload className="w-10 h-10 text-primary animate-bounce" />
+          <p className="text-sm font-medium text-primary">Solte a imagem ou link aqui</p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-xl">✨</span>
@@ -72,10 +186,16 @@ export function DreamBoard() {
             </button>
           )}
           <button
+            onClick={() => setShowUrlInput(!showUrlInput)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+          >
+            <Link className="w-3.5 h-3.5" /> URL
+          </button>
+          <button
             onClick={() => inputRef.current?.click()}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors"
           >
-            <ImagePlus className="w-3.5 h-3.5" /> Adicionar
+            <ImagePlus className="w-3.5 h-3.5" /> Upload
           </button>
         </div>
         <input
@@ -88,6 +208,27 @@ export function DreamBoard() {
         />
       </div>
 
+      {/* URL input bar */}
+      {showUrlInput && (
+        <div className="flex gap-2 mb-4 animate-float-in">
+          <input
+            type="url"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+            placeholder="Cole o link da imagem aqui..."
+            className="flex-1 h-9 rounded-xl border border-border/50 bg-secondary/30 px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            autoFocus
+          />
+          <button
+            onClick={handleUrlSubmit}
+            className="px-4 h-9 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+          >
+            Adicionar
+          </button>
+        </div>
+      )}
+
       {images.length === 0 ? (
         <button
           onClick={() => inputRef.current?.click()}
@@ -99,7 +240,7 @@ export function DreamBoard() {
           <div className="text-center">
             <p className="text-sm font-medium text-foreground">Monte seu Dream Board</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Adicione imagens dos seus sonhos e objetivos para manter a motivação
+              Arraste imagens, cole links ou faça upload
             </p>
           </div>
         </button>
