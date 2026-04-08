@@ -5,6 +5,7 @@ import { TrendingDown, TrendingUp, Target, Pencil, Check, X, ChevronDown, Chevro
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/hooks/use-theme";
 import { type Creditor } from "@/data/financialData";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
@@ -220,7 +221,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
                 <p className="text-xs text-muted-foreground">Dívida Total</p>
                 <DebtTrendBadge current={totalDebt} previous={totalDebt * 1.05} />
               </div>
-              <p className="text-2xl text-money text-expense">R$ {totalDebt.toLocaleString("pt-BR")}</p>
+              <p className="text-2xl text-money text-expense"><AnimatedNumber value={totalDebt} prefix="R$ " decimals={0} /></p>
               <p className="text-[10px] text-muted-foreground">Cartões + Credores</p>
             </div>
           </div>
@@ -244,7 +245,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
                   )}
                 </div>
                 <p className="text-2xl text-money text-chart-2">
-                  R$ {Math.max(totalDebt - cumulativeCardPayments, 0).toLocaleString("pt-BR")}
+                  <AnimatedNumber value={Math.max(totalDebt - cumulativeCardPayments, 0)} prefix="R$ " decimals={0} />
                 </p>
                 <p className="text-[10px] text-muted-foreground">
                   Até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year} (−R$ {cumulativeCardPayments.toLocaleString("pt-BR")})
