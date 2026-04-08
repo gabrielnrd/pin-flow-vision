@@ -7,6 +7,7 @@ import { FinanceProvider } from "@/stores/financeStore";
 
 import { ThemeProvider } from "@/hooks/use-theme";
 import { AppNav } from "@/components/AppNav";
+import { MobileNav } from "@/components/MobileNav";
 import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
 import RendaPage from "./pages/Renda";
@@ -30,6 +31,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <AppNav />
+              <MobileNav />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/objetivos" element={<GoalsPage />} />

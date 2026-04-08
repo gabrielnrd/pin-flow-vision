@@ -13,7 +13,8 @@ import { CalendarCard } from "@/components/CalendarCard";
 import { BudgetRuleWidget } from "@/components/BudgetRuleWidget";
 import { SnowballCalculator } from "@/components/SnowballCalculator";
 import { BrainInsightsPanel } from "@/components/BrainInsightsPanel";
-import { CreditCard, BarChart3, Brain, Users } from "lucide-react";
+import { FinancialHealthScore } from "@/components/FinancialHealthScore";
+import { CreditCard, BarChart3, Brain, Users, Activity } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
@@ -33,7 +34,7 @@ const Index = () => {
   const store = useFinanceStore();
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10">
+    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10 pb-24 md:pb-6">
       {/* Header */}
       <DashboardHeader
         totalDebt={store.totalDebt}
@@ -122,11 +123,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Section: Creditors + Brain - 2 column */}
+      {/* Section: Health + Creditors + Brain */}
       <section>
         <SectionTitle icon={Users} title="Credores & Inteligência" subtitle="Dívidas pessoais e insights do Segundo Cérebro" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div className="space-y-5">
+            <FinancialHealthScore />
             <CreditorWidget
               creditors={store.creditors}
               totalDebt={store.totalCreditorsDebt}

@@ -7,7 +7,7 @@ export function AppNav() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <nav className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50">
+    <nav className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50 hidden md:block">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 h-12">
         <NavLink to="/" end className={({ isActive }) => cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
           <LayoutDashboard className="w-4 h-4" /> Dashboard
