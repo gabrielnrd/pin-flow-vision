@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef, createContext, useContext, type ReactNode, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   banks as initialBanks,
   cashflowMonths as initialCashflow,
@@ -170,21 +172,81 @@ function saveToLocal(data: PersistedData) {
 }
 
 function useFinanceStoreInternal(): FinanceStore {
-  const [cloudLoading] = useState(false);
-  const [banksRaw, setBanks] = useState<Bank[]>(() => loadFromStorage("fin_banks", DEFAULTS.banks));
-  const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(() => mergeCashflow(loadFromStorage("fin_cashflow", DEFAULTS.cashflowMonths), DEFAULTS.cashflowMonths));
-  const [creditors, setCreditors] = useState<Creditor[]>(() => loadFromStorage("fin_creditors", DEFAULTS.creditors));
-  const [goals, setGoals] = useState<Goal[]>(() => loadFromStorage("fin_goals", DEFAULTS.goals));
+  const { user } = useAuth();
+  const [cloudLoading, setCloudLoading] = useState(true);
+  const [banksRaw, setBanks] = useState<Bank[]>(DEFAULTS.banks);
+  const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(DEFAULTS.cashflowMonths);
+  const [creditors, setCreditors] = useState<Creditor[]>(DEFAULTS.creditors);
+  const [goals, setGoals] = useState<Goal[]>(DEFAULTS.goals);
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
-  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(() => loadFromStorage("fin_incomeSources", DEFAULTS.incomeSources));
-  const [savingsGoalMonth, setSavingsGoalMonth] = useState(() => loadFromStorage("fin_savingsGoal", DEFAULTS.savingsGoalMonth));
-  const [salary, setSalary] = useState(() => loadFromStorage("fin_salary", DEFAULTS.salary));
-  const [monthlyHours, setMonthlyHours] = useState(() => loadFromStorage("fin_monthlyHours", DEFAULTS.monthlyHours));
-  const [safetyMargin, setSafetyMargin] = useState(() => loadFromStorage("fin_safetyMargin", DEFAULTS.safetyMargin));
-  const [lifeXp, setLifeXp] = useState(() => loadFromStorage("fin_lifeXp", DEFAULTS.lifeXp));
-  const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(() => loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks));
-  const initialLoadDone = useRef(true);
+  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(DEFAULTS.incomeSources);
+  const [savingsGoalMonth, setSavingsGoalMonth] = useState(DEFAULTS.savingsGoalMonth);
+  const [salary, setSalary] = useState(DEFAULTS.salary);
+  const [monthlyHours, setMonthlyHours] = useState(DEFAULTS.monthlyHours);
+  const [safetyMargin, setSafetyMargin] = useState(DEFAULTS.safetyMargin);
+  const [lifeXp, setLifeXp] = useState(DEFAULTS.lifeXp);
+  const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(DEFAULTS.lifeTasks);
+  const initialLoadDone = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load from Supabase on mount / user change
+  useEffect(() => {
+    if (!user) {
+      setCloudLoading(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setCloudLoading(true);
+      try {
+        const { data } = await supabase
+          .from("user_financial_data")
+          .select("data")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (data?.data) {
+          const d = data.data as unknown as PersistedData;
+          setBanks(d.banks ?? DEFAULTS.banks);
+          setCashflowMonths(d.cashflowMonths ? mergeCashflow(d.cashflowMonths, DEFAULTS.cashflowMonths) : DEFAULTS.cashflowMonths);
+          setCreditors(d.creditors ?? DEFAULTS.creditors);
+          setGoals(d.goals ?? DEFAULTS.goals);
+          setIncomeSources(d.incomeSources ?? DEFAULTS.incomeSources);
+          setSavingsGoalMonth(d.savingsGoalMonth ?? DEFAULTS.savingsGoalMonth);
+          setSalary(d.salary ?? DEFAULTS.salary);
+          setMonthlyHours(d.monthlyHours ?? DEFAULTS.monthlyHours);
+          setSafetyMargin(d.safetyMargin ?? DEFAULTS.safetyMargin);
+          setLifeXp(d.lifeXp ?? DEFAULTS.lifeXp);
+          setLifeTasks(d.lifeTasks ?? DEFAULTS.lifeTasks);
+        } else {
+          // No cloud data — try migrating from localStorage
+          const local = getLocalData();
+          const hasLocalData = localStorage.getItem("fin_banks") !== null;
+          if (hasLocalData) {
+            setBanks(local.banks);
+            setCashflowMonths(local.cashflowMonths);
+            setCreditors(local.creditors);
+            setGoals(local.goals);
+            setIncomeSources(local.incomeSources);
+            setSavingsGoalMonth(local.savingsGoalMonth);
+            setSalary(local.salary);
+            setMonthlyHours(local.monthlyHours);
+            setSafetyMargin(local.safetyMargin);
+            setLifeXp(local.lifeXp);
+            setLifeTasks(local.lifeTasks);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load cloud data:", e);
+      }
+      if (!cancelled) {
+        initialLoadDone.current = true;
+        setCloudLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Save to localStorage on changes
   const getPersistedData = useCallback((): PersistedData => ({
@@ -201,9 +263,36 @@ function useFinanceStoreInternal(): FinanceStore {
     lifeTasks,
   }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks]);
 
+  // Save to localStorage + Supabase (debounced)
   useEffect(() => {
-    saveToLocal(getPersistedData());
-  }, [getPersistedData]);
+    if (!initialLoadDone.current) return;
+    const data = getPersistedData();
+    saveToLocal(data);
+
+    if (!user) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { data: existing } = await supabase
+          .from("user_financial_data")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (existing) {
+          await supabase
+            .from("user_financial_data")
+            .update({ data: data as unknown as import("@/integrations/supabase/types").Json, updated_at: new Date().toISOString() })
+            .eq("user_id", user.id);
+        } else {
+          await supabase
+            .from("user_financial_data")
+            .insert({ user_id: user.id, data: data as unknown as import("@/integrations/supabase/types").Json });
+        }
+      } catch (e) {
+        console.error("Failed to save to cloud:", e);
+      }
+    }, 2000);
+  }, [getPersistedData, user]);
 
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
