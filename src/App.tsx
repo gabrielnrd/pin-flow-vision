@@ -74,11 +74,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
-        <FinanceProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <FinanceProvider>
             <AppRoutes />
-          </AuthProvider>
-        </FinanceProvider>
+          </FinanceProvider>
+        </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
