@@ -41,6 +41,8 @@ export interface Creditor {
   name: string;
   totalDebt: number;
   amountPaid: number;
+  interestRate?: number; // % ao mês
+  dueDate?: string; // YYYY-MM-DD próximo vencimento
 }
 
 export interface Goal {
@@ -304,10 +306,10 @@ export const cashflowMonths: CashflowMonth[] = [
 ];
 
 export const creditors: Creditor[] = [
-  { id: "cr1", name: "João Silva", totalDebt: 5000, amountPaid: 3500 },
-  { id: "cr2", name: "Maria Souza", totalDebt: 2000, amountPaid: 800 },
-  { id: "cr3", name: "Pedro Almeida", totalDebt: 3500, amountPaid: 3500 },
-  { id: "cr4", name: "Ana Costa", totalDebt: 1500, amountPaid: 500 },
+  { id: "cr1", name: "João Silva", totalDebt: 5000, amountPaid: 3500, interestRate: 2.5, dueDate: "2026-05-10" },
+  { id: "cr2", name: "Maria Souza", totalDebt: 2000, amountPaid: 800, interestRate: 3.2, dueDate: "2026-05-15" },
+  { id: "cr3", name: "Pedro Almeida", totalDebt: 3500, amountPaid: 3500, interestRate: 0, dueDate: "2026-04-01" },
+  { id: "cr4", name: "Ana Costa", totalDebt: 1500, amountPaid: 500, interestRate: 1.8, dueDate: "2026-05-20" },
 ];
 
 export const initialGoals: Goal[] = [
