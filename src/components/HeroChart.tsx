@@ -59,15 +59,29 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
   };
 
   // Calculate cumulative card payments from month 0 through selectedMonth
+  // Find the index of the current real month in cashflowMonths
+  const currentRealMonthIndex = useMemo(() => {
+    const now = new Date();
+    const curMonth = now.getMonth(); // 0-based
+    const curYear = now.getFullYear();
+    return cashflowMonths.findIndex((m) => {
+      const mIdx = monthNameToIndex[m.month] ?? 0;
+      return mIdx === curMonth && m.year === curYear;
+    });
+  }, [cashflowMonths]);
+
+  // Calculate card payments from current real month through selectedMonth
   const cumulativeCardPayments = useMemo(() => {
+    const startIdx = Math.max(currentRealMonthIndex, 0);
     let total = 0;
-    for (let i = 0; i <= selectedMonth && i < cashflowMonths.length; i++) {
+    for (let i = startIdx; i <= selectedMonth && i < cashflowMonths.length; i++) {
       const m = cashflowMonths[i];
       const mIdx = monthNameToIndex[m.month] ?? 0;
       const monthNum = mIdx + 1;
       total += banks.reduce((bankTotal, bank) => {
         return bankTotal + bank.installments
           .filter((inst) => {
+            if (inst.status === "pago") return false;
             const d = new Date(inst.dueDate + "T00:00:00");
             return d.getMonth() + 1 === monthNum && d.getFullYear() === m.year;
           })
@@ -75,7 +89,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
       }, 0);
     }
     return total;
-  }, [banks, cashflowMonths, selectedMonth]);
+  }, [banks, cashflowMonths, selectedMonth, currentRealMonthIndex]);
 
   // Build breakdown items
   const breakdownItems = useMemo(() => {
