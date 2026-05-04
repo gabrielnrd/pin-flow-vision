@@ -73,7 +73,7 @@ export interface FinanceStore {
   updateCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number) => void;
   addCreditor: (name: string, totalDebt: number) => void;
   removeCreditor: (id: string) => void;
-  updateCreditor: (id: string, updates: Partial<Pick<Creditor, "name" | "totalDebt" | "amountPaid">>) => void;
+  updateCreditor: (id: string, updates: Partial<Pick<Creditor, "name" | "totalDebt" | "amountPaid" | "interestRate" | "dueDate">>) => void;
   addGoal: (title: string, targetAmount: number) => void;
   removeGoal: (id: string) => void;
   updateGoal: (id: string, updates: Partial<Pick<Goal, "title" | "targetAmount" | "image">>) => void;
