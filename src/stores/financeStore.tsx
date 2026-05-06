@@ -173,6 +173,8 @@ function getLocalData(): PersistedData {
     safetyMargin: loadFromStorage("fin_safetyMargin", DEFAULTS.safetyMargin),
     lifeXp: loadFromStorage("fin_lifeXp", DEFAULTS.lifeXp),
     lifeTasks: loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks),
+    transportEntries: loadFromStorage("fin_transportEntries", DEFAULTS.transportEntries),
+    transportBalance: loadFromStorage("fin_transportBalance", DEFAULTS.transportBalance),
   };
 }
 
