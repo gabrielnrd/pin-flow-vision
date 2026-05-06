@@ -551,6 +551,14 @@ function useFinanceStoreInternal(): FinanceStore {
     setLifeTasks((prev) => prev.map((t) => ({ ...t, completedThisWeek: false })));
   }, []);
 
+  const addTransportEntry = useCallback((entry: Omit<TransportEntry, "id">) => {
+    setTransportEntries((prev) => [{ ...entry, id: `t-${Date.now()}` }, ...prev]);
+  }, []);
+
+  const removeTransportEntry = useCallback((id: string) => {
+    setTransportEntries((prev) => prev.filter((e) => e.id !== id));
+  }, []);
+
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
@@ -568,6 +576,7 @@ function useFinanceStoreInternal(): FinanceStore {
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
     lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
+    transportEntries, transportBalance, addTransportEntry, removeTransportEntry, setTransportBalance,
     cloudLoading,
   };
 }
