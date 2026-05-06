@@ -50,6 +50,8 @@ interface PersistedData {
   safetyMargin: number;
   lifeXp: number;
   lifeTasks: LifeTask[];
+  transportEntries: TransportEntry[];
+  transportBalance: number;
 }
 
 export interface FinanceStore {
