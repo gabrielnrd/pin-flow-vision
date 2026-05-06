@@ -290,7 +290,9 @@ function useFinanceStoreInternal(): FinanceStore {
     safetyMargin,
     lifeXp,
     lifeTasks,
-  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks]);
+    transportEntries,
+    transportBalance,
+  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks, transportEntries, transportBalance]);
 
   // Save to localStorage + Supabase (debounced)
   useEffect(() => {
