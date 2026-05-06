@@ -21,6 +21,16 @@ export interface IncomeSource {
   amount: number;
 }
 
+export type TripDirection = "ida" | "volta";
+
+export interface TransportEntry {
+  id: string;
+  service: string;
+  direction: TripDirection;
+  amount: number;
+  date: string;
+}
+
 export interface LifeTask {
   id: string;
   title: string;
