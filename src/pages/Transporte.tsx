@@ -3,22 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Car, Plus, Trash2, Pencil, Check, X, Wallet, TrendingDown, DollarSign, ArrowRight, ArrowLeft } from "lucide-react";
-
-type TripDirection = "ida" | "volta";
-
-interface TransportEntry {
-  id: string;
-  service: string;
-  direction: TripDirection;
-  amount: number;
-  date: string;
-}
+import { useFinanceStore, type TripDirection } from "@/stores/financeStore";
 
 export default function TransportePage() {
-  const [totalBalance, setTotalBalance] = useState(0);
+  const {
+    transportEntries: entries,
+    transportBalance: totalBalance,
+    addTransportEntry,
+    removeTransportEntry,
+    setTransportBalance,
+  } = useFinanceStore();
+
   const [editingBalance, setEditingBalance] = useState(false);
   const [balanceInput, setBalanceInput] = useState("");
-  const [entries, setEntries] = useState<TransportEntry[]>([]);
 
   // Add form
   const [service, setService] = useState("99");
@@ -32,16 +29,9 @@ export default function TransportePage() {
   const handleAddEntry = useCallback(() => {
     const val = parseFloat(amount);
     if (!val || val <= 0) return;
-    setEntries((prev) => [
-      { id: `t-${Date.now()}`, service, direction, amount: val, date },
-      ...prev,
-    ]);
+    addTransportEntry({ service, direction, amount: val, date });
     setAmount("");
-  }, [service, direction, amount, date]);
-
-  const handleRemove = useCallback((id: string) => {
-    setEntries((prev) => prev.filter((e) => e.id !== id));
-  }, []);
+  }, [service, direction, amount, date, addTransportEntry]);
 
   const startEditBalance = () => {
     setBalanceInput(totalBalance.toString());
@@ -50,7 +40,7 @@ export default function TransportePage() {
 
   const confirmBalance = () => {
     const v = parseFloat(balanceInput);
-    if (!isNaN(v) && v >= 0) setTotalBalance(v);
+    if (!isNaN(v) && v >= 0) setTransportBalance(v);
     setEditingBalance(false);
   };
 
@@ -199,7 +189,7 @@ export default function TransportePage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-destructive">-{fmt(entry.amount)}</span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleRemove(entry.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removeTransportEntry(entry.id)}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>

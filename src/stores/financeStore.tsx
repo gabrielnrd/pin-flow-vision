@@ -21,6 +21,16 @@ export interface IncomeSource {
   amount: number;
 }
 
+export type TripDirection = "ida" | "volta";
+
+export interface TransportEntry {
+  id: string;
+  service: string;
+  direction: TripDirection;
+  amount: number;
+  date: string;
+}
+
 export interface LifeTask {
   id: string;
   title: string;
@@ -40,6 +50,8 @@ interface PersistedData {
   safetyMargin: number;
   lifeXp: number;
   lifeTasks: LifeTask[];
+  transportEntries: TransportEntry[];
+  transportBalance: number;
 }
 
 export interface FinanceStore {
@@ -103,6 +115,11 @@ export interface FinanceStore {
   removeLifeTask: (id: string) => void;
   completeLifeTask: (id: string) => void;
   resetWeeklyTasks: () => void;
+  transportEntries: TransportEntry[];
+  transportBalance: number;
+  addTransportEntry: (entry: Omit<TransportEntry, "id">) => void;
+  removeTransportEntry: (id: string) => void;
+  setTransportBalance: (v: number) => void;
   cloudLoading: boolean;
 }
 
@@ -124,6 +141,8 @@ const DEFAULTS: PersistedData = {
     { id: "task-1", title: "Ler 1 livro", xpReward: 100, completedThisWeek: false },
     { id: "task-2", title: "Ir para a academia 3x", xpReward: 50, completedThisWeek: false },
   ],
+  transportEntries: [],
+  transportBalance: 0,
 };
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -154,6 +173,8 @@ function getLocalData(): PersistedData {
     safetyMargin: loadFromStorage("fin_safetyMargin", DEFAULTS.safetyMargin),
     lifeXp: loadFromStorage("fin_lifeXp", DEFAULTS.lifeXp),
     lifeTasks: loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks),
+    transportEntries: loadFromStorage("fin_transportEntries", DEFAULTS.transportEntries),
+    transportBalance: loadFromStorage("fin_transportBalance", DEFAULTS.transportBalance),
   };
 }
 
@@ -169,6 +190,8 @@ function saveToLocal(data: PersistedData) {
   localStorage.setItem("fin_safetyMargin", JSON.stringify(data.safetyMargin));
   localStorage.setItem("fin_lifeXp", JSON.stringify(data.lifeXp));
   localStorage.setItem("fin_lifeTasks", JSON.stringify(data.lifeTasks));
+  localStorage.setItem("fin_transportEntries", JSON.stringify(data.transportEntries));
+  localStorage.setItem("fin_transportBalance", JSON.stringify(data.transportBalance));
 }
 
 function useFinanceStoreInternal(): FinanceStore {
@@ -187,6 +210,8 @@ function useFinanceStoreInternal(): FinanceStore {
   const [safetyMargin, setSafetyMargin] = useState(DEFAULTS.safetyMargin);
   const [lifeXp, setLifeXp] = useState(DEFAULTS.lifeXp);
   const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(DEFAULTS.lifeTasks);
+  const [transportEntries, setTransportEntries] = useState<TransportEntry[]>(DEFAULTS.transportEntries);
+  const [transportBalance, setTransportBalance] = useState(DEFAULTS.transportBalance);
   const initialLoadDone = useRef(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -219,6 +244,8 @@ function useFinanceStoreInternal(): FinanceStore {
           setSafetyMargin(d.safetyMargin ?? DEFAULTS.safetyMargin);
           setLifeXp(d.lifeXp ?? DEFAULTS.lifeXp);
           setLifeTasks(d.lifeTasks ?? DEFAULTS.lifeTasks);
+          setTransportEntries(d.transportEntries ?? DEFAULTS.transportEntries);
+          setTransportBalance(d.transportBalance ?? DEFAULTS.transportBalance);
         } else {
           // No cloud data — try migrating from localStorage
           const local = getLocalData();
@@ -235,6 +262,8 @@ function useFinanceStoreInternal(): FinanceStore {
             setSafetyMargin(local.safetyMargin);
             setLifeXp(local.lifeXp);
             setLifeTasks(local.lifeTasks);
+            setTransportEntries(local.transportEntries);
+            setTransportBalance(local.transportBalance);
           }
         }
       } catch (e) {
@@ -261,7 +290,9 @@ function useFinanceStoreInternal(): FinanceStore {
     safetyMargin,
     lifeXp,
     lifeTasks,
-  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks]);
+    transportEntries,
+    transportBalance,
+  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks, transportEntries, transportBalance]);
 
   // Save to localStorage + Supabase (debounced)
   useEffect(() => {
@@ -520,6 +551,14 @@ function useFinanceStoreInternal(): FinanceStore {
     setLifeTasks((prev) => prev.map((t) => ({ ...t, completedThisWeek: false })));
   }, []);
 
+  const addTransportEntry = useCallback((entry: Omit<TransportEntry, "id">) => {
+    setTransportEntries((prev) => [{ ...entry, id: `t-${Date.now()}` }, ...prev]);
+  }, []);
+
+  const removeTransportEntry = useCallback((id: string) => {
+    setTransportEntries((prev) => prev.filter((e) => e.id !== id));
+  }, []);
+
   return {
     banks, cashflowMonths, creditors, goals, monthlySnapshots, incomeSources,
     selectedMonth, selectedBank, currentCashflow,
@@ -537,6 +576,7 @@ function useFinanceStoreInternal(): FinanceStore {
     phantomBalance, survivalDays,
     setSalary, setMonthlyHours, setSafetyMargin,
     lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
+    transportEntries, transportBalance, addTransportEntry, removeTransportEntry, setTransportBalance,
     cloudLoading,
   };
 }
