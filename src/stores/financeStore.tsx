@@ -115,6 +115,11 @@ export interface FinanceStore {
   removeLifeTask: (id: string) => void;
   completeLifeTask: (id: string) => void;
   resetWeeklyTasks: () => void;
+  transportEntries: TransportEntry[];
+  transportBalance: number;
+  addTransportEntry: (entry: Omit<TransportEntry, "id">) => void;
+  removeTransportEntry: (id: string) => void;
+  setTransportBalance: (v: number) => void;
   cloudLoading: boolean;
 }
 
