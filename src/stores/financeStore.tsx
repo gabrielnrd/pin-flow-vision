@@ -262,6 +262,8 @@ function useFinanceStoreInternal(): FinanceStore {
             setSafetyMargin(local.safetyMargin);
             setLifeXp(local.lifeXp);
             setLifeTasks(local.lifeTasks);
+            setTransportEntries(local.transportEntries);
+            setTransportBalance(local.transportBalance);
           }
         }
       } catch (e) {
