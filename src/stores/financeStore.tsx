@@ -244,6 +244,8 @@ function useFinanceStoreInternal(): FinanceStore {
           setSafetyMargin(d.safetyMargin ?? DEFAULTS.safetyMargin);
           setLifeXp(d.lifeXp ?? DEFAULTS.lifeXp);
           setLifeTasks(d.lifeTasks ?? DEFAULTS.lifeTasks);
+          setTransportEntries(d.transportEntries ?? DEFAULTS.transportEntries);
+          setTransportBalance(d.transportBalance ?? DEFAULTS.transportBalance);
         } else {
           // No cloud data — try migrating from localStorage
           const local = getLocalData();
