@@ -141,6 +141,8 @@ const DEFAULTS: PersistedData = {
     { id: "task-1", title: "Ler 1 livro", xpReward: 100, completedThisWeek: false },
     { id: "task-2", title: "Ir para a academia 3x", xpReward: 50, completedThisWeek: false },
   ],
+  transportEntries: [],
+  transportBalance: 0,
 };
 
 function loadFromStorage<T>(key: string, fallback: T): T {
