@@ -15,21 +15,40 @@ export function FinancialHealthScore() {
 
   const { score, tips } = useMemo(() => {
     const factors: { name: string; score: number; weight: number }[] = [];
-    
-    // 1. Balance ratio (income - expense) / income
+
+    // Dynamic debt: only pending installments + remaining creditors (updates as bills get paid)
+    const pendingBankDebt = store.banks.reduce(
+      (sum, b) => sum + b.installments.filter((i) => i.status !== "pago").reduce((s, i) => s + i.installmentAmount, 0),
+      0
+    );
+    const pendingCardExpensesMonth = (() => {
+      const MONTH_MAP: Record<string, number> = { "Janeiro":1,"Fevereiro":2,"Março":3,"Abril":4,"Maio":5,"Junho":6,"Julho":7,"Agosto":8,"Setembro":9,"Outubro":10,"Novembro":11,"Dezembro":12 };
+      const monthNum = MONTH_MAP[store.currentCashflow.month];
+      const year = store.currentCashflow.year;
+      if (!monthNum) return store.cardExpensesForMonth;
+      return store.banks.reduce((total, bank) =>
+        total + bank.installments.filter((inst) => {
+          const d = new Date(inst.dueDate + "T00:00:00");
+          return d.getMonth() + 1 === monthNum && d.getFullYear() === year && inst.status !== "pago";
+        }).reduce((s, i) => s + i.installmentAmount, 0)
+      , 0);
+    })();
+    const dynamicTotalDebt = pendingBankDebt + (store.totalCreditorsDebt - store.totalCreditorsPaid);
+
+    // 1. Balance ratio (only pending expenses count against income)
     const balanceRatio = store.totalIncome > 0
-      ? Math.max(0, Math.min(((store.totalIncome - store.totalExpense - store.cardExpensesForMonth) / store.totalIncome) * 100, 100))
+      ? Math.max(0, Math.min(((store.totalIncome - store.totalExpense + store.cardExpensesForMonth - pendingCardExpensesMonth) / store.totalIncome) * 100, 100))
       : 0;
     factors.push({ name: "Saldo", score: balanceRatio, weight: 0.3 });
 
-    // 2. Debt-to-income ratio (lower is better)
+    // 2. Debt-to-income ratio (lower is better) — uses dynamic debt
     const dti = store.totalIncome > 0
-      ? Math.min(store.totalDebt / (store.totalIncome * 6), 1)
+      ? Math.min(dynamicTotalDebt / (store.totalIncome * 6), 1)
       : 1;
     factors.push({ name: "Dívida/Renda", score: (1 - dti) * 100, weight: 0.25 });
 
     // 3. Creditors paid ratio
-    const creditorTotal = store.totalCreditorsDebt + store.totalCreditorsPaid;
+    const creditorTotal = store.totalCreditorsDebt;
     const creditorScore = creditorTotal > 0
       ? (store.totalCreditorsPaid / creditorTotal) * 100
       : 50;
@@ -50,7 +69,6 @@ export function FinancialHealthScore() {
     const weighted = factors.reduce((acc, f) => acc + f.score * f.weight, 0);
     const finalScore = Math.round(Math.max(0, Math.min(100, weighted)));
 
-    // Generate tips
     const tips: string[] = [];
     if (balanceRatio < 20) tips.push("Suas despesas estão muito próximas da sua renda");
     if (dti > 0.5) tips.push("Sua dívida está alta em relação à renda");
@@ -58,7 +76,7 @@ export function FinancialHealthScore() {
     if (finalScore >= 70) tips.push("Continue assim! Sua saúde financeira está boa");
 
     return { score: finalScore, tips };
-  }, [store]);
+  }, [store.banks, store.creditors, store.goals, store.totalIncome, store.totalExpense, store.cardExpensesForMonth, store.expectedBalance, store.totalCreditorsDebt, store.totalCreditorsPaid, store.currentCashflow]);
 
   const health = getHealthData(score);
   const Icon = health.icon;
