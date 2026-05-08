@@ -150,7 +150,7 @@ function AIAnalysisCard({
         )}
         {analysis && !loading && (
           <div className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 leading-relaxed [&_h2]:text-foreground [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-5 [&_h2]:mb-2 [&_strong]:text-foreground [&_li]:text-sm [&_p]:text-sm">
-            <div dangerouslySetInnerHTML={{ __html: markdownToHtml(analysis) }} />
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(markdownToHtml(analysis)) }} />
           </div>
         )}
       </CardContent>
