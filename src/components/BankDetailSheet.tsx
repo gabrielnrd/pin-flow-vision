@@ -290,7 +290,11 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
           Parcelas
         </h4>
         <div className="space-y-2">
-          {bank.installments.map((inst) => (
+          {[...bank.installments].sort((a, b) => {
+            if (a.status === "pago" && b.status !== "pago") return 1;
+            if (a.status !== "pago" && b.status === "pago") return -1;
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+          }).map((inst) => (
             <EditableInstallment
               key={inst.id}
               inst={inst}
