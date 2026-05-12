@@ -61,6 +61,9 @@ const Index = () => {
         cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
+      {/* AI Income Coverage */}
+      <IncomeCoverageAI />
+
       {/* Section: Cards */}
       <section>
         <SectionTitle icon={CreditCard} title="Cartões de Crédito" subtitle="Saldo usado é calculado automaticamente pelas parcelas" />
