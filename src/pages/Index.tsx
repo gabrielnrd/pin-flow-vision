@@ -15,6 +15,7 @@ import { SnowballCalculator } from "@/components/SnowballCalculator";
 import { BrainInsightsPanel } from "@/components/BrainInsightsPanel";
 import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
+import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { CreditCard, BarChart3, Brain, Users, Activity } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
