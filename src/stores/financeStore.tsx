@@ -201,7 +201,14 @@ function useFinanceStoreInternal(): FinanceStore {
   const [cashflowMonths, setCashflowMonths] = useState<CashflowMonth[]>(DEFAULTS.cashflowMonths);
   const [creditors, setCreditors] = useState<Creditor[]>(DEFAULTS.creditors);
   const [goals, setGoals] = useState<Goal[]>(DEFAULTS.goals);
-  const [selectedMonth, setSelectedMonth] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const MONTHS_PT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const now = new Date();
+    const idx = DEFAULTS.cashflowMonths.findIndex(
+      (m) => m.month === MONTHS_PT[now.getMonth()] && m.year === now.getFullYear()
+    );
+    return idx >= 0 ? idx : 0;
+  });
   const [selectedBankId, setSelectedBankId] = useState<BankId | null>(null);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>(DEFAULTS.incomeSources);
   const [savingsGoalMonth, setSavingsGoalMonth] = useState(DEFAULTS.savingsGoalMonth);
