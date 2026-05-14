@@ -18,7 +18,13 @@ export function IncomeCoverageAI() {
   const [loading, setLoading] = useState(false);
 
   const months = useMemo(() => {
-    const slice = store.cashflowMonths.slice(store.selectedMonth, store.selectedMonth + 3);
+    const MONTHS_PT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const now = new Date();
+    let startIdx = store.cashflowMonths.findIndex(
+      (m) => m.month === MONTHS_PT[now.getMonth()] && m.year === now.getFullYear()
+    );
+    if (startIdx < 0) startIdx = 0;
+    const slice = store.cashflowMonths.slice(startIdx, startIdx + 3);
     return slice.map((m) => {
       const monthNum = MONTH_MAP[m.month];
       const income = m.incomes.reduce((s, i) => s + i.amount, 0);
@@ -34,7 +40,7 @@ export function IncomeCoverageAI() {
       const cost = manual + cards;
       return { label: `${m.month} ${m.year}`, income, cost, balance: income - cost };
     });
-  }, [store.cashflowMonths, store.selectedMonth, store.banks]);
+  }, [store.cashflowMonths, store.banks]);
 
   const overall = useMemo(() => {
     const totalIncome = months.reduce((s, m) => s + m.income, 0);
