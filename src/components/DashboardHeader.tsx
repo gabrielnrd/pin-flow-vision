@@ -45,14 +45,14 @@ export function DashboardHeader({
         </div>
 
         {/* Month/year filter */}
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <div className="flex gap-1 bg-secondary/40 rounded-xl p-1">
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+          <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+          <div className="flex gap-1 bg-secondary/40 rounded-xl p-1 overflow-x-auto scrollbar-none flex-1 sm:flex-initial">
             {cashflowMonths.map((m, i) => (
               <button
                 key={i}
                 onClick={() => onMonthChange(i)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                className={`shrink-0 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 ${
                   i === selectedMonth
                     ? "bg-primary/20 text-primary shadow-sm shadow-primary/10 pill-active"
                     : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
