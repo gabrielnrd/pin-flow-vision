@@ -153,6 +153,11 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Budget Scenarios - end of dashboard */}
+      <BudgetScenarios />
+
+
+
       {/* Bank Detail Sheet */}
       <BankDetailSheet
         bank={store.selectedBank}
