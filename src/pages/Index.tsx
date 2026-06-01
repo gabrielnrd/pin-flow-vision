@@ -66,11 +66,9 @@ const Index = () => {
       {/* AI Income Coverage */}
       <IncomeCoverageAI />
 
-      {/* Budget Scenarios */}
-      <BudgetScenarios />
+      {/* Annual Subscriptions & Services */}
+      <AnnualSubscriptionsCard />
 
-      {/* Mobile Notifications */}
-      <MobileNotificationsCard />
 
       {/* Section: Cards */}
       <section>
