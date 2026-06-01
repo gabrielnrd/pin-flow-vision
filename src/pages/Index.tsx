@@ -63,12 +63,16 @@ const Index = () => {
         cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
+      {/* Near hero: Spending distribution + Financial Health */}
+      <section>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <SpendingChart banks={store.banks} />
+          <FinancialHealthScore />
+        </div>
+      </section>
+
       {/* AI Income Coverage */}
       <IncomeCoverageAI />
-
-      {/* Annual Subscriptions & Services */}
-      <AnnualSubscriptionsCard />
-
 
       {/* Section: Cards */}
       <section>
@@ -87,7 +91,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Section: Analytics - 2 column */}
+      {/* Section: Analytics - Cashflow + Budget rule */}
       <section>
         <SectionTitle icon={BarChart3} title="Análises & Fluxo" subtitle="Acompanhe suas finanças em detalhe" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -107,13 +111,10 @@ const Index = () => {
             onRemoveItem={store.removeCashflowItem}
             onUpdateItem={store.updateCashflowItem}
           />
-          <div className="space-y-5">
-            <SpendingChart banks={store.banks} />
-            <BudgetRuleWidget
-              cashflow={store.currentCashflow}
-              totalIncome={store.totalIncome}
-            />
-          </div>
+          <BudgetRuleWidget
+            cashflow={store.currentCashflow}
+            totalIncome={store.totalIncome}
+          />
         </div>
       </section>
 
@@ -133,12 +134,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Section: Health + Creditors + Brain */}
+      {/* Annual Subscriptions & Services - after timeline */}
+      <AnnualSubscriptionsCard />
+
+      {/* Section: Creditors + Brain */}
       <section>
         <SectionTitle icon={Users} title="Credores & Inteligência" subtitle="Dívidas pessoais e insights do Segundo Cérebro" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div className="space-y-5">
-            <FinancialHealthScore />
             <CreditorWidget
               creditors={store.creditors}
               totalDebt={store.totalCreditorsDebt}
