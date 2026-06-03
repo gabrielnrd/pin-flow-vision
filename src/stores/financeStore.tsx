@@ -80,9 +80,9 @@ export interface FinanceStore {
   updateBankBalance: (bankId: BankId, newUsed: number) => void;
   toggleCashflowPaid: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   depositToGoal: (goalId: string, amount: number) => void;
-  addCashflowItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number) => void;
+  addCashflowItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number, category?: string) => void;
   removeCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
-  updateCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number) => void;
+  updateCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number, category?: string) => void;
   addCreditor: (name: string, totalDebt: number) => void;
   removeCreditor: (id: string) => void;
   updateCreditor: (id: string, updates: Partial<Pick<Creditor, "name" | "totalDebt" | "amountPaid" | "interestRate" | "dueDate">>) => void;
@@ -422,11 +422,11 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  const addCashflowItem = useCallback((monthIdx: number, type: "incomes" | "expenses", label: string, amount: number) => {
+  const addCashflowItem = useCallback((monthIdx: number, type: "incomes" | "expenses", label: string, amount: number, category?: string) => {
     setCashflowMonths((prev) =>
       prev.map((m, mi) => {
         if (mi !== monthIdx) return m;
-        return { ...m, [type]: [...m[type], { label, amount, paid: false }] };
+        return { ...m, [type]: [...m[type], { label, amount, paid: false, category }] };
       })
     );
   }, []);
@@ -441,12 +441,12 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
-  const updateCashflowItem = useCallback((monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number) => {
+  const updateCashflowItem = useCallback((monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number, category?: string) => {
     setCashflowMonths((prev) =>
       prev.map((m, mi) => {
         if (mi !== monthIdx) return m;
         const items = [...m[type]];
-        items[itemIdx] = { ...items[itemIdx], label, amount };
+        items[itemIdx] = { ...items[itemIdx], label, amount, ...(category !== undefined ? { category } : {}) };
         return { ...m, [type]: items };
       })
     );
