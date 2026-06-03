@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, Pencil, Filter } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EXPENSE_CATEGORIES, getCategory, suggestCategory } from "@/data/categories";
 
 interface CashflowCardProps {
   cashflow: CashflowMonth;
@@ -17,21 +18,26 @@ interface CashflowCardProps {
   canNext: boolean;
   monthIndex: number;
   onTogglePaid: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
-  onAddItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number) => void;
+  onAddItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number, category?: string) => void;
   onRemoveItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
-  onUpdateItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number) => void;
+  onUpdateItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number, category?: string) => void;
+}
+
+function CategoryBadge({ categoryId }: { categoryId?: string }) {
+  if (!categoryId) return null;
+  const c = getCategory(categoryId);
+  return (
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${c.bg} ${c.color}`}>
+      <span className="text-[10px] leading-none">{c.emoji}</span>
+      {c.label}
+    </span>
+  );
 }
 
 function EditableItem({
-  item,
-  idx,
-  type,
-  monthIndex,
-  onTogglePaid,
-  onRemoveItem,
-  onUpdateItem,
+  item, idx, type, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem,
 }: {
-  item: { label: string; amount: number; paid?: boolean };
+  item: { label: string; amount: number; paid?: boolean; category?: string };
   idx: number;
   type: "incomes" | "expenses";
   monthIndex: number;
@@ -42,37 +48,38 @@ function EditableItem({
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(item.label);
   const [amount, setAmount] = useState(String(item.amount));
+  const [category, setCategory] = useState<string>(item.category ?? suggestCategory(item.label));
   const isIncome = type === "incomes";
 
   const handleSave = () => {
     const val = parseFloat(amount);
     if (label.trim() && !isNaN(val) && val > 0) {
-      onUpdateItem(monthIndex, type, idx, label.trim(), val);
+      onUpdateItem(monthIndex, type, idx, label.trim(), val, isIncome ? undefined : category);
     }
     setEditing(false);
   };
 
   if (editing) {
     return (
-      <div className="flex items-center gap-1.5 text-sm">
-        <Input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          className="h-7 text-xs rounded-lg flex-1"
-          autoFocus
-        />
-        <Input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="h-7 text-xs rounded-lg w-24"
-        />
-        <button onClick={handleSave} className="p-1 rounded hover:bg-income/20 text-income">
-          <Check className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => setEditing(false)} className="p-1 rounded hover:bg-expense/20 text-expense">
-          <X className="w-3.5 h-3.5" />
-        </button>
+      <div className="space-y-1.5 p-2 rounded-lg bg-secondary/40">
+        <div className="flex items-center gap-1.5">
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} className="h-7 text-xs rounded-lg flex-1" autoFocus />
+          <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-7 text-xs rounded-lg w-24" />
+        </div>
+        {!isIncome && (
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="h-7 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {EXPENSE_CATEGORIES.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.emoji} {c.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <div className="flex justify-end gap-1">
+          <button onClick={handleSave} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setEditing(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
+        </div>
       </div>
     );
   }
@@ -84,12 +91,15 @@ function EditableItem({
         onCheckedChange={() => onTogglePaid(monthIndex, type, idx)}
         className={`h-4 w-4 rounded border-border ${isIncome ? "data-[state=checked]:bg-income data-[state=checked]:border-income" : "data-[state=checked]:bg-expense data-[state=checked]:border-expense"}`}
       />
-      <span
-        className={`flex-1 cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
-        onClick={() => { setLabel(item.label); setAmount(String(item.amount)); setEditing(true); }}
-      >
-        {item.label}
-      </span>
+      <div className="flex-1 min-w-0 flex items-center gap-1.5">
+        <span
+          className={`truncate cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
+          onClick={() => { setLabel(item.label); setAmount(String(item.amount)); setEditing(true); }}
+        >
+          {item.label}
+        </span>
+        {!isIncome && <CategoryBadge categoryId={item.category ?? suggestCategory(item.label)} />}
+      </div>
       <span
         className={`text-money cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-foreground"}`}
         onClick={() => { setLabel(item.label); setAmount(String(item.amount)); setEditing(true); }}
@@ -115,14 +125,14 @@ function AddItemRow({ type, monthIndex, onAdd }: {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
   const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("outros");
+  const isIncome = type === "incomes";
 
   const handleAdd = () => {
     const val = parseFloat(amount);
     if (label.trim() && !isNaN(val) && val > 0) {
-      onAdd(monthIndex, type, label.trim(), val);
-      setLabel("");
-      setAmount("");
-      setAdding(false);
+      onAdd(monthIndex, type, label.trim(), val, isIncome ? undefined : category);
+      setLabel(""); setAmount(""); setCategory("outros"); setAdding(false);
     }
   };
 
@@ -132,35 +142,51 @@ function AddItemRow({ type, monthIndex, onAdd }: {
         onClick={() => setAdding(true)}
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors mt-1"
       >
-        <Plus className="w-3 h-3" /> Adicionar {type === "incomes" ? "entrada" : "saída"}
+        <Plus className="w-3 h-3" /> Adicionar {isIncome ? "entrada" : "saída"}
       </button>
     );
   }
 
   return (
-    <div className="flex items-center gap-1.5 mt-1">
-      <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Descrição" className="h-7 text-xs rounded-lg flex-1" autoFocus />
-      <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Valor" className="h-7 text-xs rounded-lg w-24" />
-      <button onClick={handleAdd} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
-      <button onClick={() => setAdding(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
+    <div className="space-y-1.5 mt-1 p-2 rounded-lg bg-secondary/40">
+      <div className="flex items-center gap-1.5">
+        <Input
+          value={label}
+          onChange={(e) => {
+            setLabel(e.target.value);
+            if (!isIncome && e.target.value.length >= 3) {
+              const s = suggestCategory(e.target.value);
+              if (s !== "outros") setCategory(s);
+            }
+          }}
+          placeholder="Descrição"
+          className="h-7 text-xs rounded-lg flex-1"
+          autoFocus
+        />
+        <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Valor" className="h-7 text-xs rounded-lg w-24" />
+      </div>
+      {!isIncome && (
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger className="h-7 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {EXPENSE_CATEGORIES.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.emoji} {c.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      <div className="flex justify-end gap-1">
+        <button onClick={handleAdd} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
+        <button onClick={() => { setAdding(false); setLabel(""); setAmount(""); }} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
+      </div>
     </div>
   );
 }
 
-const FIXED_LABELS = ["aluguel", "parcelas cartões", "luz", "água", "internet", "condomínio", "seguro", "plano de saúde"];
-const VARIABLE_LABELS = ["alimentação", "transporte", "lazer", "ifood", "uber", "99", "roupas", "assinatura"];
+type ExpenseFilter = "todas" | string; // "todas" or category id
 
-type ExpenseFilter = "todas" | "fixas" | "variáveis";
-
-function classifyExpense(label: string): "fixa" | "variável" {
-  const lower = label.toLowerCase();
-  if (FIXED_LABELS.some((f) => lower.includes(f))) return "fixa";
-  return "variável";
-}
-
-function ExpenseSection({ cashflow, totalExpense, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem }: {
+function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem }: {
   cashflow: CashflowMonth;
-  totalExpense: number;
   monthIndex: number;
   onTogglePaid: CashflowCardProps["onTogglePaid"];
   onRemoveItem: CashflowCardProps["onRemoveItem"];
@@ -169,12 +195,24 @@ function ExpenseSection({ cashflow, totalExpense, monthIndex, onTogglePaid, onRe
 }) {
   const [filter, setFilter] = useState<ExpenseFilter>("todas");
 
+  // Build category totals + used set
+  const { categoryTotals, usedCategories } = useMemo(() => {
+    const totals = new Map<string, number>();
+    cashflow.expenses.forEach((e) => {
+      const cat = e.category ?? suggestCategory(e.label);
+      totals.set(cat, (totals.get(cat) || 0) + e.amount);
+    });
+    return {
+      categoryTotals: totals,
+      usedCategories: EXPENSE_CATEGORIES.filter((c) => totals.has(c.id)),
+    };
+  }, [cashflow.expenses]);
+
   const filtered = useMemo(() => {
     if (filter === "todas") return cashflow.expenses.map((item, idx) => ({ item, idx }));
-    const target = filter === "fixas" ? "fixa" : "variável";
     return cashflow.expenses
       .map((item, idx) => ({ item, idx }))
-      .filter(({ item }) => classifyExpense(item.label) === target);
+      .filter(({ item }) => (item.category ?? suggestCategory(item.label)) === filter);
   }, [cashflow.expenses, filter]);
 
   const filteredTotal = filtered.reduce((s, { item }) => s + item.amount, 0);
@@ -183,34 +221,61 @@ function ExpenseSection({ cashflow, totalExpense, monthIndex, onTogglePaid, onRe
     <div>
       <div className="flex items-center gap-2 mb-2">
         <ArrowDownRight className="w-4 h-4 text-expense" />
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Saídas</span>
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Saídas (manuais)</span>
         <span className="ml-auto text-sm text-money text-expense">R$ {filteredTotal.toLocaleString("pt-BR")}</span>
       </div>
-      <div className="flex gap-1.5 mb-2">
-        {(["todas", "fixas", "variáveis"] as ExpenseFilter[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-2.5 py-1 text-[10px] rounded-lg font-medium transition-colors ${filter === f ? "bg-primary/20 text-primary" : "bg-secondary/50 text-muted-foreground hover:text-foreground"}`}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+
+      <div className="flex gap-1.5 mb-2 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
+        <button
+          onClick={() => setFilter("todas")}
+          className={`shrink-0 px-2.5 py-1 text-[10px] rounded-lg font-medium transition-colors ${filter === "todas" ? "bg-primary/20 text-primary" : "bg-secondary/50 text-muted-foreground hover:text-foreground"}`}
+        >
+          Todas
+        </button>
+        {usedCategories.map((c) => {
+          const active = filter === c.id;
+          return (
+            <button
+              key={c.id}
+              onClick={() => setFilter(c.id)}
+              className={`shrink-0 px-2 py-1 text-[10px] rounded-lg font-medium transition-colors inline-flex items-center gap-1 ${
+                active ? `${c.bg} ${c.color}` : "bg-secondary/50 text-muted-foreground hover:text-foreground"
+              }`}
+              title={`R$ ${(categoryTotals.get(c.id) ?? 0).toLocaleString("pt-BR")}`}
+            >
+              <span>{c.emoji}</span>
+              {c.label}
+            </button>
+          );
+        })}
       </div>
+
       <div className="space-y-1.5">
         {filtered.map(({ item, idx }) => (
-          <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="expenses" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} />
+          <EditableItem
+            key={`${item.label}-${idx}`}
+            item={item}
+            idx={idx}
+            type="expenses"
+            monthIndex={monthIndex}
+            onTogglePaid={onTogglePaid}
+            onRemoveItem={onRemoveItem}
+            onUpdateItem={onUpdateItem}
+          />
         ))}
         <AddItemRow type="expenses" monthIndex={monthIndex} onAdd={onAddItem} />
       </div>
     </div>
   );
 }
+
 export function CashflowCard({
   cashflow, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
   onPrev, onNext, canPrev, canNext, monthIndex,
   onTogglePaid, onAddItem, onRemoveItem, onUpdateItem,
 }: CashflowCardProps) {
+  const manualExpenses = totalExpense - cardExpensesForMonth;
+
   return (
     <div className="glass-card rounded-2xl p-5 animate-float-in">
       <div className="flex items-center justify-between mb-5">
@@ -228,12 +293,29 @@ export function CashflowCard({
         </div>
       </div>
 
-      <div className="text-center mb-5 py-4 rounded-xl bg-secondary/50 relative overflow-hidden group/balance">
+      {/* Saldo Final breakdown */}
+      <div className="mb-5 py-4 px-4 rounded-xl bg-secondary/50 relative overflow-hidden group/balance">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent opacity-0 group-hover/balance:opacity-100 transition-opacity duration-500" />
-        <p className="text-xs text-muted-foreground mb-1">Saldo Esperado</p>
-        <p className={`text-3xl text-money ${expectedBalance >= 0 ? "text-income" : "text-expense"}`}>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest text-center mb-1">Saldo Final do Mês</p>
+        <p className={`text-3xl text-money text-center ${expectedBalance >= 0 ? "text-income" : "text-expense"}`}>
           R$ {expectedBalance.toLocaleString("pt-BR")}
         </p>
+        <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/30 text-[10px]">
+          <div className="text-center">
+            <p className="text-muted-foreground">Receitas</p>
+            <p className="text-income text-money">+ {totalIncome.toLocaleString("pt-BR")}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-muted-foreground">Despesas</p>
+            <p className="text-expense text-money">− {manualExpenses.toLocaleString("pt-BR")}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-muted-foreground flex items-center justify-center gap-0.5">
+              <CreditCard className="w-2.5 h-2.5" /> Cartão
+            </p>
+            <p className="text-expense text-money">− {cardExpensesForMonth.toLocaleString("pt-BR")}</p>
+          </div>
+        </div>
       </div>
 
       {/* Income */}
@@ -251,12 +333,12 @@ export function CashflowCard({
         </div>
       </div>
 
-      {/* Card-based expenses */}
+      {/* Card-based expenses (automatic) */}
       {cardExpensesForMonth > 0 && (
         <div className="mb-4 p-3 rounded-xl bg-expense/5 border border-expense/10">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground flex items-center gap-2">
-              <ArrowDownRight className="w-3.5 h-3.5 text-expense" />
+              <CreditCard className="w-3.5 h-3.5 text-expense" />
               Parcelas dos Cartões (automático)
             </span>
             <span className="text-expense font-medium">R$ {cardExpensesForMonth.toLocaleString("pt-BR")}</span>
@@ -264,10 +346,9 @@ export function CashflowCard({
         </div>
       )}
 
-      {/* Manual Expenses with filters */}
+      {/* Manual Expenses with category filters */}
       <ExpenseSection
         cashflow={cashflow}
-        totalExpense={totalExpense}
         monthIndex={monthIndex}
         onTogglePaid={onTogglePaid}
         onRemoveItem={onRemoveItem}
