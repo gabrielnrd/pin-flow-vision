@@ -17,6 +17,7 @@ import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
+import { AlertsInsightsPanel } from "@/components/AlertsInsightsPanel";
 import { CreditCard, BarChart3, Brain, Users, Activity } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
@@ -158,6 +159,11 @@ const Index = () => {
 
       {/* Budget Scenarios - end of dashboard */}
       <BudgetScenarios />
+
+      {/* Alerts & Insights */}
+      <AlertsInsightsPanel />
+
+
 
 
 
