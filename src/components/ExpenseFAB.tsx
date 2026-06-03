@@ -1,5 +1,5 @@
 import { Plus, Check, X, CreditCard, ArrowUp, ArrowDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,14 +12,44 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFinanceStore } from "@/stores/financeStore";
 import { toast } from "@/hooks/use-toast";
+import { EXPENSE_CATEGORIES, suggestCategory, getCategory } from "@/data/categories";
 
 type Mode = "income" | "expense" | "card" | null;
+
+function CategoryPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground mb-1.5">Categoria</p>
+      <div className="grid grid-cols-4 gap-1.5">
+        {EXPENSE_CATEGORIES.map((c) => {
+          const active = value === c.id;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onChange(c.id)}
+              className={`flex flex-col items-center gap-0.5 px-1 py-2 rounded-lg border text-[10px] transition-all ${
+                active
+                  ? `${c.bg} ${c.color} border-current scale-105`
+                  : "bg-secondary/40 border-transparent text-muted-foreground hover:bg-secondary/70"
+              }`}
+            >
+              <span className="text-base leading-none">{c.emoji}</span>
+              <span className="truncate w-full text-center">{c.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function ExpenseFAB() {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<Mode>(null);
   const [label, setLabel] = useState("");
   const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState<string>("outros");
   // card-specific
   const [bankId, setBankId] = useState<string>("");
   const [parcels, setParcels] = useState("1");
@@ -27,8 +57,16 @@ export function ExpenseFAB() {
 
   const { selectedMonth, addCashflowItem, banks, addInstallment } = useFinanceStore();
 
+  // Auto-suggest category from label
+  useEffect(() => {
+    if (label.trim().length >= 3) {
+      const s = suggestCategory(label);
+      if (s !== "outros") setCategory(s);
+    }
+  }, [label]);
+
   const reset = () => {
-    setType(null); setLabel(""); setAmount("");
+    setType(null); setLabel(""); setAmount(""); setCategory("outros");
     setBankId(""); setParcels("1");
     setFirstDate(new Date().toISOString().slice(0, 10));
   };
@@ -36,9 +74,19 @@ export function ExpenseFAB() {
   const handleAddSimple = () => {
     const val = parseFloat(amount);
     if (!label.trim() || isNaN(val) || val <= 0 || !type) return;
-    addCashflowItem(selectedMonth, type === "income" ? "incomes" : "expenses", label.trim(), val);
+    addCashflowItem(
+      selectedMonth,
+      type === "income" ? "incomes" : "expenses",
+      label.trim(),
+      val,
+      type === "expense" ? category : undefined,
+    );
+    const cat = getCategory(category);
     reset(); setOpen(false);
-    toast({ title: "Adicionado", description: `${label} • R$ ${val.toLocaleString("pt-BR")}` });
+    toast({
+      title: "Adicionado",
+      description: `${type === "expense" ? cat.emoji + " " : ""}${label} • R$ ${val.toLocaleString("pt-BR")}`,
+    });
   };
 
   const handleAddCard = () => {
@@ -57,12 +105,13 @@ export function ExpenseFAB() {
         totalInstallments: n,
         dueDate: d.toISOString().slice(0, 10),
         status: "pendente",
+        category,
       });
     }
     reset(); setOpen(false);
     toast({
       title: "Gasto no cartão registrado",
-      description: `${n}x de R$ ${per.toLocaleString("pt-BR")} • atualizado automaticamente no fluxo`,
+      description: `${n}x de R$ ${per.toLocaleString("pt-BR")} • já descontado do saldo final do mês`,
     });
   };
 
@@ -73,7 +122,7 @@ export function ExpenseFAB() {
           <Plus className="w-6 h-6 transition-transform duration-300 group-hover:rotate-90" />
         </button>
       </DialogTrigger>
-      <DialogContent className="glass-card border-border/30 sm:max-w-md">
+      <DialogContent className="glass-card border-border/30 sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-foreground">Nova Transação</DialogTitle>
         </DialogHeader>
@@ -107,11 +156,11 @@ export function ExpenseFAB() {
             </div>
           ) : type === "card" ? (
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Gasto no cartão — gera parcelas automaticamente</p>
+              <p className="text-sm text-muted-foreground">Compra no cartão — vira parcelas e desconta do saldo final do mês</p>
               <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Descrição (ex: Tênis Nike)" className="rounded-xl" autoFocus />
               <div className="grid grid-cols-2 gap-2">
                 <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Valor total (R$)" className="rounded-xl" min={0} />
-                <Input type="number" value={parcels} onChange={(e) => setParcels(e.target.value)} placeholder="Parcelas" className="rounded-xl" min={1} max={48} />
+                <Input type="number" value={parcels} onChange={(e) => setParcels(e.target.value)} placeholder="Parcelas (1 = à vista)" className="rounded-xl" min={1} max={48} />
               </div>
               <Select value={bankId} onValueChange={setBankId}>
                 <SelectTrigger className="rounded-xl"><SelectValue placeholder="Cartão" /></SelectTrigger>
@@ -125,9 +174,10 @@ export function ExpenseFAB() {
                 <p className="text-xs text-muted-foreground mb-1">1ª parcela vence em</p>
                 <Input type="date" value={firstDate} onChange={(e) => setFirstDate(e.target.value)} className="rounded-xl" />
               </div>
+              <CategoryPicker value={category} onChange={setCategory} />
               {amount && parcels && (
                 <div className="text-xs text-muted-foreground bg-secondary/30 rounded-lg p-2">
-                  {parcels}x de <strong className="text-foreground">R$ {(parseFloat(amount || "0") / Math.max(1, parseInt(parcels) || 1)).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}</strong> — refletirá automaticamente no fluxo de caixa
+                  {parcels}x de <strong className="text-foreground">R$ {(parseFloat(amount || "0") / Math.max(1, parseInt(parcels) || 1)).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}</strong> — descontado automaticamente do saldo final
                 </div>
               )}
               <div className="flex gap-2">
@@ -142,10 +192,11 @@ export function ExpenseFAB() {
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                {type === "income" ? "Nova Receita" : "Nova Despesa"}
+                {type === "income" ? "Nova Receita" : "Nova Despesa (débito/dinheiro/Pix)"}
               </p>
               <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Descrição" className="rounded-xl" autoFocus />
               <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Valor (R$)" className="rounded-xl" min={0} />
+              {type === "expense" && <CategoryPicker value={category} onChange={setCategory} />}
               <div className="flex gap-2">
                 <Button className="flex-1 rounded-xl gap-2" onClick={handleAddSimple}>
                   <Check className="w-4 h-4" /> Adicionar

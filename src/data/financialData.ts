@@ -21,6 +21,7 @@ export interface Installment {
   totalInstallments: number;
   dueDate: string;
   status: "pendente" | "pago" | "atrasado";
+  category?: string;
 }
 
 export interface CashflowItem {
