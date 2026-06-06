@@ -18,7 +18,11 @@ import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
 import { AlertsInsightsPanel } from "@/components/AlertsInsightsPanel";
-import { CreditCard, BarChart3, Brain, Users, Activity } from "lucide-react";
+import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard";
+import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
+import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
+import { CashflowSankey } from "@/components/CashflowSankey";
+import { CreditCard, BarChart3, Brain, Users, Activity, PieChart } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
@@ -74,6 +78,19 @@ const Index = () => {
 
       {/* AI Income Coverage */}
       <IncomeCoverageAI />
+
+      {/* Analysis & Visualization */}
+      <section>
+        <SectionTitle icon={PieChart} title="Análise & Visualização" subtitle="Score, projeções, comparativos e fluxos" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          <FinancialHealthDashboard />
+          <BalanceProjectionChart />
+        </div>
+        <div className="space-y-5">
+          <MonthCategoryHeatmap />
+          <CashflowSankey />
+        </div>
+      </section>
 
       {/* Section: Cards */}
       <section>
