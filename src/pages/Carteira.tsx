@@ -1,9 +1,127 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useFinanceStore } from "@/stores/financeStore";
-import { CreditCard, AlertTriangle, ChevronLeft, ChevronRight, Wallet } from "lucide-react";
+import { CreditCard, AlertTriangle, ChevronLeft, ChevronRight, Wallet, Plus, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EXPENSE_CATEGORIES, suggestCategory, getCategory } from "@/data/categories";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+
+function DebitExpenseForm({ bankName }: { bankName: string }) {
+  const { selectedMonth, currentCashflow, addCashflowItem, totalIncome, totalExpense, expectedBalance } =
+    useFinanceStore();
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("outros");
+
+  useEffect(() => {
+    if (label.trim().length >= 3) {
+      const s = suggestCategory(label);
+      if (s !== "outros") setCategory(s);
+    }
+  }, [label]);
+
+  const handleAdd = () => {
+    const val = parseFloat(amount);
+    if (!label.trim() || isNaN(val) || val <= 0) return;
+    addCashflowItem(
+      selectedMonth,
+      "expenses",
+      `💳 ${bankName} (débito) — ${label.trim()}`,
+      val,
+      category,
+    );
+    const cat = getCategory(category);
+    toast({
+      title: "Débito registrado",
+      description: `${cat.emoji} ${label} • R$ ${val.toLocaleString("pt-BR")} descontado do saldo final`,
+    });
+    setLabel(""); setAmount(""); setCategory("outros"); setOpen(false);
+  };
+
+  const projectedAfter = expectedBalance - (parseFloat(amount) || 0);
+
+  return (
+    <div className="rounded-xl bg-background/50 border border-border/40 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">Gasto no débito</h3>
+          <p className="text-[10px] text-muted-foreground">
+            Desconta do saldo final do mês ({currentCashflow.month})
+          </p>
+        </div>
+        {!open && (
+          <Button size="sm" variant="outline" className="rounded-lg gap-1.5" onClick={() => setOpen(true)}>
+            <Plus className="w-3.5 h-3.5" /> Novo
+          </Button>
+        )}
+      </div>
+
+      {open && (
+        <div className="space-y-2.5">
+          <Input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Descrição (ex: Supermercado)"
+            className="rounded-lg h-9 text-sm"
+            autoFocus
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Valor (R$)"
+              className="rounded-lg h-9 text-sm"
+              min={0}
+            />
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="rounded-lg h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {EXPENSE_CATEGORIES.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.emoji} {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {amount && parseFloat(amount) > 0 && (
+            <div className="text-[11px] bg-secondary/40 rounded-lg px-2.5 py-1.5 flex justify-between">
+              <span className="text-muted-foreground">Saldo final projetado</span>
+              <span className={cn("font-bold tabular-nums", projectedAfter < 0 ? "text-expense" : "text-income")}>
+                R$ {projectedAfter.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button size="sm" className="flex-1 rounded-lg gap-1.5" onClick={handleAdd}>
+              <Check className="w-3.5 h-3.5" /> Adicionar
+            </Button>
+            <Button size="sm" variant="outline" className="rounded-lg" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-between text-[11px] pt-1 border-t border-border/30">
+        <span className="text-muted-foreground">Saldo final do mês</span>
+        <span className={cn("font-bold tabular-nums", expectedBalance < 0 ? "text-expense" : "text-income")}>
+          R$ {expectedBalance.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 const statusLabels: Record<string, string> = {
   pendente: "Pendente",
