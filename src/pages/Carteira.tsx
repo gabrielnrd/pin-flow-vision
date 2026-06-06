@@ -495,6 +495,8 @@ export default function CarteiraPage() {
                     </div>
                   </div>
                 )}
+
+                <DebitExpenseForm bankName={activeBank.name} />
               </div>
             )}
 
