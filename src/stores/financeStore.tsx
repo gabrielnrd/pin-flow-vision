@@ -53,6 +53,7 @@ interface PersistedData {
   lifeTasks: LifeTask[];
   transportEntries: TransportEntry[];
   transportBalance: number;
+  savedBalance: number;
 }
 
 export interface FinanceStore {
