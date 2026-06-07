@@ -638,6 +638,7 @@ function useFinanceStoreInternal(): FinanceStore {
     setSalary, setMonthlyHours, setSafetyMargin,
     lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
     transportEntries, transportBalance, addTransportEntry, removeTransportEntry, setTransportBalance,
+    savedBalance, projectedTotalBalance, setSavedBalance,
     cloudLoading,
   };
 }
