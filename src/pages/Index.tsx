@@ -69,11 +69,12 @@ const Index = () => {
         cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
-      {/* Near hero: Spending distribution + Financial Health */}
+      {/* Near hero: Spending distribution + Financial Health + Saved Balance */}
       <section>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <SpendingChart banks={store.banks} />
           <FinancialHealthScore />
+          <SavedBalanceWidget />
         </div>
       </section>
 
