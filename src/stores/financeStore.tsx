@@ -147,6 +147,7 @@ const DEFAULTS: PersistedData = {
   ],
   transportEntries: [],
   transportBalance: 0,
+  savedBalance: 0,
 };
 
 function loadFromStorage<T>(key: string, fallback: T): T {
