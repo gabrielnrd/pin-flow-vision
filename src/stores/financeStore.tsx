@@ -53,6 +53,7 @@ interface PersistedData {
   lifeTasks: LifeTask[];
   transportEntries: TransportEntry[];
   transportBalance: number;
+  savedBalance: number;
 }
 
 export interface FinanceStore {
@@ -70,6 +71,8 @@ export interface FinanceStore {
   totalExpense: number;
   cardExpensesForMonth: number;
   expectedBalance: number;
+  savedBalance: number;
+  projectedTotalBalance: number;
   totalCreditorsDebt: number;
   totalCreditorsPaid: number;
   savingsGoalMonth: number;
@@ -123,6 +126,7 @@ export interface FinanceStore {
   addTransportEntry: (entry: Omit<TransportEntry, "id">) => void;
   removeTransportEntry: (id: string) => void;
   setTransportBalance: (v: number) => void;
+  setSavedBalance: (v: number) => void;
   cloudLoading: boolean;
 }
 
@@ -146,6 +150,7 @@ const DEFAULTS: PersistedData = {
   ],
   transportEntries: [],
   transportBalance: 0,
+  savedBalance: 0,
 };
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -178,6 +183,7 @@ function getLocalData(): PersistedData {
     lifeTasks: loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks),
     transportEntries: loadFromStorage("fin_transportEntries", DEFAULTS.transportEntries),
     transportBalance: loadFromStorage("fin_transportBalance", DEFAULTS.transportBalance),
+    savedBalance: loadFromStorage("fin_savedBalance", DEFAULTS.savedBalance),
   };
 }
 
@@ -195,6 +201,7 @@ function saveToLocal(data: PersistedData) {
   localStorage.setItem("fin_lifeTasks", JSON.stringify(data.lifeTasks));
   localStorage.setItem("fin_transportEntries", JSON.stringify(data.transportEntries));
   localStorage.setItem("fin_transportBalance", JSON.stringify(data.transportBalance));
+  localStorage.setItem("fin_savedBalance", JSON.stringify(data.savedBalance));
 }
 
 function useFinanceStoreInternal(): FinanceStore {
@@ -220,6 +227,7 @@ function useFinanceStoreInternal(): FinanceStore {
   const [safetyMargin, setSafetyMargin] = useState(DEFAULTS.safetyMargin);
   const [lifeXp, setLifeXp] = useState(DEFAULTS.lifeXp);
   const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(DEFAULTS.lifeTasks);
+  const [savedBalance, setSavedBalance] = useState(DEFAULTS.savedBalance);
   const [transportEntries, setTransportEntries] = useState<TransportEntry[]>(DEFAULTS.transportEntries);
   const [transportBalance, setTransportBalance] = useState(DEFAULTS.transportBalance);
   const initialLoadDone = useRef(false);
@@ -256,6 +264,7 @@ function useFinanceStoreInternal(): FinanceStore {
           setLifeTasks(d.lifeTasks ?? DEFAULTS.lifeTasks);
           setTransportEntries(d.transportEntries ?? DEFAULTS.transportEntries);
           setTransportBalance(d.transportBalance ?? DEFAULTS.transportBalance);
+          setSavedBalance(d.savedBalance ?? DEFAULTS.savedBalance);
         } else {
           // No cloud data — try migrating from localStorage
           const local = getLocalData();
@@ -274,6 +283,7 @@ function useFinanceStoreInternal(): FinanceStore {
             setLifeTasks(local.lifeTasks);
             setTransportEntries(local.transportEntries);
             setTransportBalance(local.transportBalance);
+            setSavedBalance(local.savedBalance);
           }
         }
       } catch (e) {
@@ -302,7 +312,8 @@ function useFinanceStoreInternal(): FinanceStore {
     lifeTasks,
     transportEntries,
     transportBalance,
-  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks, transportEntries, transportBalance]);
+    savedBalance,
+  }), [banksRaw, cashflowMonths, creditors, goals, incomeSources, savingsGoalMonth, salary, monthlyHours, safetyMargin, lifeXp, lifeTasks, transportEntries, transportBalance, savedBalance]);
 
   // Save to localStorage + Supabase (debounced)
   useEffect(() => {
@@ -380,6 +391,7 @@ function useFinanceStoreInternal(): FinanceStore {
   const manualExpenses = currentCashflow.expenses.reduce((s, e) => s + e.amount, 0);
   const totalExpense = manualExpenses + cardExpensesForMonth;
   const expectedBalance = totalIncome - totalExpense;
+  const projectedTotalBalance = savedBalance + expectedBalance;
   const phantomBalance = expectedBalance - safetyMargin;
   const avgDailyExpense = totalExpense / 30;
   const survivalDays = avgDailyExpense > 0 ? Math.floor(expectedBalance / avgDailyExpense) : 0;
@@ -626,6 +638,7 @@ function useFinanceStoreInternal(): FinanceStore {
     setSalary, setMonthlyHours, setSafetyMargin,
     lifeXp, lifeTasks, addLifeTask, removeLifeTask, completeLifeTask, resetWeeklyTasks,
     transportEntries, transportBalance, addTransportEntry, removeTransportEntry, setTransportBalance,
+    savedBalance, projectedTotalBalance, setSavedBalance,
     cloudLoading,
   };
 }

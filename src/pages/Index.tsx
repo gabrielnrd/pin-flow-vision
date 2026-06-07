@@ -22,6 +22,7 @@ import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard"
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
 import { CashflowSankey } from "@/components/CashflowSankey";
+import { SavedBalanceWidget } from "@/components/SavedBalanceWidget";
 import { CreditCard, BarChart3, Brain, Users, Activity, PieChart } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
@@ -68,11 +69,12 @@ const Index = () => {
         cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
-      {/* Near hero: Spending distribution + Financial Health */}
+      {/* Near hero: Spending distribution + Financial Health + Saved Balance */}
       <section>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <SpendingChart banks={store.banks} />
           <FinancialHealthScore />
+          <SavedBalanceWidget />
         </div>
       </section>
 

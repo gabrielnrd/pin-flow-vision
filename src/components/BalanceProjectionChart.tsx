@@ -33,8 +33,8 @@ export function BalanceProjectionChart() {
       return { label: `${MONTHS_SHORT[(monthNum || 1) - 1]}/${String(m.year).slice(2)}`, balance: income - expense - cardExp, year: m.year, monthNum };
     });
 
-    // Cumulative real
-    let acc = 0;
+    // Cumulative real starting from saved balance
+    let acc = store.savedBalance;
     real.forEach((r, i) => {
       acc += r.balance;
       points.push({ label: r.label, real: acc });
