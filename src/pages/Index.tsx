@@ -128,6 +128,8 @@ const Index = () => {
             onAddItem={store.addCashflowItem}
             onRemoveItem={store.removeCashflowItem}
             onUpdateItem={store.updateCashflowItem}
+            onSetFixed={store.setCashflowItemFixed}
+            onReplicateFixed={store.replicateFixedItem}
           />
           <BudgetRuleWidget
             cashflow={store.currentCashflow}

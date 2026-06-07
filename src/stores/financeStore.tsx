@@ -10,6 +10,7 @@ import {
   type Bank,
   type BankId,
   type CashflowMonth,
+  type CashflowItem,
   type Creditor,
   type Goal,
   type MonthlySnapshot,
@@ -83,6 +84,8 @@ export interface FinanceStore {
   addCashflowItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number, category?: string) => void;
   removeCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   updateCashflowItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number, category?: string) => void;
+  setCashflowItemFixed: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, fixed: boolean) => void;
+  replicateFixedItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   addCreditor: (name: string, totalDebt: number) => void;
   removeCreditor: (id: string) => void;
   updateCreditor: (id: string, updates: Partial<Pick<Creditor, "name" | "totalDebt" | "amountPaid" | "interestRate" | "dueDate">>) => void;
@@ -452,6 +455,45 @@ function useFinanceStoreInternal(): FinanceStore {
     );
   }, []);
 
+  const setCashflowItemFixed = useCallback((monthIdx: number, type: "incomes" | "expenses", itemIdx: number, fixed: boolean) => {
+    setCashflowMonths((prev) =>
+      prev.map((m, mi) => {
+        if (mi !== monthIdx) return m;
+        const items = [...m[type]];
+        items[itemIdx] = { ...items[itemIdx], fixed };
+        return { ...m, [type]: items };
+      })
+    );
+  }, []);
+
+  const replicateFixedItem = useCallback((monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => {
+    setCashflowMonths((prev) => {
+      const source = prev[monthIdx]?.[type]?.[itemIdx];
+      if (!source) return prev;
+      return prev.map((m, mi) => {
+        if (mi <= monthIdx) {
+          if (mi === monthIdx) {
+            const items = [...m[type]];
+            items[itemIdx] = { ...items[itemIdx], fixed: true };
+            return { ...m, [type]: items };
+          }
+          return m;
+        }
+        // skip if exact label already exists
+        const exists = m[type].some((it) => it.label.trim().toLowerCase() === source.label.trim().toLowerCase());
+        if (exists) return m;
+        const newItem: CashflowItem = {
+          label: source.label,
+          amount: source.amount,
+          category: source.category,
+          fixed: true,
+          paid: false,
+        };
+        return { ...m, [type]: [...m[type], newItem] };
+      });
+    });
+  }, []);
+
   const addCreditor = useCallback((name: string, totalDebt: number) => {
     setCreditors((prev) => [...prev, { id: `cr-${Date.now()}`, name, totalDebt, amountPaid: 0 }]);
   }, []);
@@ -574,7 +616,7 @@ function useFinanceStoreInternal(): FinanceStore {
     allInstallments,
     setSelectedMonth, setSelectedBank, nextMonth, prevMonth,
     updateBankBalance, toggleCashflowPaid, depositToGoal,
-    addCashflowItem, removeCashflowItem, updateCashflowItem,
+    addCashflowItem, removeCashflowItem, updateCashflowItem, setCashflowItemFixed, replicateFixedItem,
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
     updateBank, removeBank, addBank, addInstallment, removeInstallment, updateInstallment,

@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard, Pin, PinOff } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EXPENSE_CATEGORIES, getCategory, suggestCategory } from "@/data/categories";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CashflowCardProps {
   cashflow: CashflowMonth;
@@ -21,6 +25,8 @@ interface CashflowCardProps {
   onAddItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number, category?: string) => void;
   onRemoveItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   onUpdateItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number, category?: string) => void;
+  onSetFixed: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, fixed: boolean) => void;
+  onReplicateFixed: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
 }
 
 function CategoryBadge({ categoryId }: { categoryId?: string }) {
@@ -35,20 +41,23 @@ function CategoryBadge({ categoryId }: { categoryId?: string }) {
 }
 
 function EditableItem({
-  item, idx, type, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem,
+  item, idx, type, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onSetFixed, onReplicateFixed,
 }: {
-  item: { label: string; amount: number; paid?: boolean; category?: string };
+  item: { label: string; amount: number; paid?: boolean; category?: string; fixed?: boolean };
   idx: number;
   type: "incomes" | "expenses";
   monthIndex: number;
   onTogglePaid: CashflowCardProps["onTogglePaid"];
   onRemoveItem: CashflowCardProps["onRemoveItem"];
   onUpdateItem: CashflowCardProps["onUpdateItem"];
+  onSetFixed: CashflowCardProps["onSetFixed"];
+  onReplicateFixed: CashflowCardProps["onReplicateFixed"];
 }) {
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(item.label);
   const [amount, setAmount] = useState(String(item.amount));
   const [category, setCategory] = useState<string>(item.category ?? suggestCategory(item.label));
+  const [confirmFixedOpen, setConfirmFixedOpen] = useState(false);
   const isIncome = type === "incomes";
 
   const handleSave = () => {
@@ -57,6 +66,14 @@ function EditableItem({
       onUpdateItem(monthIndex, type, idx, label.trim(), val, isIncome ? undefined : category);
     }
     setEditing(false);
+  };
+
+  const handlePinClick = () => {
+    if (item.fixed) {
+      onSetFixed(monthIndex, type, idx, false);
+    } else {
+      setConfirmFixedOpen(true);
+    }
   };
 
   if (editing) {
@@ -85,35 +102,68 @@ function EditableItem({
   }
 
   return (
-    <div className="flex items-center gap-2 text-sm group">
-      <Checkbox
-        checked={item.paid}
-        onCheckedChange={() => onTogglePaid(monthIndex, type, idx)}
-        className={`h-4 w-4 rounded border-border ${isIncome ? "data-[state=checked]:bg-income data-[state=checked]:border-income" : "data-[state=checked]:bg-expense data-[state=checked]:border-expense"}`}
-      />
-      <div className="flex-1 min-w-0 flex items-center gap-1.5">
+    <>
+      <div className="flex items-center gap-2 text-sm group">
+        <Checkbox
+          checked={item.paid}
+          onCheckedChange={() => onTogglePaid(monthIndex, type, idx)}
+          className={`h-4 w-4 rounded border-border ${isIncome ? "data-[state=checked]:bg-income data-[state=checked]:border-income" : "data-[state=checked]:bg-expense data-[state=checked]:border-expense"}`}
+        />
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
+          <span
+            className={`truncate cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
+            onClick={() => { setLabel(item.label); setAmount(String(item.amount)); setEditing(true); }}
+          >
+            {item.label}
+          </span>
+          {item.fixed && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary/15 text-primary">
+              <Pin className="w-2.5 h-2.5" /> FIXO
+            </span>
+          )}
+          {!isIncome && <CategoryBadge categoryId={item.category ?? suggestCategory(item.label)} />}
+        </div>
         <span
-          className={`truncate cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
+          className={`text-money cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-foreground"}`}
           onClick={() => { setLabel(item.label); setAmount(String(item.amount)); setEditing(true); }}
         >
-          {item.label}
+          R$ {item.amount.toLocaleString("pt-BR")}
         </span>
-        {!isIncome && <CategoryBadge categoryId={item.category ?? suggestCategory(item.label)} />}
+        {item.paid && <Check className={`w-3.5 h-3.5 ${isIncome ? "text-income" : "text-expense"}`} />}
+        <button
+          onClick={handlePinClick}
+          title={item.fixed ? "Desmarcar como fixo" : "Marcar como fixo e replicar"}
+          className={`p-0.5 rounded transition-all ${item.fixed ? "text-primary opacity-100" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary"} hover:bg-primary/10`}
+        >
+          {item.fixed ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+        </button>
+        <button
+          onClick={() => onRemoveItem(monthIndex, type, idx)}
+          className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-expense/20 text-muted-foreground hover:text-expense transition-all"
+        >
+          <X className="w-3 h-3" />
+        </button>
       </div>
-      <span
-        className={`text-money cursor-pointer hover:text-foreground transition-colors ${item.paid ? "text-muted-foreground line-through" : "text-foreground"}`}
-        onClick={() => { setLabel(item.label); setAmount(String(item.amount)); setEditing(true); }}
-      >
-        R$ {item.amount.toLocaleString("pt-BR")}
-      </span>
-      {item.paid && <Check className={`w-3.5 h-3.5 ${isIncome ? "text-income" : "text-expense"}`} />}
-      <button
-        onClick={() => onRemoveItem(monthIndex, type, idx)}
-        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-expense/20 text-muted-foreground hover:text-expense transition-all"
-      >
-        <X className="w-3 h-3" />
-      </button>
-    </div>
+
+      <AlertDialog open={confirmFixedOpen} onOpenChange={setConfirmFixedOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Replicar "{item.label}" para os próximos meses?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esse custo se mantém nos meses seguintes? Se sim, vamos adicionar R$ {item.amount.toLocaleString("pt-BR")} em cada mês posterior (sem duplicar onde já existir).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => onSetFixed(monthIndex, type, idx, true)}>
+              Só marcar como fixo
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => onReplicateFixed(monthIndex, type, idx)}>
+              Sim, replicar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -185,13 +235,15 @@ function AddItemRow({ type, monthIndex, onAdd }: {
 
 type ExpenseFilter = "todas" | string; // "todas" or category id
 
-function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem }: {
+function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem, onSetFixed, onReplicateFixed }: {
   cashflow: CashflowMonth;
   monthIndex: number;
   onTogglePaid: CashflowCardProps["onTogglePaid"];
   onRemoveItem: CashflowCardProps["onRemoveItem"];
   onUpdateItem: CashflowCardProps["onUpdateItem"];
   onAddItem: CashflowCardProps["onAddItem"];
+  onSetFixed: CashflowCardProps["onSetFixed"];
+  onReplicateFixed: CashflowCardProps["onReplicateFixed"];
 }) {
   const [filter, setFilter] = useState<ExpenseFilter>("todas");
 
@@ -261,6 +313,8 @@ function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUp
             onTogglePaid={onTogglePaid}
             onRemoveItem={onRemoveItem}
             onUpdateItem={onUpdateItem}
+            onSetFixed={onSetFixed}
+            onReplicateFixed={onReplicateFixed}
           />
         ))}
         <AddItemRow type="expenses" monthIndex={monthIndex} onAdd={onAddItem} />
@@ -272,7 +326,7 @@ function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUp
 export function CashflowCard({
   cashflow, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
   onPrev, onNext, canPrev, canNext, monthIndex,
-  onTogglePaid, onAddItem, onRemoveItem, onUpdateItem,
+  onTogglePaid, onAddItem, onRemoveItem, onUpdateItem, onSetFixed, onReplicateFixed,
 }: CashflowCardProps) {
   const manualExpenses = totalExpense - cardExpensesForMonth;
 
@@ -327,7 +381,7 @@ export function CashflowCard({
         </div>
         <div className="space-y-1.5">
           {cashflow.incomes.map((item, idx) => (
-            <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="incomes" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} />
+            <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="incomes" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} onSetFixed={onSetFixed} onReplicateFixed={onReplicateFixed} />
           ))}
           <AddItemRow type="incomes" monthIndex={monthIndex} onAdd={onAddItem} />
         </div>
@@ -354,6 +408,8 @@ export function CashflowCard({
         onRemoveItem={onRemoveItem}
         onUpdateItem={onUpdateItem}
         onAddItem={onAddItem}
+        onSetFixed={onSetFixed}
+        onReplicateFixed={onReplicateFixed}
       />
     </div>
   );
