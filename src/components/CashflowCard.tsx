@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard, Pin, PinOff } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EXPENSE_CATEGORIES, getCategory, suggestCategory } from "@/data/categories";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CashflowCardProps {
   cashflow: CashflowMonth;
@@ -21,6 +25,8 @@ interface CashflowCardProps {
   onAddItem: (monthIdx: number, type: "incomes" | "expenses", label: string, amount: number, category?: string) => void;
   onRemoveItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
   onUpdateItem: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, label: string, amount: number, category?: string) => void;
+  onSetFixed: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number, fixed: boolean) => void;
+  onReplicateFixed: (monthIdx: number, type: "incomes" | "expenses", itemIdx: number) => void;
 }
 
 function CategoryBadge({ categoryId }: { categoryId?: string }) {
