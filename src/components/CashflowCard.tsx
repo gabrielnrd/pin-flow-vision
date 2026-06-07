@@ -235,13 +235,15 @@ function AddItemRow({ type, monthIndex, onAdd }: {
 
 type ExpenseFilter = "todas" | string; // "todas" or category id
 
-function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem }: {
+function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUpdateItem, onAddItem, onSetFixed, onReplicateFixed }: {
   cashflow: CashflowMonth;
   monthIndex: number;
   onTogglePaid: CashflowCardProps["onTogglePaid"];
   onRemoveItem: CashflowCardProps["onRemoveItem"];
   onUpdateItem: CashflowCardProps["onUpdateItem"];
   onAddItem: CashflowCardProps["onAddItem"];
+  onSetFixed: CashflowCardProps["onSetFixed"];
+  onReplicateFixed: CashflowCardProps["onReplicateFixed"];
 }) {
   const [filter, setFilter] = useState<ExpenseFilter>("todas");
 
@@ -311,6 +313,8 @@ function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUp
             onTogglePaid={onTogglePaid}
             onRemoveItem={onRemoveItem}
             onUpdateItem={onUpdateItem}
+            onSetFixed={onSetFixed}
+            onReplicateFixed={onReplicateFixed}
           />
         ))}
         <AddItemRow type="expenses" monthIndex={monthIndex} onAdd={onAddItem} />
@@ -322,7 +326,7 @@ function ExpenseSection({ cashflow, monthIndex, onTogglePaid, onRemoveItem, onUp
 export function CashflowCard({
   cashflow, totalIncome, totalExpense, cardExpensesForMonth, expectedBalance,
   onPrev, onNext, canPrev, canNext, monthIndex,
-  onTogglePaid, onAddItem, onRemoveItem, onUpdateItem,
+  onTogglePaid, onAddItem, onRemoveItem, onUpdateItem, onSetFixed, onReplicateFixed,
 }: CashflowCardProps) {
   const manualExpenses = totalExpense - cardExpensesForMonth;
 
