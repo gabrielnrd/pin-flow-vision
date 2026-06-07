@@ -126,6 +126,7 @@ export interface FinanceStore {
   addTransportEntry: (entry: Omit<TransportEntry, "id">) => void;
   removeTransportEntry: (id: string) => void;
   setTransportBalance: (v: number) => void;
+  setSavedBalance: (v: number) => void;
   cloudLoading: boolean;
 }
 
