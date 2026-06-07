@@ -224,6 +224,7 @@ function useFinanceStoreInternal(): FinanceStore {
   const [safetyMargin, setSafetyMargin] = useState(DEFAULTS.safetyMargin);
   const [lifeXp, setLifeXp] = useState(DEFAULTS.lifeXp);
   const [lifeTasks, setLifeTasks] = useState<LifeTask[]>(DEFAULTS.lifeTasks);
+  const [savedBalance, setSavedBalance] = useState(DEFAULTS.savedBalance);
   const [transportEntries, setTransportEntries] = useState<TransportEntry[]>(DEFAULTS.transportEntries);
   const [transportBalance, setTransportBalance] = useState(DEFAULTS.transportBalance);
   const initialLoadDone = useRef(false);
