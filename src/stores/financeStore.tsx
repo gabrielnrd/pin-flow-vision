@@ -180,6 +180,7 @@ function getLocalData(): PersistedData {
     lifeTasks: loadFromStorage("fin_lifeTasks", DEFAULTS.lifeTasks),
     transportEntries: loadFromStorage("fin_transportEntries", DEFAULTS.transportEntries),
     transportBalance: loadFromStorage("fin_transportBalance", DEFAULTS.transportBalance),
+    savedBalance: loadFromStorage("fin_savedBalance", DEFAULTS.savedBalance),
   };
 }
 
