@@ -29,6 +29,7 @@ export interface CashflowItem {
   amount: number;
   paid?: boolean;
   category?: string;
+  fixed?: boolean;
 }
 
 export interface CashflowMonth {
