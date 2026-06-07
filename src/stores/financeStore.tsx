@@ -73,6 +73,7 @@ export interface FinanceStore {
   expectedBalance: number;
   savedBalance: number;
   projectedTotalBalance: number;
+  setSavedBalance: (v: number) => void;
   totalCreditorsDebt: number;
   totalCreditorsPaid: number;
   savingsGoalMonth: number;
