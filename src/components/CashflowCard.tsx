@@ -381,7 +381,7 @@ export function CashflowCard({
         </div>
         <div className="space-y-1.5">
           {cashflow.incomes.map((item, idx) => (
-            <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="incomes" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} />
+            <EditableItem key={`${item.label}-${idx}`} item={item} idx={idx} type="incomes" monthIndex={monthIndex} onTogglePaid={onTogglePaid} onRemoveItem={onRemoveItem} onUpdateItem={onUpdateItem} onSetFixed={onSetFixed} onReplicateFixed={onReplicateFixed} />
           ))}
           <AddItemRow type="incomes" monthIndex={monthIndex} onAdd={onAddItem} />
         </div>
@@ -408,6 +408,8 @@ export function CashflowCard({
         onRemoveItem={onRemoveItem}
         onUpdateItem={onUpdateItem}
         onAddItem={onAddItem}
+        onSetFixed={onSetFixed}
+        onReplicateFixed={onReplicateFixed}
       />
     </div>
   );
