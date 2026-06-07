@@ -198,6 +198,7 @@ function saveToLocal(data: PersistedData) {
   localStorage.setItem("fin_lifeTasks", JSON.stringify(data.lifeTasks));
   localStorage.setItem("fin_transportEntries", JSON.stringify(data.transportEntries));
   localStorage.setItem("fin_transportBalance", JSON.stringify(data.transportBalance));
+  localStorage.setItem("fin_savedBalance", JSON.stringify(data.savedBalance));
 }
 
 function useFinanceStoreInternal(): FinanceStore {
