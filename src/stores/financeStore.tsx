@@ -283,6 +283,7 @@ function useFinanceStoreInternal(): FinanceStore {
             setLifeTasks(local.lifeTasks);
             setTransportEntries(local.transportEntries);
             setTransportBalance(local.transportBalance);
+            setSavedBalance(local.savedBalance);
           }
         }
       } catch (e) {
