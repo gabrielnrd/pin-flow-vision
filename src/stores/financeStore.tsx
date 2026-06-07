@@ -71,6 +71,8 @@ export interface FinanceStore {
   totalExpense: number;
   cardExpensesForMonth: number;
   expectedBalance: number;
+  savedBalance: number;
+  projectedTotalBalance: number;
   totalCreditorsDebt: number;
   totalCreditorsPaid: number;
   savingsGoalMonth: number;
