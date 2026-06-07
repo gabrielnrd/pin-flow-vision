@@ -22,6 +22,7 @@ import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard"
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
 import { CashflowSankey } from "@/components/CashflowSankey";
+import { SavedBalanceWidget } from "@/components/SavedBalanceWidget";
 import { CreditCard, BarChart3, Brain, Users, Activity, PieChart } from "lucide-react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
