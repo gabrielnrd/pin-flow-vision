@@ -392,7 +392,6 @@ function useFinanceStoreInternal(): FinanceStore {
   const totalExpense = manualExpenses + cardExpensesForMonth;
   const expectedBalance = totalIncome - totalExpense;
   const projectedTotalBalance = savedBalance + expectedBalance;
-  const expectedBalance = totalIncome - totalExpense;
   const phantomBalance = expectedBalance - safetyMargin;
   const avgDailyExpense = totalExpense / 30;
   const survivalDays = avgDailyExpense > 0 ? Math.floor(expectedBalance / avgDailyExpense) : 0;
