@@ -16,12 +16,14 @@ const statusLabels = {
   pendente: "Pendente",
   pago: "Pago",
   parcial: "Parcial",
+  cancelado: "Cancelado",
 };
 
 const statusStyles = {
   pendente: "bg-expense/20 text-expense border-expense/30",
   pago: "bg-income/20 text-income border-income/30",
   parcial: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  cancelado: "bg-muted/40 text-muted-foreground border-muted-foreground/30",
 };
 
 const bankGradients: Record<string, string> = {
@@ -51,7 +53,7 @@ const bankProgressColor: Record<string, string> = {
   "bank-other": "[&>div]:bg-white/80",
 };
 
-const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial"];
+const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial", "cancelado"];
 
 export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) {
   const [editingName, setEditingName] = useState(false);

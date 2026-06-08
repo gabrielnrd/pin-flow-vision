@@ -348,6 +348,10 @@ function useFinanceStoreInternal(): FinanceStore {
 
   // Derive limitUsed and debtFinal from installments
   const banks = banksRaw.map((b) => {
+    if (b.status === "cancelado") {
+      // Cancelled cards are hidden from calculations: zero out usage and installments
+      return { ...b, limitUsed: 0, debtFinal: 0, installments: [] as typeof b.installments };
+    }
     const usedFromInstallments = b.installments
       .filter((inst) => inst.status !== "pago")
       .reduce((sum, inst) => sum + inst.installmentAmount, 0);
