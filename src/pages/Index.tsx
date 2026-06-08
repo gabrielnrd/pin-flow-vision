@@ -150,23 +150,17 @@ const Index = () => {
       {/* Annual Subscriptions & Services - after timeline */}
       <AnnualSubscriptionsCard />
 
-      {/* Section: Creditors + Brain */}
+      {/* Section: Creditors */}
       <section>
-        <SectionTitle icon={Users} title="Credores & Inteligência" subtitle="Dívidas pessoais e insights do Segundo Cérebro" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div className="space-y-5">
-            <CreditorWidget
-              creditors={store.creditors}
-              totalDebt={store.totalCreditorsDebt}
-              totalPaid={store.totalCreditorsPaid}
-              onAdd={store.addCreditor}
-              onRemove={store.removeCreditor}
-              onUpdate={store.updateCreditor}
-            />
-            <SnowballCalculator creditors={store.creditors} />
-          </div>
-          <BrainInsightsPanel />
-        </div>
+        <SectionTitle icon={Users} title="Credores" subtitle="Dívidas pessoais" />
+        <CreditorWidget
+          creditors={store.creditors}
+          totalDebt={store.totalCreditorsDebt}
+          totalPaid={store.totalCreditorsPaid}
+          onAdd={store.addCreditor}
+          onRemove={store.removeCreditor}
+          onUpdate={store.updateCreditor}
+        />
       </section>
 
       {/* Budget Scenarios - end of dashboard */}
