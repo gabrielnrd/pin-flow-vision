@@ -108,33 +108,27 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Section: Analytics - Cashflow + Budget rule */}
+      {/* Section: Analytics - Cashflow */}
       <section>
         <SectionTitle icon={BarChart3} title="Análises & Fluxo" subtitle="Acompanhe suas finanças em detalhe" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <CashflowCard
-            cashflow={store.currentCashflow}
-            totalIncome={store.totalIncome}
-            totalExpense={store.totalExpense}
-            cardExpensesForMonth={store.cardExpensesForMonth}
-            expectedBalance={store.expectedBalance}
-            onPrev={store.prevMonth}
-            onNext={store.nextMonth}
-            canPrev={store.selectedMonth > 0}
-            canNext={store.selectedMonth < store.cashflowMonths.length - 1}
-            monthIndex={store.selectedMonth}
-            onTogglePaid={store.toggleCashflowPaid}
-            onAddItem={store.addCashflowItem}
-            onRemoveItem={store.removeCashflowItem}
-            onUpdateItem={store.updateCashflowItem}
-            onSetFixed={store.setCashflowItemFixed}
-            onReplicateFixed={store.replicateFixedItem}
-          />
-          <BudgetRuleWidget
-            cashflow={store.currentCashflow}
-            totalIncome={store.totalIncome}
-          />
-        </div>
+        <CashflowCard
+          cashflow={store.currentCashflow}
+          totalIncome={store.totalIncome}
+          totalExpense={store.totalExpense}
+          cardExpensesForMonth={store.cardExpensesForMonth}
+          expectedBalance={store.expectedBalance}
+          onPrev={store.prevMonth}
+          onNext={store.nextMonth}
+          canPrev={store.selectedMonth > 0}
+          canNext={store.selectedMonth < store.cashflowMonths.length - 1}
+          monthIndex={store.selectedMonth}
+          onTogglePaid={store.toggleCashflowPaid}
+          onAddItem={store.addCashflowItem}
+          onRemoveItem={store.removeCashflowItem}
+          onUpdateItem={store.updateCashflowItem}
+          onSetFixed={store.setCashflowItemFixed}
+          onReplicateFixed={store.replicateFixedItem}
+        />
       </section>
 
       {/* Section: Timeline + Calendar - 2 column */}
