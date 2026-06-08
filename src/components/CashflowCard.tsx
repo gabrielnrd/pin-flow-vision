@@ -354,20 +354,20 @@ export function CashflowCard({
         <p className={`text-3xl text-money text-center ${expectedBalance >= 0 ? "text-income" : "text-expense"}`}>
           R$ {expectedBalance.toLocaleString("pt-BR")}
         </p>
-        <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/30 text-[10px]">
-          <div className="text-center">
-            <p className="text-muted-foreground">Receitas</p>
-            <p className="text-income text-money">+ {totalIncome.toLocaleString("pt-BR")}</p>
+        <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border/30">
+          <div className="text-center rounded-lg bg-income/5 py-2.5 px-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Receitas</p>
+            <p className="text-lg sm:text-xl text-income text-money font-semibold">+ {totalIncome.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="text-center">
-            <p className="text-muted-foreground">Despesas</p>
-            <p className="text-expense text-money">− {manualExpenses.toLocaleString("pt-BR")}</p>
+          <div className="text-center rounded-lg bg-expense/5 py-2.5 px-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Despesas</p>
+            <p className="text-lg sm:text-xl text-expense text-money font-semibold">− {manualExpenses.toLocaleString("pt-BR")}</p>
           </div>
-          <div className="text-center">
-            <p className="text-muted-foreground flex items-center justify-center gap-0.5">
-              <CreditCard className="w-2.5 h-2.5" /> Cartão
+          <div className="text-center rounded-lg bg-expense/5 py-2.5 px-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+              <CreditCard className="w-3 h-3" /> Cartão
             </p>
-            <p className="text-expense text-money">− {cardExpensesForMonth.toLocaleString("pt-BR")}</p>
+            <p className="text-lg sm:text-xl text-expense text-money font-semibold">− {cardExpensesForMonth.toLocaleString("pt-BR")}</p>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useTheme } from "@/hooks/use-theme";
 import { type Creditor } from "@/data/financialData";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { SavedBalanceWidget } from "@/components/SavedBalanceWidget";
 
 interface HeroChartProps {
   cashflowMonths: CashflowMonth[];
@@ -330,6 +331,8 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
               )}
             </div>
           </div>
+
+          <SavedBalanceWidget />
         </div>
       </div>
     </section>

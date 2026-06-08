@@ -8,7 +8,7 @@ export interface Bank {
   limitTotal: number;
   limitUsed: number;
   debtFinal: number;
-  status: "pendente" | "pago" | "parcial";
+  status: "pendente" | "pago" | "parcial" | "cancelado";
   installments: Installment[];
 }
 

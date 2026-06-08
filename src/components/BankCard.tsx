@@ -16,12 +16,14 @@ const statusLabels = {
   pendente: "Pendente",
   pago: "Pago",
   parcial: "Parcial",
+  cancelado: "Cancelado",
 };
 
 const statusStyles = {
   pendente: "bg-expense/20 text-expense border-expense/30",
   pago: "bg-income/20 text-income border-income/30",
   parcial: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  cancelado: "bg-muted/40 text-muted-foreground border-muted-foreground/30",
 };
 
 const bankGradients: Record<string, string> = {
@@ -51,7 +53,7 @@ const bankProgressColor: Record<string, string> = {
   "bank-other": "[&>div]:bg-white/80",
 };
 
-const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial"];
+const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial", "cancelado"];
 
 export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) {
   const [editingName, setEditingName] = useState(false);
@@ -76,10 +78,12 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
 
   const cardNumber = `•••• •••• •••• ${String(Math.abs(bank.name.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % 10000)).padStart(4, "0")}`;
 
+  const isCancelled = bank.status === "cancelado";
+
   return (
     <div
-      onClick={editingName || editingLimit ? undefined : onClick}
-      className={`w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""}`}
+      onClick={editingName || editingLimit || isCancelled ? undefined : onClick}
+      className={`w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""} ${isCancelled ? "opacity-50 grayscale" : ""}`}
       style={{ animationDelay: `${index * 80}ms`, aspectRatio: "1.586/1" }}
     >
       <div className={`relative w-full h-full bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between ${textColor}`}>
