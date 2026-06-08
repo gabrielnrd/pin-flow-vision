@@ -19,8 +19,8 @@ import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard"
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
 import { CashflowSankey } from "@/components/CashflowSankey";
-import { SavedBalanceWidget } from "@/components/SavedBalanceWidget";
-import { CreditCard, BarChart3, Brain, Users, Activity, PieChart } from "lucide-react";
+import { CreditCard, BarChart3, Brain, Users, Activity, PieChart, EyeOff, Eye } from "lucide-react";
+import { useState } from "react";
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
@@ -38,6 +38,10 @@ function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: strin
 
 const Index = () => {
   const store = useFinanceStore();
+  const [showCancelled, setShowCancelled] = useState(false);
+
+  const activeBanks = store.banks.filter((b) => b.status !== "cancelado");
+  const cancelledBanks = store.banks.filter((b) => b.status === "cancelado");
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10 pb-24 md:pb-6">
@@ -66,12 +70,11 @@ const Index = () => {
         cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
-      {/* Near hero: Spending distribution + Financial Health + Saved Balance */}
+      {/* Near hero: Spending distribution + Financial Health */}
       <section>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <SpendingChart banks={store.banks} />
           <FinancialHealthScore />
-          <SavedBalanceWidget />
         </div>
       </section>
 
@@ -93,13 +96,33 @@ const Index = () => {
 
       {/* Section: Cards */}
       <section>
-        <SectionTitle icon={CreditCard} title="Cartões de Crédito" subtitle="Saldo usado é calculado automaticamente pelas parcelas" />
+        <div className="flex items-center justify-between mb-5">
+          <SectionTitle icon={CreditCard} title="Cartões de Crédito" subtitle="Saldo usado é calculado automaticamente pelas parcelas" />
+          {cancelledBanks.length > 0 && (
+            <button
+              onClick={() => setShowCancelled((s) => !s)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary"
+            >
+              {showCancelled ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              {showCancelled ? "Ocultar cancelados" : `Mostrar cancelados (${cancelledBanks.length})`}
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 stagger-children">
-          {store.banks.map((bank, i) => (
+          {activeBanks.map((bank, i) => (
             <BankCard
               key={bank.id}
               bank={bank}
               index={i}
+              onClick={() => store.setSelectedBank(bank)}
+              onUpdateBank={store.updateBank}
+            />
+          ))}
+          {showCancelled && cancelledBanks.map((bank, i) => (
+            <BankCard
+              key={bank.id}
+              bank={bank}
+              index={activeBanks.length + i}
               onClick={() => store.setSelectedBank(bank)}
               onUpdateBank={store.updateBank}
             />
