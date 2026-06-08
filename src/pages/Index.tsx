@@ -10,9 +10,6 @@ import { BankDetailSheet } from "@/components/BankDetailSheet";
 import { ExpenseFAB } from "@/components/ExpenseFAB";
 import { HeroChart } from "@/components/HeroChart";
 import { CalendarCard } from "@/components/CalendarCard";
-import { BudgetRuleWidget } from "@/components/BudgetRuleWidget";
-import { SnowballCalculator } from "@/components/SnowballCalculator";
-import { BrainInsightsPanel } from "@/components/BrainInsightsPanel";
 import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { BudgetScenarios } from "@/components/BudgetScenarios";
@@ -111,33 +108,27 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Section: Analytics - Cashflow + Budget rule */}
+      {/* Section: Analytics - Cashflow */}
       <section>
         <SectionTitle icon={BarChart3} title="Análises & Fluxo" subtitle="Acompanhe suas finanças em detalhe" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <CashflowCard
-            cashflow={store.currentCashflow}
-            totalIncome={store.totalIncome}
-            totalExpense={store.totalExpense}
-            cardExpensesForMonth={store.cardExpensesForMonth}
-            expectedBalance={store.expectedBalance}
-            onPrev={store.prevMonth}
-            onNext={store.nextMonth}
-            canPrev={store.selectedMonth > 0}
-            canNext={store.selectedMonth < store.cashflowMonths.length - 1}
-            monthIndex={store.selectedMonth}
-            onTogglePaid={store.toggleCashflowPaid}
-            onAddItem={store.addCashflowItem}
-            onRemoveItem={store.removeCashflowItem}
-            onUpdateItem={store.updateCashflowItem}
-            onSetFixed={store.setCashflowItemFixed}
-            onReplicateFixed={store.replicateFixedItem}
-          />
-          <BudgetRuleWidget
-            cashflow={store.currentCashflow}
-            totalIncome={store.totalIncome}
-          />
-        </div>
+        <CashflowCard
+          cashflow={store.currentCashflow}
+          totalIncome={store.totalIncome}
+          totalExpense={store.totalExpense}
+          cardExpensesForMonth={store.cardExpensesForMonth}
+          expectedBalance={store.expectedBalance}
+          onPrev={store.prevMonth}
+          onNext={store.nextMonth}
+          canPrev={store.selectedMonth > 0}
+          canNext={store.selectedMonth < store.cashflowMonths.length - 1}
+          monthIndex={store.selectedMonth}
+          onTogglePaid={store.toggleCashflowPaid}
+          onAddItem={store.addCashflowItem}
+          onRemoveItem={store.removeCashflowItem}
+          onUpdateItem={store.updateCashflowItem}
+          onSetFixed={store.setCashflowItemFixed}
+          onReplicateFixed={store.replicateFixedItem}
+        />
       </section>
 
       {/* Section: Timeline + Calendar - 2 column */}
@@ -159,23 +150,17 @@ const Index = () => {
       {/* Annual Subscriptions & Services - after timeline */}
       <AnnualSubscriptionsCard />
 
-      {/* Section: Creditors + Brain */}
+      {/* Section: Creditors */}
       <section>
-        <SectionTitle icon={Users} title="Credores & Inteligência" subtitle="Dívidas pessoais e insights do Segundo Cérebro" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div className="space-y-5">
-            <CreditorWidget
-              creditors={store.creditors}
-              totalDebt={store.totalCreditorsDebt}
-              totalPaid={store.totalCreditorsPaid}
-              onAdd={store.addCreditor}
-              onRemove={store.removeCreditor}
-              onUpdate={store.updateCreditor}
-            />
-            <SnowballCalculator creditors={store.creditors} />
-          </div>
-          <BrainInsightsPanel />
-        </div>
+        <SectionTitle icon={Users} title="Credores" subtitle="Dívidas pessoais" />
+        <CreditorWidget
+          creditors={store.creditors}
+          totalDebt={store.totalCreditorsDebt}
+          totalPaid={store.totalCreditorsPaid}
+          onAdd={store.addCreditor}
+          onRemove={store.removeCreditor}
+          onUpdate={store.updateCreditor}
+        />
       </section>
 
       {/* Budget Scenarios - end of dashboard */}
