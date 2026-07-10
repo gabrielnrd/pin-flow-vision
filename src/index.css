@@ -400,6 +400,42 @@
   .light ::-webkit-scrollbar-thumb:hover {
     background: hsl(240 5% 65% / 0.7);
   }
+
+  /* Monochrome overrides */
+  .monochrome ::selection {
+    background: hsl(0 0% 100% / 0.25);
+    color: hsl(0 0% 0%);
+  }
+
+  .monochrome .glass-card {
+    @apply bg-card/70 border-white/10 shadow-none;
+  }
+  .monochrome .glass-card:hover {
+    border-color: hsl(0 0% 100% / 0.25);
+    box-shadow: 0 8px 32px -8px hsl(0 0% 100% / 0.06), 0 20px 40px -12px hsl(0 0% 100% / 0.04);
+  }
+
+  .monochrome .text-gradient {
+    background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 70%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .monochrome .glow-nubank,
+  .monochrome .glow-inter,
+  .monochrome .glow-c6,
+  .monochrome .glow-itau,
+  .monochrome .glow-bb {
+    box-shadow: 0 0 40px -10px hsl(0 0% 100% / 0.12);
+  }
+
+  .monochrome ::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 25% / 0.5);
+  }
+  .monochrome ::-webkit-scrollbar-thumb:hover {
+    background: hsl(0 0% 35% / 0.7);
+  }
 }
 
 @layer utilities {
