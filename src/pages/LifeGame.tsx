@@ -249,9 +249,9 @@ export default function NeuroRecoveryPage() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Reiniciar jornada?</DialogTitle>
-                  <DialogDescription-fallback>
+                  <DialogDescription>
                     Recaídas fazem parte. Seu recorde ({state.bestStreakDays} dias) fica salvo.
-                  </DialogDescription-fallback>
+                  </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                   <Button variant="ghost" onClick={() => setResetOpen(false)}>Cancelar</Button>
