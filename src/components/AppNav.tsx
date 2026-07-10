@@ -1,10 +1,18 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, TrendingUp, TrendingDown, Gamepad2, Wallet } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Car, Sun, Moon, Contrast, TrendingUp, TrendingDown, Gamepad2, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 
+const THEME_LABELS: Record<string, string> = {
+  dark: "Modo escuro",
+  light: "Modo claro",
+  monochrome: "Monocromático P&B",
+};
+
 export function AppNav() {
   const { theme, toggleTheme } = useTheme();
+
+  const ThemeIcon = theme === "dark" ? Sun : theme === "light" ? Moon : Contrast;
 
   return (
     <nav className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/50 hidden md:block">
@@ -39,13 +47,9 @@ export function AppNav() {
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 group"
-            title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+            title={THEME_LABELS[theme]}
           >
-            {theme === "dark" ? (
-              <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
-            ) : (
-              <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
-            )}
+            <ThemeIcon className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
           </button>
         </div>
       </div>
