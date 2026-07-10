@@ -14,13 +14,23 @@ const BANK_COLORS: Record<string, string> = {
   bb: "#FFCD00",
 };
 
+const MONOCHROME_BANK_COLORS: Record<string, string> = {
+  nubank: "#a0a0a0",
+  inter: "#c0c0c0",
+  c6: "#505050",
+  itau: "#d0d0d0",
+  bb: "#e0e0e0",
+};
+
 export function SpendingChart({ banks }: SpendingChartProps) {
   const { theme } = useTheme();
   const isLight = theme === "light";
+  const isMonochrome = theme === "monochrome";
+  const palette = isMonochrome ? MONOCHROME_BANK_COLORS : BANK_COLORS;
   const data = banks.map((b) => ({
     name: b.name,
     value: b.debtFinal,
-    color: BANK_COLORS[b.id] || "#888",
+    color: palette[b.id] || (isMonochrome ? "#888" : "#888"),
   }));
 
   const total = data.reduce((s, d) => s + d.value, 0);
