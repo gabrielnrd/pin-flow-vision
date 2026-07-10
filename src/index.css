@@ -113,6 +113,63 @@
     --sidebar-border: 240 5% 87%;
     --sidebar-ring: 265 80% 50%;
   }
+
+  /* Monochrome black & white theme */
+  .monochrome {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 100%;
+
+    --income: 0 0% 100%;
+    --expense: 0 0% 60%;
+
+    --glass-bg: 0 0% 6% / 0.7;
+    --glass-border: 0 0% 25% / 0.5;
+    --glass-blur: 20px;
+
+    --glow-primary: 0 0% 100%;
+
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 0% 100%;
+
+    /* Bank brand colors become grayscale */
+    --bank-nubank: 0 0% 55%;
+    --bank-inter: 0 0% 70%;
+    --bank-c6: 0 0% 35%;
+    --bank-itau: 0 0% 80%;
+    --bank-bb: 0 0% 90%;
+    --bank-other: 0 0% 50%;
+  }
 }
 
 @layer base {
