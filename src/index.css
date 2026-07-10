@@ -113,6 +113,63 @@
     --sidebar-border: 240 5% 87%;
     --sidebar-ring: 265 80% 50%;
   }
+
+  /* Monochrome black & white theme */
+  .monochrome {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 100%;
+
+    --income: 0 0% 100%;
+    --expense: 0 0% 60%;
+
+    --glass-bg: 0 0% 6% / 0.7;
+    --glass-border: 0 0% 25% / 0.5;
+    --glass-blur: 20px;
+
+    --glow-primary: 0 0% 100%;
+
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 0% 100%;
+
+    /* Bank brand colors become grayscale */
+    --bank-nubank: 0 0% 55%;
+    --bank-inter: 0 0% 70%;
+    --bank-c6: 0 0% 35%;
+    --bank-itau: 0 0% 80%;
+    --bank-bb: 0 0% 90%;
+    --bank-other: 0 0% 50%;
+  }
 }
 
 @layer base {
@@ -342,6 +399,42 @@
   }
   .light ::-webkit-scrollbar-thumb:hover {
     background: hsl(240 5% 65% / 0.7);
+  }
+
+  /* Monochrome overrides */
+  .monochrome ::selection {
+    background: hsl(0 0% 100% / 0.25);
+    color: hsl(0 0% 0%);
+  }
+
+  .monochrome .glass-card {
+    @apply bg-card/70 border-white/10 shadow-none;
+  }
+  .monochrome .glass-card:hover {
+    border-color: hsl(0 0% 100% / 0.25);
+    box-shadow: 0 8px 32px -8px hsl(0 0% 100% / 0.06), 0 20px 40px -12px hsl(0 0% 100% / 0.04);
+  }
+
+  .monochrome .text-gradient {
+    background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 70%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .monochrome .glow-nubank,
+  .monochrome .glow-inter,
+  .monochrome .glow-c6,
+  .monochrome .glow-itau,
+  .monochrome .glow-bb {
+    box-shadow: 0 0 40px -10px hsl(0 0% 100% / 0.12);
+  }
+
+  .monochrome ::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 25% / 0.5);
+  }
+  .monochrome ::-webkit-scrollbar-thumb:hover {
+    background: hsl(0 0% 35% / 0.7);
   }
 }
 
