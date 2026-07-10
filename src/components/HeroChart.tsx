@@ -195,27 +195,27 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "hsl(240 5% 90%)" : "hsl(240 5% 18% / 0.5)"} />
-                <XAxis dataKey="month" tick={{ fill: isLight ? "hsl(240 5% 40%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: isLight ? "hsl(240 5% 40%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "hsl(240 5% 90%)" : isMonochrome ? "hsl(0 0% 18% / 0.5)" : "hsl(240 5% 18% / 0.5)"} />
+                <XAxis dataKey="month" tick={{ fill: isLight ? "hsl(240 5% 40%)" : isMonochrome ? "hsl(0 0% 55%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: isLight ? "hsl(240 5% 40%)" : isMonochrome ? "hsl(0 0% 55%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     const labels: Record<string, string> = { entradas: "Entradas", saidas: "Saídas", future_entradas: "Entradas (Projeção)", future_saidas: "Saídas (Projeção)" };
                     return [`R$ ${value?.toLocaleString("pt-BR") ?? "—"}`, labels[name] || name];
                   }}
                   contentStyle={{
-                    background: isLight ? "hsl(0 0% 100% / 0.95)" : "hsl(240 6% 10% / 0.95)",
-                    border: `1px solid ${isLight ? "hsl(240 5% 87%)" : "hsl(240 5% 25% / 0.4)"}`,
+                    background: isLight ? "hsl(0 0% 100% / 0.95)" : isMonochrome ? "hsl(0 0% 6% / 0.95)" : "hsl(240 6% 10% / 0.95)",
+                    border: `1px solid ${isLight ? "hsl(240 5% 87%)" : isMonochrome ? "hsl(0 0% 25% / 0.4)" : "hsl(240 5% 25% / 0.4)"}`,
                     borderRadius: "12px",
                     fontSize: "12px",
-                    color: isLight ? "hsl(240 10% 10%)" : "hsl(0 0% 95%)",
+                    color: isLight ? "hsl(240 10% 10%)" : isMonochrome ? "hsl(0 0% 95%)" : "hsl(0 0% 95%)",
                   }}
                 />
-                <Line type="monotone" dataKey="entradas" stroke="hsl(145 63% 42%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} />
-                <Line type="monotone" dataKey="saidas" stroke="hsl(0 72% 51%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} />
+                <Line type="monotone" dataKey="entradas" stroke={isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)"} strokeWidth={2.5} dot={{ r: 4, fill: isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} />
+                <Line type="monotone" dataKey="saidas" stroke={isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)"} strokeWidth={2.5} dot={{ r: 4, fill: isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} />
                 {/* Future/dashed lines */}
-                <Line type="monotone" dataKey="future_entradas" stroke="hsl(145 63% 42%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(145 63% 42%)", strokeDasharray: "" }} name="future_entradas" connectNulls={false} />
-                <Line type="monotone" dataKey="future_saidas" stroke="hsl(0 72% 51%)" strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: "hsl(0 72% 51%)", strokeDasharray: "" }} name="future_saidas" connectNulls={false} />
+                <Line type="monotone" dataKey="future_entradas" stroke={isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)"} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)", strokeDasharray: "" }} name="future_entradas" connectNulls={false} />
+                <Line type="monotone" dataKey="future_saidas" stroke={isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)"} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)", strokeDasharray: "" }} name="future_saidas" connectNulls={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
