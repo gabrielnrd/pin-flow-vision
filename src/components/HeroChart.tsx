@@ -49,6 +49,7 @@ function DebtTrendBadge({ current, previous }: { current: number; previous: numb
 export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBalance, savingsGoalMonth, onSavingsGoalChange, selectedMonth, banks, creditors, cardExpensesForMonth }: HeroChartProps) {
   const { theme } = useTheme();
   const isLight = theme === "light";
+  const isMonochrome = theme === "monochrome";
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalValue, setGoalValue] = useState(String(savingsGoalMonth));
   const [showBreakdown, setShowBreakdown] = useState(false);
