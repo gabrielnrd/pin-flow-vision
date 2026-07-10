@@ -477,12 +477,3 @@ export default function NeuroRecoveryPage() {
   );
 }
 
-// Small shim so we don't need to import DialogDescription
-function DialogDescriptionFallback({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-muted-foreground">{children}</p>;
-}
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const DialogDescription_fallback = DialogDescriptionFallback;
-// Alias to satisfy JSX above
-const DialogDescription = DialogDescriptionFallback;
-export { DialogDescription as "DialogDescription-fallback" };
