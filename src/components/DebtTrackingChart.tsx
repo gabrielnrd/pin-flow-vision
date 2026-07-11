@@ -1,4 +1,4 @@
-import { useMemo } from "react"; // cache-bust
+import { useMemo } from "react";
 import { useFinanceStore } from "@/stores/financeStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,7 +12,7 @@ import {
   ReferenceLine,
   ComposedChart,
 } from "recharts";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Info } from "lucide-react";
 
 const MONTH_MAP: Record<string, number> = {
   Janeiro: 0, Fevereiro: 1, Março: 2, Abril: 3, Maio: 4, Junho: 5,
@@ -21,6 +21,15 @@ const MONTH_MAP: Record<string, number> = {
 
 const SHORT_MONTH = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
+/**
+ * Debt tracking chart — ACCURATE version.
+ *
+ * - `initialDebt`: original total of all installments contracted (paid + unpaid) + total owed to creditors.
+ * - `abatimento` (per month): actual debt reduction only.
+ *     - Bank: installments with dueDate in that month AND status === "pago" (real) OR scheduled installments in future months (projected).
+ *     - Creditor: creditor.amountPaid is not month-tagged; we attribute it entirely to the current month bucket (single lump) to keep cumulative curve consistent with `totalDebt`.
+ * - Non-debt paid expenses (rent, food, leisure) are NOT counted as debt abatement.
+ */
 export function DebtTrackingChart() {
   const store = useFinanceStore();
 
@@ -29,27 +38,48 @@ export function DebtTrackingChart() {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
+    // Original total contracted debt from all installments (banks) — paid or not
     const initialBankDebt = store.banks.reduce((sum, b) => {
-      return sum + b.installments
-        .filter((inst) => inst.status !== "pago")
-        .reduce((s, inst) => s + inst.installmentAmount * (inst.totalInstallments - inst.currentInstallment + 1), 0);
+      return sum + b.installments.reduce(
+        (s, inst) => s + inst.installmentAmount * inst.totalInstallments,
+        0,
+      );
     }, 0);
+    const creditorsTotal = store.totalCreditorsDebt;
+    const totalInitial = initialBankDebt + creditorsTotal;
 
-    const creditorsRemaining = store.totalCreditorsDebt - store.totalCreditorsPaid;
-    const totalInitial = initialBankDebt + creditorsRemaining;
+    // Creditor payments (not month-tagged) attributed to current month bucket
+    const creditorsPaidLump = store.totalCreditorsPaid;
+
     let cumulativePaid = 0;
 
     const data = store.cashflowMonths.map((m, idx) => {
       const mIdx = MONTH_MAP[m.month] ?? idx;
-      const isPast = m.year < currentYear || (m.year === currentYear && mIdx <= currentMonth);
+      const isCurrent = m.year === currentYear && mIdx === currentMonth;
+      const isPast = m.year < currentYear || (m.year === currentYear && mIdx < currentMonth);
+      const isFuture = !isPast && !isCurrent;
 
-      const paidExpenses = m.expenses.filter((e) => e.paid).reduce((s, e) => s + e.amount, 0);
-      const totalExpenses = m.expenses.reduce((s, e) => s + e.amount, 0);
-      const abatimento = isPast ? paidExpenses : totalExpenses;
+      // Bank abatement in this month
+      let bankAbatement = 0;
+      store.banks.forEach((b) => {
+        b.installments.forEach((inst) => {
+          const d = new Date(inst.dueDate + "T00:00:00");
+          if (d.getMonth() !== mIdx || d.getFullYear() !== m.year) return;
+          if (isFuture) {
+            // Projected: assume it will be paid
+            bankAbatement += inst.installmentAmount;
+          } else if (inst.status === "pago") {
+            bankAbatement += inst.installmentAmount;
+          }
+        });
+      });
 
+      // Attribute all creditor payments to the current month (single lump)
+      const creditorAbatement = isCurrent ? creditorsPaidLump : 0;
+
+      const abatimento = bankAbatement + creditorAbatement;
       cumulativePaid += abatimento;
 
-      // Inverted: progress goes UP. Shows how much has been paid off (positive = good)
       const progresso = cumulativePaid;
       const remaining = Math.max(totalInitial - cumulativePaid, 0);
 
@@ -58,14 +88,14 @@ export function DebtTrackingChart() {
         progresso,
         abatimento,
         remaining,
-        isPast,
+        isPast: isPast || isCurrent,
       };
     });
 
     return { chartData: data, initialDebt: totalInitial };
   }, [store.cashflowMonths, store.banks, store.totalCreditorsDebt, store.totalCreditorsPaid]);
 
-  const totalDebt = store.totalDebt;
+  const currentDebt = store.totalDebt;
   const totalPaid = chartData.length > 0 ? chartData[chartData.length - 1].progresso : 0;
   const reductionPercent = initialDebt > 0 ? Math.round((totalPaid / initialDebt) * 100) : 0;
 
@@ -79,14 +109,14 @@ export function DebtTrackingChart() {
             </div>
             <div>
               <CardTitle className="text-lg font-bold tracking-tight">Progresso de Quitação</CardTitle>
-              <p className="text-xs text-muted-foreground">
-                Quanto mais alto, mais perto da liberdade
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Info className="w-3 h-3" /> Considera apenas parcelas pagas e amortização de credores
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-foreground">
-              R$ {totalDebt.toLocaleString("pt-BR")}
+              R$ {currentDebt.toLocaleString("pt-BR")}
             </p>
             <p className="text-xs text-muted-foreground">
               Quitado: <span className="text-chart-2 font-semibold">{reductionPercent}%</span>
@@ -118,7 +148,6 @@ export function DebtTrackingChart() {
                 tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
               />
               <Tooltip content={<DebtTooltip initialDebt={initialDebt} />} />
-              {/* Target line: full debt paid */}
               <ReferenceLine
                 y={initialDebt}
                 stroke="hsl(var(--chart-2))"
@@ -150,11 +179,11 @@ export function DebtTrackingChart() {
         <div className="flex items-center justify-center gap-6 mt-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "hsl(var(--chart-2))" }} />
-            <span>Progresso Acumulado</span>
+            <span>Quitação Acumulada</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-sm bg-destructive/60" />
-            <span>Pagamento Mensal</span>
+            <span>Abatimento Mensal</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-6 h-0 border-t-2 border-dashed" style={{ borderColor: "hsl(var(--chart-2))" }} />
@@ -180,7 +209,7 @@ function DebtTooltip({ active, payload, label, initialDebt }: any) {
         return (
           <div key={i} className="flex items-center justify-between gap-4 text-xs">
             <span className="text-muted-foreground">
-              {isProgress ? "Total Quitado" : "Pagamento"}
+              {isProgress ? "Total Quitado" : "Abatimento"}
             </span>
             <span
               className="font-bold"

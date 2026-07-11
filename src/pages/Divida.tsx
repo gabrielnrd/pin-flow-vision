@@ -419,24 +419,65 @@ function DueDateAlerts({ creditors }: { creditors: ReturnType<typeof useFinanceS
 export default function DividaPage() {
   const store = useFinanceStore();
 
-  const totalPaidExpenses = store.cashflowMonths.reduce(
-    (sum, m) => sum + m.expenses.filter((e) => e.paid).reduce((s, e) => s + e.amount, 0),
-    0
+  // Original total contracted debt (banks: all installments; creditors: totalDebt)
+  const initialBankDebt = useMemo(
+    () => store.banks.reduce((s, b) => s + b.installments.reduce((x, i) => x + i.installmentAmount * i.totalInstallments, 0), 0),
+    [store.banks],
   );
+  const initialTotalDebt = initialBankDebt + store.totalCreditorsDebt;
 
-  const totalRemaining = store.totalDebt - totalPaidExpenses;
+  // Real debt paid so far: paid installments + creditor amortization
+  const paidInstallmentsTotal = useMemo(
+    () => store.banks.reduce(
+      (s, b) => s + b.installments.filter(i => i.status === "pago").reduce((x, i) => x + i.installmentAmount, 0),
+      0,
+    ),
+    [store.banks],
+  );
+  const totalAbatido = paidInstallmentsTotal + store.totalCreditorsPaid;
+  const totalRemaining = Math.max(initialTotalDebt - totalAbatido, 0);
+  const pctQuitado = initialTotalDebt > 0 ? Math.round((totalAbatido / initialTotalDebt) * 100) : 0;
 
-  const monthsWithPayments = store.cashflowMonths.filter(
-    (m) => m.expenses.some((e) => e.paid)
-  ).length;
+  // Average monthly abatement based on months with actual paid installments
+  const monthsWithPayments = useMemo(() => {
+    const set = new Set<string>();
+    store.banks.forEach(b => b.installments.forEach(i => {
+      if (i.status === "pago") set.add(i.dueDate.slice(0, 7));
+    }));
+    return set.size;
+  }, [store.banks]);
+  const avgMonthly = monthsWithPayments > 0 ? paidInstallmentsTotal / monthsWithPayments : 0;
+  const monthsToPayOff = avgMonthly > 0 ? Math.ceil(totalRemaining / avgMonthly) : 0;
 
-  const avgMonthly = monthsWithPayments > 0 ? totalPaidExpenses / monthsWithPayments : 0;
-  const monthsToPayOff = avgMonthly > 0 ? Math.ceil(Math.max(totalRemaining, 0) / avgMonthly) : 0;
+  // Extra rich metrics
+  const totalInstallmentsCount = store.banks.reduce((s, b) => s + b.installments.length, 0);
+  const paidInstallmentsCount = store.banks.reduce(
+    (s, b) => s + b.installments.filter(i => i.status === "pago").length,
+    0,
+  );
+  const overdueCount = store.banks.reduce(
+    (s, b) => s + b.installments.filter(i => i.status === "atrasado").length,
+    0,
+  );
+  const avgInterest = useMemo(() => {
+    const rates = store.creditors.filter(c => (c.interestRate ?? 0) > 0).map(c => c.interestRate!);
+    return rates.length > 0 ? rates.reduce((s, r) => s + r, 0) / rates.length : 0;
+  }, [store.creditors]);
+  const nextInstallment: any = useMemo(() => {
+    const now = Date.now();
+    return store.allInstallments
+      .filter((i: any) => new Date(i.dueDate + "T00:00:00").getTime() >= now)
+      .sort((a: any, b: any) => a.dueDate.localeCompare(b.dueDate))[0];
+  }, [store.allInstallments]);
+  const highestDebt = useMemo(() => {
+    const sorted = [...store.banks].filter(b => b.status !== "cancelado").sort((a, b) => b.limitUsed - a.limitUsed);
+    return sorted[0];
+  }, [store.banks]);
 
   // Donut data: combine banks + creditors
   const donutData = useMemo(() => {
     const bankItems = store.banks.map(b => {
-      const totalOwed = b.installments.reduce((s, inst) => s + inst.installmentAmount * (inst.totalInstallments - inst.currentInstallment + 1), 0);
+      const totalOwed = b.installments.reduce((s, inst) => s + inst.installmentAmount * inst.totalInstallments, 0);
       const paid = b.installments
         .filter(inst => inst.status === "pago")
         .reduce((s, inst) => s + inst.installmentAmount, 0);
@@ -464,29 +505,63 @@ export default function DividaPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={TrendingDown}
-          label="Dívida Total"
+          label="Dívida Atual"
           value={`R$ ${store.totalDebt.toLocaleString("pt-BR")}`}
+          sub={`Original: R$ ${initialTotalDebt.toLocaleString("pt-BR")}`}
           color="bg-destructive/10 text-destructive"
         />
         <StatCard
           icon={TrendingUp}
           label="Total Abatido"
-          value={`R$ ${totalPaidExpenses.toLocaleString("pt-BR")}`}
+          value={`R$ ${totalAbatido.toLocaleString("pt-BR")}`}
+          sub={`${paidInstallmentsCount}/${totalInstallmentsCount} parcelas pagas`}
           color="bg-chart-2/10 text-chart-2"
         />
         <StatCard
           icon={Percent}
           label="Quanto Falta"
-          value={`R$ ${Math.max(totalRemaining, 0).toLocaleString("pt-BR")}`}
-          sub={`${store.totalDebt > 0 ? Math.round((totalPaidExpenses / store.totalDebt) * 100) : 0}% quitado`}
+          value={`R$ ${totalRemaining.toLocaleString("pt-BR")}`}
+          sub={`${pctQuitado}% quitado`}
           color="bg-primary/10 text-primary"
         />
         <StatCard
           icon={CalendarDays}
           label="Previsão"
-          value={monthsToPayOff > 0 ? `${monthsToPayOff} meses` : "Quitado! 🎉"}
-          sub="para quitar tudo"
+          value={monthsToPayOff > 0 ? `${monthsToPayOff} meses` : "—"}
+          sub={avgMonthly > 0 ? `Ritmo: R$ ${Math.round(avgMonthly).toLocaleString("pt-BR")}/mês` : "sem histórico ainda"}
           color="bg-accent/50 text-accent-foreground"
+        />
+      </div>
+
+      {/* Extra info cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          icon={AlertTriangle}
+          label="Parcelas Atrasadas"
+          value={`${overdueCount}`}
+          sub={overdueCount > 0 ? "Atenção urgente" : "Tudo em dia"}
+          color={overdueCount > 0 ? "bg-destructive/10 text-destructive" : "bg-chart-2/10 text-chart-2"}
+        />
+        <StatCard
+          icon={Percent}
+          label="Juros Médio (credores)"
+          value={avgInterest > 0 ? `${avgInterest.toFixed(2)}% a.m.` : "—"}
+          sub={`${store.creditors.length} credores`}
+          color="bg-yellow-500/10 text-yellow-500"
+        />
+        <StatCard
+          icon={Clock}
+          label="Próximo Vencimento"
+          value={nextInstallment ? `R$ ${nextInstallment.installmentAmount.toLocaleString("pt-BR")}` : "—"}
+          sub={nextInstallment ? `${nextInstallment.bankName} · ${new Date(nextInstallment.dueDate).toLocaleDateString("pt-BR")}` : "sem parcelas"}
+          color="bg-primary/10 text-primary"
+        />
+        <StatCard
+          icon={Flame}
+          label="Maior Dívida"
+          value={highestDebt ? `R$ ${highestDebt.limitUsed.toLocaleString("pt-BR")}` : "—"}
+          sub={highestDebt?.name ?? ""}
+          color="bg-destructive/10 text-destructive"
         />
       </div>
 
