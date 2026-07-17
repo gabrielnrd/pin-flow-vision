@@ -4,8 +4,9 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Brain, Zap, Shield, Flame, Sparkles, Trophy, RotateCcw, Calendar, Skull, Award, Building2, Cpu, Heart, BookOpen, Factory, TreePine, Info } from "lucide-react";
+import { Brain, Zap, Shield, Flame, Sparkles, Trophy, RotateCcw, Calendar, Skull, Award, Building2, Cpu, Heart, BookOpen, Factory, TreePine, Info, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Coin3D, type CoinTier } from "@/components/Coin3D";
 
 // ============ DATA ============
 
@@ -88,6 +89,32 @@ const SCIENCE_FACTS: Record<number, string> = {
   365: "Você consolidou um ano de prática de novos comportamentos — a base é muito mais forte.",
 };
 
+// ============ MILESTONE COINS ============
+
+type MilestoneCoin = {
+  day: number;
+  tier: CoinTier;
+  icon: string;
+  title: string;
+  label: string; // short back-face text
+  reward: string; // narrative reward
+};
+
+const MILESTONE_COINS: MilestoneCoin[] = [
+  { day: 1,   tier: "bronze",   icon: "🌱", title: "Primeira Vitória",   label: "DAY 1",   reward: "A jornada começou. +100 XP" },
+  { day: 3,   tier: "bronze",   icon: "💨", title: "72 Horas Firme",     label: "72H",     reward: "Primeiro pico de abstinência vencido" },
+  { day: 7,   tier: "silver",   icon: "🗓️", title: "Semana Um",          label: "WEEK 1",  reward: "Córtex pré-frontal iniciou reparo" },
+  { day: 14,  tier: "silver",   icon: "⚡", title: "Duas Semanas",       label: "14D",     reward: "Receptores dopaminérgicos ressensibilizando" },
+  { day: 21,  tier: "gold",     icon: "🔗", title: "Três Semanas",       label: "21D",     reward: "Neuroplasticidade em ação" },
+  { day: 30,  tier: "gold",     icon: "🏆", title: "Primeiro Mês",       label: "30D",     reward: "Fábrica de hábitos reformada" },
+  { day: 45,  tier: "gold",     icon: "🛡️", title: "45 Dias",            label: "45D",     reward: "Amígdala mais resiliente" },
+  { day: 60,  tier: "platinum", icon: "📚", title: "60 Dias",            label: "60D",     reward: "Hipocampo restaurado" },
+  { day: 90,  tier: "platinum", icon: "🧠", title: "Novo Cérebro",       label: "90D",     reward: "Ínsula estabilizada" },
+  { day: 120, tier: "diamond",  icon: "🌳", title: "120 Dias",           label: "120D",    reward: "Rede de recompensa florescendo" },
+  { day: 180, tier: "diamond",  icon: "☀️", title: "Meio Ano",           label: "6M",      reward: "Integração cerebral avançada" },
+  { day: 365, tier: "legend",   icon: "👑", title: "Um Ano Livre",       label: "LEGEND",  reward: "Mestre da Neuroplasticidade" },
+];
+
 // ============ STORAGE ============
 
 const STORAGE_KEY = "neuro-recovery-v1";
@@ -96,14 +123,19 @@ type NeuroState = {
   startDate: string | null; // ISO
   defeatedBosses: string[];
   bestStreakDays: number;
+  claimedCoins?: number[]; // list of coin.day already celebrated
 };
 
 function loadState(): NeuroState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const s = JSON.parse(raw) as NeuroState;
+      if (!s.claimedCoins) s.claimedCoins = [];
+      return s;
+    }
   } catch {}
-  return { startDate: null, defeatedBosses: [], bestStreakDays: 0 };
+  return { startDate: null, defeatedBosses: [], bestStreakDays: 0, claimedCoins: [] };
 }
 
 function saveState(s: NeuroState) {
@@ -144,6 +176,7 @@ export default function NeuroRecoveryPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerDate, setPickerDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [resetOpen, setResetOpen] = useState(false);
+  const [celebrateCoin, setCelebrateCoin] = useState<MilestoneCoin | null>(null);
 
   // Refresh every minute so day rollover reflects
   useEffect(() => {
@@ -166,6 +199,17 @@ export default function NeuroRecoveryPage() {
     }
   }, [days]); // eslint-disable-line
 
+  // Detect newly-unlocked coins and trigger celebration
+  useEffect(() => {
+    if (!state.startDate) return;
+    const claimed = state.claimedCoins ?? [];
+    const newly = MILESTONE_COINS.find((c) => days >= c.day && !claimed.includes(c.day));
+    if (newly) {
+      setCelebrateCoin(newly);
+      setState((s) => ({ ...s, claimedCoins: [...(s.claimedCoins ?? []), newly.day] }));
+    }
+  }, [days, state.startDate]); // eslint-disable-line
+
   const currentFact = useMemo(() => {
     const keys = Object.keys(SCIENCE_FACTS).map(Number).sort((a, b) => a - b);
     let last = 0;
@@ -173,14 +217,16 @@ export default function NeuroRecoveryPage() {
     return last ? SCIENCE_FACTS[last] : "Cada dia offline reconstrói um pouco do seu cérebro. Isto é ciência, não mágica.";
   }, [days]);
 
+  const unlockedCoinsCount = MILESTONE_COINS.filter((c) => days >= c.day).length;
+
   const startJourney = () => {
     const iso = new Date(pickerDate + "T00:00:00").toISOString();
-    setState({ startDate: iso, defeatedBosses: [], bestStreakDays: 0 });
+    setState({ startDate: iso, defeatedBosses: [], bestStreakDays: 0, claimedCoins: [] });
     setPickerOpen(false);
   };
 
   const resetJourney = () => {
-    setState({ startDate: null, defeatedBosses: [], bestStreakDays: state.bestStreakDays });
+    setState({ startDate: null, defeatedBosses: [], bestStreakDays: state.bestStreakDays, claimedCoins: [] });
     setResetOpen(false);
   };
 
@@ -469,10 +515,88 @@ export default function NeuroRecoveryPage() {
           </Card>
         </div>
 
+        {/* Vault — 3D Coins */}
+        <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-violet-500/5 overflow-hidden">
+          <CardHeader>
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-amber-500" /> Cofre de Conquistas
+                </CardTitle>
+                <CardDescription>Moedas 3D forjadas a cada marco superado. Passe o mouse para girar mais devagar.</CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-black text-amber-500 leading-none tabular-nums">
+                  {unlockedCoinsCount}<span className="text-muted-foreground/60 text-lg">/{MILESTONE_COINS.length}</span>
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Coletadas</div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {MILESTONE_COINS.map((c) => {
+                const unlocked = days >= c.day;
+                return (
+                  <div key={c.day} className="flex flex-col items-center text-center gap-2 group">
+                    <div className="relative">
+                      <Coin3D tier={c.tier} icon={c.icon} label={c.label} size={92} locked={!unlocked} />
+                      {unlocked && (
+                        <>
+                          <span className="absolute -top-1 -right-1 text-lg animate-[sparkle_1.5s_ease-in-out_infinite]">✨</span>
+                          <span className="absolute -bottom-1 -left-1 text-lg animate-[sparkle_1.5s_ease-in-out_infinite] [animation-delay:0.7s]">✨</span>
+                        </>
+                      )}
+                    </div>
+                    <div>
+                      <p className={cn("text-xs font-bold leading-tight", unlocked ? "text-foreground" : "text-muted-foreground/60")}>
+                        {c.title}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {unlocked ? "✓ Conquistada" : `Dia ${c.day}`}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
         <p className="text-center text-xs text-muted-foreground italic pb-6">
           Aviso: este app é uma ferramenta motivacional. Não substitui acompanhamento profissional. Se precisar de ajuda: CVV 188.
         </p>
       </main>
+
+      {/* Celebration modal — new coin unlocked */}
+      <Dialog open={!!celebrateCoin} onOpenChange={(o) => !o && setCelebrateCoin(null)}>
+        <DialogContent className="sm:max-w-md overflow-hidden">
+          {celebrateCoin && (
+            <>
+              <div className="absolute inset-0 pointer-events-none">
+                {["top-4 left-6", "top-8 right-8", "bottom-12 left-10", "bottom-6 right-6", "top-20 left-1/2"].map((pos, i) => (
+                  <span key={i} className={cn("absolute text-2xl animate-[sparkle_1.5s_ease-in-out_infinite]", pos)} style={{ animationDelay: `${i * 0.2}s` }}>✨</span>
+                ))}
+              </div>
+              <DialogHeader className="text-center items-center relative z-10">
+                <div className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-1">Nova Conquista</div>
+                <DialogTitle className="text-2xl">{celebrateCoin.title}</DialogTitle>
+                <DialogDescription>{celebrateCoin.reward}</DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-center py-4 relative z-10">
+                <div className="animate-[coin-pop_1.2s_cubic-bezier(0.34,1.56,0.64,1)_forwards]">
+                  <Coin3D tier={celebrateCoin.tier} icon={celebrateCoin.icon} label={celebrateCoin.label} size={180} />
+                </div>
+              </div>
+              <DialogFooter className="relative z-10">
+                <Button className="w-full gap-2" onClick={() => setCelebrateCoin(null)}>
+                  <Sparkles className="w-4 h-4" /> Adicionar ao cofre
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
