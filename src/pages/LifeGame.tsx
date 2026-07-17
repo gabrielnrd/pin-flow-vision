@@ -176,6 +176,7 @@ export default function NeuroRecoveryPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerDate, setPickerDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [resetOpen, setResetOpen] = useState(false);
+  const [celebrateCoin, setCelebrateCoin] = useState<MilestoneCoin | null>(null);
 
   // Refresh every minute so day rollover reflects
   useEffect(() => {
@@ -198,6 +199,17 @@ export default function NeuroRecoveryPage() {
     }
   }, [days]); // eslint-disable-line
 
+  // Detect newly-unlocked coins and trigger celebration
+  useEffect(() => {
+    if (!state.startDate) return;
+    const claimed = state.claimedCoins ?? [];
+    const newly = MILESTONE_COINS.find((c) => days >= c.day && !claimed.includes(c.day));
+    if (newly) {
+      setCelebrateCoin(newly);
+      setState((s) => ({ ...s, claimedCoins: [...(s.claimedCoins ?? []), newly.day] }));
+    }
+  }, [days, state.startDate]); // eslint-disable-line
+
   const currentFact = useMemo(() => {
     const keys = Object.keys(SCIENCE_FACTS).map(Number).sort((a, b) => a - b);
     let last = 0;
@@ -205,14 +217,16 @@ export default function NeuroRecoveryPage() {
     return last ? SCIENCE_FACTS[last] : "Cada dia offline reconstrói um pouco do seu cérebro. Isto é ciência, não mágica.";
   }, [days]);
 
+  const unlockedCoinsCount = MILESTONE_COINS.filter((c) => days >= c.day).length;
+
   const startJourney = () => {
     const iso = new Date(pickerDate + "T00:00:00").toISOString();
-    setState({ startDate: iso, defeatedBosses: [], bestStreakDays: 0 });
+    setState({ startDate: iso, defeatedBosses: [], bestStreakDays: 0, claimedCoins: [] });
     setPickerOpen(false);
   };
 
   const resetJourney = () => {
-    setState({ startDate: null, defeatedBosses: [], bestStreakDays: state.bestStreakDays });
+    setState({ startDate: null, defeatedBosses: [], bestStreakDays: state.bestStreakDays, claimedCoins: [] });
     setResetOpen(false);
   };
 
