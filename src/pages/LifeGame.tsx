@@ -89,6 +89,32 @@ const SCIENCE_FACTS: Record<number, string> = {
   365: "Você consolidou um ano de prática de novos comportamentos — a base é muito mais forte.",
 };
 
+// ============ MILESTONE COINS ============
+
+type MilestoneCoin = {
+  day: number;
+  tier: CoinTier;
+  icon: string;
+  title: string;
+  label: string; // short back-face text
+  reward: string; // narrative reward
+};
+
+const MILESTONE_COINS: MilestoneCoin[] = [
+  { day: 1,   tier: "bronze",   icon: "🌱", title: "Primeira Vitória",   label: "DAY 1",   reward: "A jornada começou. +100 XP" },
+  { day: 3,   tier: "bronze",   icon: "💨", title: "72 Horas Firme",     label: "72H",     reward: "Primeiro pico de abstinência vencido" },
+  { day: 7,   tier: "silver",   icon: "🗓️", title: "Semana Um",          label: "WEEK 1",  reward: "Córtex pré-frontal iniciou reparo" },
+  { day: 14,  tier: "silver",   icon: "⚡", title: "Duas Semanas",       label: "14D",     reward: "Receptores dopaminérgicos ressensibilizando" },
+  { day: 21,  tier: "gold",     icon: "🔗", title: "Três Semanas",       label: "21D",     reward: "Neuroplasticidade em ação" },
+  { day: 30,  tier: "gold",     icon: "🏆", title: "Primeiro Mês",       label: "30D",     reward: "Fábrica de hábitos reformada" },
+  { day: 45,  tier: "gold",     icon: "🛡️", title: "45 Dias",            label: "45D",     reward: "Amígdala mais resiliente" },
+  { day: 60,  tier: "platinum", icon: "📚", title: "60 Dias",            label: "60D",     reward: "Hipocampo restaurado" },
+  { day: 90,  tier: "platinum", icon: "🧠", title: "Novo Cérebro",       label: "90D",     reward: "Ínsula estabilizada" },
+  { day: 120, tier: "diamond",  icon: "🌳", title: "120 Dias",           label: "120D",    reward: "Rede de recompensa florescendo" },
+  { day: 180, tier: "diamond",  icon: "☀️", title: "Meio Ano",           label: "6M",      reward: "Integração cerebral avançada" },
+  { day: 365, tier: "legend",   icon: "👑", title: "Um Ano Livre",       label: "LEGEND",  reward: "Mestre da Neuroplasticidade" },
+];
+
 // ============ STORAGE ============
 
 const STORAGE_KEY = "neuro-recovery-v1";
@@ -97,14 +123,19 @@ type NeuroState = {
   startDate: string | null; // ISO
   defeatedBosses: string[];
   bestStreakDays: number;
+  claimedCoins?: number[]; // list of coin.day already celebrated
 };
 
 function loadState(): NeuroState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const s = JSON.parse(raw) as NeuroState;
+      if (!s.claimedCoins) s.claimedCoins = [];
+      return s;
+    }
   } catch {}
-  return { startDate: null, defeatedBosses: [], bestStreakDays: 0 };
+  return { startDate: null, defeatedBosses: [], bestStreakDays: 0, claimedCoins: [] };
 }
 
 function saveState(s: NeuroState) {
