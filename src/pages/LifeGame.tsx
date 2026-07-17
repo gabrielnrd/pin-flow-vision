@@ -515,10 +515,88 @@ export default function NeuroRecoveryPage() {
           </Card>
         </div>
 
+        {/* Vault — 3D Coins */}
+        <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-violet-500/5 overflow-hidden">
+          <CardHeader>
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-amber-500" /> Cofre de Conquistas
+                </CardTitle>
+                <CardDescription>Moedas 3D forjadas a cada marco superado. Passe o mouse para girar mais devagar.</CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-black text-amber-500 leading-none tabular-nums">
+                  {unlockedCoinsCount}<span className="text-muted-foreground/60 text-lg">/{MILESTONE_COINS.length}</span>
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Coletadas</div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {MILESTONE_COINS.map((c) => {
+                const unlocked = days >= c.day;
+                return (
+                  <div key={c.day} className="flex flex-col items-center text-center gap-2 group">
+                    <div className="relative">
+                      <Coin3D tier={c.tier} icon={c.icon} label={c.label} size={92} locked={!unlocked} />
+                      {unlocked && (
+                        <>
+                          <span className="absolute -top-1 -right-1 text-lg animate-[sparkle_1.5s_ease-in-out_infinite]">✨</span>
+                          <span className="absolute -bottom-1 -left-1 text-lg animate-[sparkle_1.5s_ease-in-out_infinite] [animation-delay:0.7s]">✨</span>
+                        </>
+                      )}
+                    </div>
+                    <div>
+                      <p className={cn("text-xs font-bold leading-tight", unlocked ? "text-foreground" : "text-muted-foreground/60")}>
+                        {c.title}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {unlocked ? "✓ Conquistada" : `Dia ${c.day}`}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
         <p className="text-center text-xs text-muted-foreground italic pb-6">
           Aviso: este app é uma ferramenta motivacional. Não substitui acompanhamento profissional. Se precisar de ajuda: CVV 188.
         </p>
       </main>
+
+      {/* Celebration modal — new coin unlocked */}
+      <Dialog open={!!celebrateCoin} onOpenChange={(o) => !o && setCelebrateCoin(null)}>
+        <DialogContent className="sm:max-w-md overflow-hidden">
+          {celebrateCoin && (
+            <>
+              <div className="absolute inset-0 pointer-events-none">
+                {["top-4 left-6", "top-8 right-8", "bottom-12 left-10", "bottom-6 right-6", "top-20 left-1/2"].map((pos, i) => (
+                  <span key={i} className={cn("absolute text-2xl animate-[sparkle_1.5s_ease-in-out_infinite]", pos)} style={{ animationDelay: `${i * 0.2}s` }}>✨</span>
+                ))}
+              </div>
+              <DialogHeader className="text-center items-center relative z-10">
+                <div className="text-xs font-bold uppercase tracking-widest text-amber-500 mb-1">Nova Conquista</div>
+                <DialogTitle className="text-2xl">{celebrateCoin.title}</DialogTitle>
+                <DialogDescription>{celebrateCoin.reward}</DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-center py-4 relative z-10">
+                <div className="animate-[coin-pop_1.2s_cubic-bezier(0.34,1.56,0.64,1)_forwards]">
+                  <Coin3D tier={celebrateCoin.tier} icon={celebrateCoin.icon} label={celebrateCoin.label} size={180} />
+                </div>
+              </div>
+              <DialogFooter className="relative z-10">
+                <Button className="w-full gap-2" onClick={() => setCelebrateCoin(null)}>
+                  <Sparkles className="w-4 h-4" /> Adicionar ao cofre
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
