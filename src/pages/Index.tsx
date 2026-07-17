@@ -25,8 +25,9 @@ import { useState } from "react";
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) {
   return (
     <div className="flex items-center gap-3 mb-5">
-      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-        <Icon className="w-4.5 h-4.5 text-primary" />
+      <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary/25 to-primary/5 flex items-center justify-center ring-1 ring-primary/20 shadow-[0_0_20px_-4px_hsl(var(--primary)/0.5)]">
+        <Icon className="w-4.5 h-4.5 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.7)]" />
+        <span className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10" />
       </div>
       <div>
         <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
@@ -44,7 +45,15 @@ const Index = () => {
   const cancelledBanks = store.banks.filter((b) => b.status === "cancelado");
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10 pb-24 md:pb-6">
+    <div className="relative min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-10 pb-24 md:pb-6 overflow-hidden">
+      {/* Ambient glow orbs */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full bg-primary/20 blur-[120px] opacity-60 animate-pulse [animation-duration:8s]" />
+        <div className="absolute top-1/3 -right-40 w-[560px] h-[560px] rounded-full bg-accent/20 blur-[140px] opacity-50 animate-pulse [animation-duration:11s]" />
+        <div className="absolute bottom-0 left-1/3 w-[480px] h-[480px] rounded-full bg-primary/15 blur-[120px] opacity-40 animate-pulse [animation-duration:14s]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,transparent_0%,hsl(var(--background))_70%)]" />
+      </div>
+
       {/* Header */}
       <DashboardHeader
         totalDebt={store.totalDebt}
