@@ -12,7 +12,7 @@ import { MobileNav } from "@/components/MobileNav";
 import Index from "./pages/Index";
 import GoalsPage from "./pages/Goals";
 import RendaPage from "./pages/Renda";
-import TransportePage from "./pages/Transporte";
+
 import TradePage from "./pages/Trade";
 import DividaPage from "./pages/Divida";
 import CarteiraPage from "./pages/Carteira";
@@ -57,7 +57,7 @@ function AppRoutes() {
         <Route path="/" element={<Index />} />
         <Route path="/objetivos" element={<GoalsPage />} />
         <Route path="/renda" element={<RendaPage />} />
-        <Route path="/transporte" element={<TransportePage />} />
+        
         <Route path="/trade" element={<TradePage />} />
         <Route path="/divida" element={<DividaPage />} />
         <Route path="/carteira" element={<CarteiraPage />} />

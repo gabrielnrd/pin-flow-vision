@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { type CashflowMonth, type Bank } from "@/data/financialData";
 import { TrendingDown, TrendingUp, Target, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -185,16 +185,45 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
     return result;
   }, [cashflowMonths, banks]);
 
+  const incomeColor = isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)";
+  const expenseColor = isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)";
+
   return (
     <section className="mb-8 animate-float-in">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-        <div className="glass-card rounded-2xl p-5">
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-            Entradas × Saídas — Fluxo de Caixa
-          </h3>
-          <div className="h-[240px]">
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden group">
+          {/* Ambient chart glow */}
+          <div aria-hidden className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-60" />
+          <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary/20 blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
+
+          <div className="relative flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Entradas × Saídas — Fluxo de Caixa
+            </h3>
+            <span className="text-[10px] font-medium text-primary/80 px-2 py-0.5 rounded-full bg-primary/10 ring-1 ring-primary/20">
+              {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year}
+            </span>
+          </div>
+          <div key={selectedMonth} className="relative h-[240px] animate-float-in">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+              <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="grad-income" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={incomeColor} stopOpacity={0.45} />
+                    <stop offset="100%" stopColor={incomeColor} stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="grad-expense" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={expenseColor} stopOpacity={0.35} />
+                    <stop offset="100%" stopColor={expenseColor} stopOpacity={0} />
+                  </linearGradient>
+                  <filter id="glow-line" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "hsl(240 5% 90%)" : isMonochrome ? "hsl(0 0% 18% / 0.5)" : "hsl(240 5% 18% / 0.5)"} />
                 <XAxis dataKey="month" tick={{ fill: isLight ? "hsl(240 5% 40%)" : isMonochrome ? "hsl(0 0% 55%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: isLight ? "hsl(240 5% 40%)" : isMonochrome ? "hsl(0 0% 55%)" : "hsl(240 5% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
@@ -209,19 +238,24 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
                     borderRadius: "12px",
                     fontSize: "12px",
                     color: isLight ? "hsl(240 10% 10%)" : isMonochrome ? "hsl(0 0% 95%)" : "hsl(0 0% 95%)",
+                    boxShadow: "0 8px 32px -8px hsl(var(--primary) / 0.25)",
                   }}
                 />
-                <Line type="monotone" dataKey="entradas" stroke={isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)"} strokeWidth={2.5} dot={{ r: 4, fill: isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)" }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} />
-                <Line type="monotone" dataKey="saidas" stroke={isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)"} strokeWidth={2.5} dot={{ r: 4, fill: isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)" }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} />
+                {/* Gradient area fills */}
+                <Area type="monotone" dataKey="entradas" stroke="none" fill="url(#grad-income)" isAnimationActive animationDuration={800} connectNulls={false} />
+                <Area type="monotone" dataKey="saidas" stroke="none" fill="url(#grad-expense)" isAnimationActive animationDuration={800} connectNulls={false} />
+                {/* Glowing lines */}
+                <Line type="monotone" dataKey="entradas" stroke={incomeColor} strokeWidth={2.5} dot={{ r: 4, fill: incomeColor }} activeDot={{ r: 6 }} name="entradas" connectNulls={false} filter="url(#glow-line)" isAnimationActive animationDuration={900} />
+                <Line type="monotone" dataKey="saidas" stroke={expenseColor} strokeWidth={2.5} dot={{ r: 4, fill: expenseColor }} activeDot={{ r: 6 }} name="saidas" connectNulls={false} filter="url(#glow-line)" isAnimationActive animationDuration={900} />
                 {/* Future/dashed lines */}
-                <Line type="monotone" dataKey="future_entradas" stroke={isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)"} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: isMonochrome ? "hsl(0 0% 100%)" : "hsl(145 63% 42%)", strokeDasharray: "" }} name="future_entradas" connectNulls={false} />
-                <Line type="monotone" dataKey="future_saidas" stroke={isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)"} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: isMonochrome ? "hsl(0 0% 60%)" : "hsl(0 72% 51%)", strokeDasharray: "" }} name="future_saidas" connectNulls={false} />
-              </LineChart>
+                <Line type="monotone" dataKey="future_entradas" stroke={incomeColor} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: incomeColor, strokeDasharray: "" }} name="future_entradas" connectNulls={false} isAnimationActive animationDuration={900} />
+                <Line type="monotone" dataKey="future_saidas" stroke={expenseColor} strokeWidth={2} strokeDasharray="6 4" dot={{ r: 3, fill: expenseColor, strokeDasharray: "" }} name="future_saidas" connectNulls={false} isAnimationActive animationDuration={900} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex gap-5 mt-3">
-            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-3 h-3 rounded-sm bg-income inline-block" /> Entradas</span>
-            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-3 h-3 rounded-sm bg-expense inline-block" /> Saídas</span>
+          <div className="relative flex gap-5 mt-3">
+            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-3 h-3 rounded-sm bg-income inline-block shadow-[0_0_8px_hsl(145_63%_42%/0.6)]" /> Entradas</span>
+            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-3 h-3 rounded-sm bg-expense inline-block shadow-[0_0_8px_hsl(0_72%_51%/0.6)]" /> Saídas</span>
             <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-3 h-0.5 border-t-2 border-dashed border-muted-foreground inline-block" /> Projeção</span>
           </div>
         </div>
