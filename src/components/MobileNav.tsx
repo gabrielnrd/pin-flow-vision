@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, Target, TrendingDown, Wallet, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { DollarSign, Car, TrendingUp, Gamepad2, X, Sparkles } from "lucide-react";
+import { DollarSign, TrendingUp, Gamepad2, X, Sparkles } from "lucide-react";
 
 const mainTabs = [
   { to: "/", icon: LayoutDashboard, label: "Home", end: true },
@@ -14,7 +14,6 @@ const mainTabs = [
 const moreTabs = [
   { to: "/desejos", icon: Sparkles, label: "Desejos" },
   { to: "/renda", icon: DollarSign, label: "Renda" },
-  { to: "/transporte", icon: Car, label: "Transporte" },
   { to: "/trade", icon: TrendingUp, label: "Trade" },
   { to: "/lifegame", icon: Gamepad2, label: "LifeGame" },
 ];
