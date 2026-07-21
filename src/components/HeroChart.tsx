@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, defs } from "recharts";
+import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { type CashflowMonth, type Bank } from "@/data/financialData";
 import { TrendingDown, TrendingUp, Target, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
