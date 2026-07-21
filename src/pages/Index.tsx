@@ -65,7 +65,7 @@ const Index = () => {
         cashflowMonths={store.cashflowMonths}
       />
 
-      {/* Hero Chart - Full width */}
+      {/* 1. Hero: KPIs + chart (most important) */}
       <HeroChart
         cashflowMonths={store.cashflowMonths}
         totalDebt={store.totalDebt}
@@ -79,31 +79,44 @@ const Index = () => {
         cardExpensesForMonth={store.cardExpensesForMonth}
       />
 
-      {/* Near hero: Spending distribution + Financial Health */}
-      <section>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <SpendingChart banks={store.banks} />
-          <FinancialHealthScore />
-        </div>
-      </section>
-
-      {/* AI Income Coverage */}
+      {/* 2. AI Income Coverage — will your income cover the next months? */}
       <IncomeCoverageAI />
 
-      {/* Analysis & Visualization */}
+      {/* 3. Alerts & Insights — actionable signals */}
+      <AlertsInsightsPanel />
+
+      {/* 4. Financial Health + Spending distribution */}
       <section>
-        <SectionTitle icon={PieChart} title="Análise & Visualização" subtitle="Score, projeções, comparativos e fluxos" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-          <FinancialHealthDashboard />
-          <BalanceProjectionChart />
-        </div>
-        <div className="space-y-5">
-          <MonthCategoryHeatmap />
-          <CashflowSankey />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <FinancialHealthScore />
+          <SpendingChart banks={store.banks} />
         </div>
       </section>
 
-      {/* Section: Cards */}
+      {/* 5. Cashflow of the selected month (re-animates on change) */}
+      <section key={`cf-${store.selectedMonth}`} className="animate-float-in">
+        <SectionTitle icon={BarChart3} title="Fluxo do Mês" subtitle="Receitas, despesas e cartão do período selecionado" />
+        <CashflowCard
+          cashflow={store.currentCashflow}
+          totalIncome={store.totalIncome}
+          totalExpense={store.totalExpense}
+          cardExpensesForMonth={store.cardExpensesForMonth}
+          expectedBalance={store.expectedBalance}
+          onPrev={store.prevMonth}
+          onNext={store.nextMonth}
+          canPrev={store.selectedMonth > 0}
+          canNext={store.selectedMonth < store.cashflowMonths.length - 1}
+          monthIndex={store.selectedMonth}
+          onTogglePaid={store.toggleCashflowPaid}
+          onAddItem={store.addCashflowItem}
+          onRemoveItem={store.removeCashflowItem}
+          onUpdateItem={store.updateCashflowItem}
+          onSetFixed={store.setCashflowItemFixed}
+          onReplicateFixed={store.replicateFixedItem}
+        />
+      </section>
+
+      {/* 6. Cards */}
       <section>
         <div className="flex items-center justify-between mb-5">
           <SectionTitle icon={CreditCard} title="Cartões de Crédito" subtitle="Saldo usado é calculado automaticamente pelas parcelas" />
@@ -140,30 +153,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Section: Analytics - Cashflow */}
-      <section>
-        <SectionTitle icon={BarChart3} title="Análises & Fluxo" subtitle="Acompanhe suas finanças em detalhe" />
-        <CashflowCard
-          cashflow={store.currentCashflow}
-          totalIncome={store.totalIncome}
-          totalExpense={store.totalExpense}
-          cardExpensesForMonth={store.cardExpensesForMonth}
-          expectedBalance={store.expectedBalance}
-          onPrev={store.prevMonth}
-          onNext={store.nextMonth}
-          canPrev={store.selectedMonth > 0}
-          canNext={store.selectedMonth < store.cashflowMonths.length - 1}
-          monthIndex={store.selectedMonth}
-          onTogglePaid={store.toggleCashflowPaid}
-          onAddItem={store.addCashflowItem}
-          onRemoveItem={store.removeCashflowItem}
-          onUpdateItem={store.updateCashflowItem}
-          onSetFixed={store.setCashflowItemFixed}
-          onReplicateFixed={store.replicateFixedItem}
-        />
-      </section>
-
-      {/* Section: Timeline + Calendar - 2 column */}
+      {/* 7. Timeline + Calendar */}
       <section>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5">
           <InstallmentTimeline
@@ -179,10 +169,23 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Annual Subscriptions & Services - after timeline */}
+      {/* 8. Deeper analytics */}
+      <section>
+        <SectionTitle icon={PieChart} title="Análise & Visualização" subtitle="Score, projeções, comparativos e fluxos" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          <FinancialHealthDashboard />
+          <BalanceProjectionChart />
+        </div>
+        <div className="space-y-5">
+          <MonthCategoryHeatmap />
+          <CashflowSankey />
+        </div>
+      </section>
+
+      {/* 9. Annual subscriptions */}
       <AnnualSubscriptionsCard />
 
-      {/* Section: Creditors */}
+      {/* 10. Creditors */}
       <section>
         <SectionTitle icon={Users} title="Credores" subtitle="Dívidas pessoais" />
         <CreditorWidget
@@ -195,11 +198,8 @@ const Index = () => {
         />
       </section>
 
-      {/* Budget Scenarios - end of dashboard */}
+      {/* 11. Budget scenarios (planning at the end) */}
       <BudgetScenarios />
-
-      {/* Alerts & Insights */}
-      <AlertsInsightsPanel />
 
 
 
