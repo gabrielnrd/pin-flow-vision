@@ -2,7 +2,7 @@ import * as XLSX from "xlsx";
 import { Download } from "lucide-react";
 import { useFinanceStore } from "@/stores/financeStore";
 import { toast } from "@/hooks/use-toast";
-import { EXPENSE_CATEGORIES, getCategory } from "@/data/categories";
+import { EXPENSE_CATEGORIES } from "@/data/categories";
 
 const BRL = 'R$ #,##0.00;[Red]-R$ #,##0.00;"-"';
 const INT = "#,##0";
