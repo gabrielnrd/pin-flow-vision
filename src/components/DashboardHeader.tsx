@@ -63,6 +63,7 @@ export function DashboardHeader({
               </button>
             ))}
           </div>
+          <ExportXlsxButton compact />
         </div>
       </div>
     </header>
