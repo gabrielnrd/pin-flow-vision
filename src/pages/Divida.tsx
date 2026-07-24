@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TrendingDown, TrendingUp, Percent, CalendarDays, AlertTriangle,
-  Clock, CheckCircle2, Calculator, Zap, Target, History, Bell, Flame, Snowflake,
+  Clock, CheckCircle2, Calculator, Zap, Target, History, Bell, Flame, Snowflake, Timer, Briefcase,
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { ExportXlsxButton } from "@/components/ExportXlsxButton";
 
 /* ───── Helpers ───── */
 
