@@ -497,10 +497,17 @@ export default function DividaPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-8 pb-24 md:pb-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Dívida</h1>
-        <p className="text-sm text-muted-foreground">Acompanhe a evolução e abatimento da sua dívida total</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Dívida</h1>
+          <p className="text-sm text-muted-foreground">Acompanhe a evolução e abatimento da sua dívida total</p>
+        </div>
+        <ExportXlsxButton />
       </div>
+
+      {/* Payoff Time (48h/semana) */}
+      <PayoffTimeCard totalRemaining={totalRemaining} cashflowMonths={store.cashflowMonths} />
+
 
       {/* 4 Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
