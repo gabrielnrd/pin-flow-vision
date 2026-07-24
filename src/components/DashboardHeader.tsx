@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Filter, Sun, Moon, Sunrise, Sunset } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
+import { ExportXlsxButton } from "@/components/ExportXlsxButton";
 
 interface DashboardHeaderProps {
   totalDebt: number;
@@ -62,6 +63,7 @@ export function DashboardHeader({
               </button>
             ))}
           </div>
+          <ExportXlsxButton compact />
         </div>
       </div>
     </header>

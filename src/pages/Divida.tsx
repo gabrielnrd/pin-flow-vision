@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TrendingDown, TrendingUp, Percent, CalendarDays, AlertTriangle,
-  Clock, CheckCircle2, Calculator, Zap, Target, History, Bell, Flame, Snowflake,
+  Clock, CheckCircle2, Calculator, Zap, Target, History, Bell, Flame, Snowflake, Timer, Briefcase,
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { ExportXlsxButton } from "@/components/ExportXlsxButton";
 
 /* ───── Helpers ───── */
 
@@ -414,7 +415,108 @@ function DueDateAlerts({ creditors }: { creditors: ReturnType<typeof useFinanceS
   );
 }
 
+/* ───── Payoff Time (48h/semana) ───── */
+
+function PayoffTimeCard({
+  totalRemaining,
+  cashflowMonths,
+}: {
+  totalRemaining: number;
+  cashflowMonths: ReturnType<typeof useFinanceStore>["cashflowMonths"];
+}) {
+  const HOURS_PER_WEEK = 48;
+  const HOURS_PER_MONTH = HOURS_PER_WEEK * (52 / 12); // ≈ 208
+
+  const { avgIncome, hourlyRate, workHours, calendarDays, workDays, weeks } = useMemo(() => {
+    const totals = cashflowMonths.map((m) => m.incomes.reduce((s, i) => s + i.amount, 0));
+    const positive = totals.filter((t) => t > 0);
+    const avg = positive.length > 0 ? positive.reduce((s, t) => s + t, 0) / positive.length : 0;
+    const rate = avg / HOURS_PER_MONTH;
+    const hours = rate > 0 ? totalRemaining / rate : 0;
+    const wks = hours / HOURS_PER_WEEK;
+    const cal = wks * 7;
+    const wDays = hours / 8; // 8h/dia útil
+    return { avgIncome: avg, hourlyRate: rate, workHours: hours, calendarDays: cal, workDays: wDays, weeks: wks };
+  }, [cashflowMonths, totalRemaining]);
+
+  const totalHoursCeil = Math.ceil(workHours);
+  const days = Math.floor(calendarDays);
+  const hoursRemainder = Math.max(0, Math.ceil((calendarDays - days) * 24));
+
+  if (totalRemaining <= 0) {
+    return (
+      <Card className="border-chart-2/30 bg-card/80 backdrop-blur-sm">
+        <CardContent className="p-5 text-center">
+          <p className="text-sm text-chart-2 font-semibold">🎉 Sem dívida pendente — nada a quitar!</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (avgIncome <= 0) {
+    return (
+      <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+        <CardContent className="p-5">
+          <p className="text-sm text-muted-foreground">Cadastre suas receitas para calcular o tempo de trabalho até a quitação.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-card/90 to-primary/5 backdrop-blur-sm overflow-hidden relative">
+      <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/10 blur-3xl" />
+      <CardHeader className="pb-3 relative">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Timer className="w-4.5 h-4.5 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-lg font-bold tracking-tight">Tempo até a Quitação</CardTitle>
+            <p className="text-xs text-muted-foreground">Baseado em escala de 48h/semana e sua renda média mensal</p>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="relative space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Dias corridos</p>
+            <p className="text-2xl font-bold text-primary text-money">{days}</p>
+            <p className="text-[11px] text-muted-foreground">e {hoursRemainder}h</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Horas de trabalho</p>
+            <p className="text-2xl font-bold text-foreground text-money">{totalHoursCeil.toLocaleString("pt-BR")}h</p>
+            <p className="text-[11px] text-muted-foreground">a 48h/semana</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Semanas</p>
+            <p className="text-2xl font-bold text-foreground text-money">{Math.ceil(weeks)}</p>
+            <p className="text-[11px] text-muted-foreground">≈ {Math.ceil(workDays)} dias úteis (8h)</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Valor/hora</p>
+            <p className="text-2xl font-bold text-chart-2 text-money">R$ {hourlyRate.toFixed(2)}</p>
+            <p className="text-[11px] text-muted-foreground">Renda média: R$ {Math.round(avgIncome).toLocaleString("pt-BR")}</p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+          <Briefcase className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Para quitar <span className="text-foreground font-semibold text-money">R$ {totalRemaining.toLocaleString("pt-BR")}</span>,
+            você precisa trabalhar <span className="text-primary font-bold">{totalHoursCeil.toLocaleString("pt-BR")} horas</span>
+            {" "}(≈ <span className="text-foreground font-semibold">{days} dias e {hoursRemainder} horas</span> corridos),
+            considerando 48h semanais e sua renda média histórica.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 /* ───── Page ───── */
+
 
 export default function DividaPage() {
   const store = useFinanceStore();
@@ -496,10 +598,17 @@ export default function DividaPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto space-y-8 pb-24 md:pb-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Dívida</h1>
-        <p className="text-sm text-muted-foreground">Acompanhe a evolução e abatimento da sua dívida total</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Dívida</h1>
+          <p className="text-sm text-muted-foreground">Acompanhe a evolução e abatimento da sua dívida total</p>
+        </div>
+        <ExportXlsxButton />
       </div>
+
+      {/* Payoff Time (48h/semana) */}
+      <PayoffTimeCard totalRemaining={totalRemaining} cashflowMonths={store.cashflowMonths} />
+
 
       {/* 4 Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
