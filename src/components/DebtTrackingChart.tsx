@@ -33,23 +33,32 @@ const SHORT_MONTH = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Se
 export function DebtTrackingChart() {
   const store = useFinanceStore();
 
+  const INITIAL_DEBT_FIXED = 30000;
+
   const { chartData, initialDebt } = useMemo(() => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
-    // Original total contracted debt from all installments (banks) — paid or not
-    const initialBankDebt = store.banks.reduce((sum, b) => {
-      return sum + b.installments.reduce(
-        (s, inst) => s + inst.installmentAmount * inst.totalInstallments,
-        0,
-      );
-    }, 0);
-    const creditorsTotal = store.totalCreditorsDebt;
-    const totalInitial = initialBankDebt + creditorsTotal;
+    const totalInitial = INITIAL_DEBT_FIXED;
+    const currentTotalDebt = store.totalDebt;
+    // Total amount already amortized to reach current debt from the fixed initial baseline
+    const alreadyAmortized = Math.max(totalInitial - currentTotalDebt, 0);
 
-    // Creditor payments (not month-tagged) attributed to current month bucket
-    const creditorsPaidLump = store.totalCreditorsPaid;
+    // Future projected abatement per month (from scheduled installments)
+    const futureAbatementByMonth = new Map<string, number>();
+    store.banks.forEach((b) => {
+      b.installments.forEach((inst) => {
+        const d = new Date(inst.dueDate + "T00:00:00");
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        const dIsFuture =
+          d.getFullYear() > currentYear ||
+          (d.getFullYear() === currentYear && d.getMonth() > currentMonth);
+        if (dIsFuture && inst.status !== "pago") {
+          futureAbatementByMonth.set(key, (futureAbatementByMonth.get(key) ?? 0) + inst.installmentAmount);
+        }
+      });
+    });
 
     let cumulativePaid = 0;
 
@@ -59,33 +68,23 @@ export function DebtTrackingChart() {
       const isPast = m.year < currentYear || (m.year === currentYear && mIdx < currentMonth);
       const isFuture = !isPast && !isCurrent;
 
-      // Bank abatement in this month
-      let bankAbatement = 0;
-      store.banks.forEach((b) => {
-        b.installments.forEach((inst) => {
-          const d = new Date(inst.dueDate + "T00:00:00");
-          if (d.getMonth() !== mIdx || d.getFullYear() !== m.year) return;
-          if (isFuture) {
-            // Projected: assume it will be paid
-            bankAbatement += inst.installmentAmount;
-          } else if (inst.status === "pago") {
-            bankAbatement += inst.installmentAmount;
-          }
-        });
-      });
+      let abatimento = 0;
+      if (isCurrent) {
+        // Attribute the entire historical amortization to the current month bucket
+        abatimento = alreadyAmortized - cumulativePaid;
+      } else if (isFuture) {
+        abatimento = futureAbatementByMonth.get(`${m.year}-${mIdx}`) ?? 0;
+      }
 
-      // Attribute all creditor payments to the current month (single lump)
-      const creditorAbatement = isCurrent ? creditorsPaidLump : 0;
-
-      const abatimento = bankAbatement + creditorAbatement;
       cumulativePaid += abatimento;
+      // Cap so cumulative never exceeds initial
+      if (cumulativePaid > totalInitial) cumulativePaid = totalInitial;
 
-      const progresso = cumulativePaid;
       const remaining = Math.max(totalInitial - cumulativePaid, 0);
 
       return {
         name: SHORT_MONTH[mIdx] ?? m.month.slice(0, 3),
-        progresso,
+        progresso: cumulativePaid,
         abatimento,
         remaining,
         isPast: isPast || isCurrent,
@@ -93,7 +92,7 @@ export function DebtTrackingChart() {
     });
 
     return { chartData: data, initialDebt: totalInitial };
-  }, [store.cashflowMonths, store.banks, store.totalCreditorsDebt, store.totalCreditorsPaid]);
+  }, [store.cashflowMonths, store.banks, store.totalDebt]);
 
   const currentDebt = store.totalDebt;
   const totalPaid = chartData.length > 0 ? chartData[chartData.length - 1].progresso : 0;
