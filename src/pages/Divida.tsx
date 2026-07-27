@@ -521,14 +521,12 @@ function PayoffTimeCard({
 export default function DividaPage() {
   const store = useFinanceStore();
 
-  // Original total contracted debt (banks: all installments; creditors: totalDebt)
-  const initialBankDebt = useMemo(
-    () => store.banks.reduce((s, b) => s + b.installments.reduce((x, i) => x + i.installmentAmount * i.totalInstallments, 0), 0),
-    [store.banks],
-  );
-  const initialTotalDebt = initialBankDebt + store.totalCreditorsDebt;
+  // Fixed initial debt baseline (user-defined). Current totalDebt is trusted;
+  // amortization is derived so that remaining === store.totalDebt.
+  const INITIAL_DEBT_FIXED = 30000;
+  const initialTotalDebt = INITIAL_DEBT_FIXED;
 
-  // Real debt paid so far: paid installments + creditor amortization
+  // Real debt paid so far: paid installments + creditor amortization (used for pace metrics only)
   const paidInstallmentsTotal = useMemo(
     () => store.banks.reduce(
       (s, b) => s + b.installments.filter(i => i.status === "pago").reduce((x, i) => x + i.installmentAmount, 0),
@@ -536,8 +534,8 @@ export default function DividaPage() {
     ),
     [store.banks],
   );
-  const totalAbatido = paidInstallmentsTotal + store.totalCreditorsPaid;
-  const totalRemaining = Math.max(initialTotalDebt - totalAbatido, 0);
+  const totalRemaining = store.totalDebt;
+  const totalAbatido = Math.max(initialTotalDebt - totalRemaining, 0);
   const pctQuitado = initialTotalDebt > 0 ? Math.round((totalAbatido / initialTotalDebt) * 100) : 0;
 
   // Average monthly abatement based on months with actual paid installments
