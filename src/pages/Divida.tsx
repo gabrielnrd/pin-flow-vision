@@ -515,6 +515,178 @@ function PayoffTimeCard({
   );
 }
 
+/* ───── Ideal Income Suggestion ───── */
+
+function IdealIncomeCard({
+  banks,
+  cashflowMonths,
+  totalRemaining,
+  currentIncome,
+}: {
+  banks: ReturnType<typeof useFinanceStore>["banks"];
+  cashflowMonths: ReturnType<typeof useFinanceStore>["cashflowMonths"];
+  totalRemaining: number;
+  currentIncome: number;
+}) {
+  const MONTH_MAP: Record<string, number> = {
+    Janeiro: 0, Fevereiro: 1, Março: 2, Abril: 3, Maio: 4, Junho: 5,
+    Julho: 6, Agosto: 7, Setembro: 8, Outubro: 9, Novembro: 10, Dezembro: 11,
+  };
+
+  const {
+    avgMonthlyCost,
+    creditorAllocation,
+    idealIncome,
+    gap,
+    status,
+    statusLabel,
+    statusColor,
+    StatusIcon,
+  } = useMemo(() => {
+    const monthsWithCost = cashflowMonths.map((m) => {
+      const manual = m.expenses.reduce((s, e) => s + e.amount, 0);
+      const monthIdx = MONTH_MAP[m.month];
+      const cardTotal = banks.reduce((sum, bank) => {
+        if (bank.status === "cancelado") return sum;
+        return (
+          sum +
+          bank.installments
+            .filter((inst) => {
+              const d = new Date(inst.dueDate + "T00:00:00");
+              return d.getMonth() === monthIdx && d.getFullYear() === m.year;
+            })
+            .reduce((s, inst) => s + inst.installmentAmount, 0)
+        );
+      }, 0);
+      return manual + cardTotal;
+    });
+
+    const avgCost =
+      monthsWithCost.length > 0
+        ? monthsWithCost.reduce((s, c) => s + c, 0) / monthsWithCost.length
+        : 0;
+
+    // Suggest allocating enough to clear remaining debt in 24 months (conservative baseline)
+    const allocation = totalRemaining > 0 ? totalRemaining / 24 : 0;
+    const base = avgCost + allocation;
+    const ideal = base * 1.2; // 20% safety margin
+
+    const gapValue = ideal - currentIncome;
+    let st: "ok" | "warn" | "danger";
+    if (currentIncome >= ideal) st = "ok";
+    else if (currentIncome >= ideal * 0.85) st = "warn";
+    else st = "danger";
+
+    const config = {
+      ok: {
+        label: "Renda cobre com folga",
+        color: "text-chart-2",
+        bg: "bg-chart-2/10",
+        border: "border-chart-2/30",
+        bar: "bg-chart-2",
+        Icon: CheckCircle2,
+      },
+      warn: {
+        label: "Renda cobre, mas sem margem",
+        color: "text-yellow-500",
+        bg: "bg-yellow-500/10",
+        border: "border-yellow-500/30",
+        bar: "bg-yellow-500",
+        Icon: AlertTriangle,
+      },
+      danger: {
+        label: "Renda abaixo do ideal",
+        color: "text-destructive",
+        bg: "bg-destructive/10",
+        border: "border-destructive/30",
+        bar: "bg-destructive",
+        Icon: TrendingDown,
+      },
+    }[st];
+
+    return {
+      avgMonthlyCost: avgCost,
+      creditorAllocation: allocation,
+      idealIncome: ideal,
+      gap: gapValue,
+      status: st,
+      statusLabel: config.label,
+      statusColor: config.color,
+      StatusIcon: config.Icon,
+    };
+  }, [banks, cashflowMonths, totalRemaining, currentIncome]);
+
+  const coverageRatio = idealIncome > 0 ? (currentIncome / idealIncome) * 100 : 100;
+
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-card/90 to-primary/5 backdrop-blur-sm overflow-hidden relative">
+      <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-chart-2/10 blur-3xl" />
+      <CardHeader className="pb-3 relative">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Wallet className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-bold tracking-tight">Renda Ideal Sugerida</CardTitle>
+              <p className="text-xs text-muted-foreground">Quanto sua renda deveria ser para cobrir custos com folga</p>
+            </div>
+          </div>
+          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${status === "ok" ? "bg-chart-2/10 text-chart-2" : status === "warn" ? "bg-yellow-500/10 text-yellow-500" : "bg-destructive/10 text-destructive"}`}>
+            <StatusIcon className="w-3.5 h-3.5" />
+            {statusLabel}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="relative space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Renda ideal</p>
+            <p className="text-2xl font-bold text-primary text-money">R$ {Math.round(idealIncome).toLocaleString("pt-BR")}</p>
+            <p className="text-[11px] text-muted-foreground">com 20% de margem</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Renda atual</p>
+            <p className="text-2xl font-bold text-foreground text-money">R$ {Math.round(currentIncome).toLocaleString("pt-BR")}</p>
+            <p className="text-[11px] text-muted-foreground">mês selecionado</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Gap</p>
+            <p className={`text-2xl font-bold text-money ${gap > 0 ? "text-destructive" : "text-chart-2"}`}>
+              {gap > 0 ? "+" : ""}R$ {Math.round(Math.abs(gap)).toLocaleString("pt-BR")}
+            </p>
+            <p className="text-[11px] text-muted-foreground">{gap > 0 ? "faltam" : "sobram"} por mês</p>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Cobertura atual</span>
+            <span className="font-semibold text-foreground">{coverageRatio.toFixed(0)}% da renda ideal</span>
+          </div>
+          <div className="relative h-2.5 rounded-full bg-secondary overflow-hidden">
+            <div
+              className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 ${status === "ok" ? "bg-chart-2" : status === "warn" ? "bg-yellow-500" : "bg-destructive"}`}
+              style={{ width: `${Math.min(coverageRatio, 100)}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+          <Calculator className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Consideramos seus custos médios mensais de{" "}
+            <span className="text-foreground font-semibold text-money">R$ {Math.round(avgMonthlyCost).toLocaleString("pt-BR")}</span>
+            {" "}mais uma alocação de{" "}
+            <span className="text-foreground font-semibold text-money">R$ {Math.round(creditorAllocation).toLocaleString("pt-BR")}</span>
+            /mês para quitar dívidas em 24 meses, com 20% de reserva.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 /* ───── Page ───── */
 
 
