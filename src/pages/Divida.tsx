@@ -779,6 +779,13 @@ export default function DividaPage() {
       {/* Payoff Time (48h/semana) */}
       <PayoffTimeCard totalRemaining={totalRemaining} cashflowMonths={store.cashflowMonths} />
 
+      {/* Ideal income suggestion */}
+      <IdealIncomeCard
+        banks={store.banks}
+        cashflowMonths={store.cashflowMonths}
+        totalRemaining={totalRemaining}
+        currentIncome={store.totalIncome}
+      />
 
       {/* 4 Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
