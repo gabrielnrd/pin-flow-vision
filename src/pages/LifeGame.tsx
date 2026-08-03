@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Brain, Zap, Shield, Flame, Sparkles, Trophy, RotateCcw, Calendar, Skull, Award, Building2, Cpu, Heart, BookOpen, Factory, TreePine, Info, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Coin3D, type CoinTier } from "@/components/Coin3D";
+import { HabitsWheel } from "@/components/HabitsWheel";
 
 // ============ DATA ============
 
