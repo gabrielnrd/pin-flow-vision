@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Brain, Zap, Shield, Flame, Sparkles, Trophy, RotateCcw, Calendar, Skull, Award, Building2, Cpu, Heart, BookOpen, Factory, TreePine, Info, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Coin3D, type CoinTier } from "@/components/Coin3D";
+import { HabitsWheel } from "@/components/HabitsWheel";
 
 // ============ DATA ============
 
@@ -515,7 +516,11 @@ export default function NeuroRecoveryPage() {
           </Card>
         </div>
 
+        {/* Wheel of Habits */}
+        <HabitsWheel />
+
         {/* Vault — 3D Coins */}
+
         <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-violet-500/5 overflow-hidden">
           <CardHeader>
             <div className="flex items-start justify-between gap-3 flex-wrap">
