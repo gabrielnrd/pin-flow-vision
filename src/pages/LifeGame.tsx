@@ -516,7 +516,11 @@ export default function NeuroRecoveryPage() {
           </Card>
         </div>
 
+        {/* Wheel of Habits */}
+        <HabitsWheel />
+
         {/* Vault — 3D Coins */}
+
         <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-violet-500/5 overflow-hidden">
           <CardHeader>
             <div className="flex items-start justify-between gap-3 flex-wrap">
