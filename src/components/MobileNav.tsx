@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Target, TrendingDown, Wallet, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Target, TrendingDown, Wallet, MoreHorizontal, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DollarSign, TrendingUp, Gamepad2, X, Sparkles } from "lucide-react";
@@ -16,6 +16,7 @@ const moreTabs = [
   { to: "/renda", icon: DollarSign, label: "Renda" },
   { to: "/trade", icon: TrendingUp, label: "Trade" },
   { to: "/lifegame", icon: Gamepad2, label: "LifeGame" },
+  { to: "/habitos", icon: Brain, label: "Hábitos" },
 ];
 
 export function MobileNav() {
