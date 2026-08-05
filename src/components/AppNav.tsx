@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Sun, Moon, Contrast, TrendingUp, TrendingDown, Gamepad2, Wallet, Sparkles, Brain } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Sun, Moon, Contrast, TrendingUp, TrendingDown, Gamepad2, Wallet, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -37,9 +37,6 @@ export function AppNav() {
         </NavLink>
         <NavLink to="/lifegame" className={({ isActive }) => cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
           <Gamepad2 className="w-4 h-4" /> LifeGame
-        </NavLink>
-        <NavLink to="/habitos" className={({ isActive }) => cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
-          <Brain className="w-4 h-4" /> Hábitos
         </NavLink>
         <NavLink to="/desejos" className={({ isActive }) => cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary")}>
           <Sparkles className="w-4 h-4" /> Desejos

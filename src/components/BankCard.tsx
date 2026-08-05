@@ -4,6 +4,7 @@ import { CreditCard, AlertTriangle, Pencil, Check, X, Wifi } from "lucide-react"
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { getCardColor } from "@/data/cardColors";
 
 interface BankCardProps {
   bank: Bank;
@@ -26,33 +27,6 @@ const statusStyles = {
   cancelado: "bg-muted/40 text-muted-foreground border-muted-foreground/30",
 };
 
-const bankGradients: Record<string, string> = {
-  "bank-nubank": "from-[hsl(280,97%,38%)] to-[hsl(300,80%,25%)]",
-  "bank-inter": "from-[hsl(27,100%,50%)] to-[hsl(15,90%,40%)]",
-  "bank-c6": "from-[hsl(220,10%,20%)] to-[hsl(220,15%,12%)]",
-  "bank-itau": "from-[#F88104] to-[hsl(25,90%,35%)]",
-  "bank-bb": "from-[hsl(45,100%,45%)] to-[hsl(45,80%,30%)]",
-  "bank-other": "from-[hsl(190,65%,31%)] to-[hsl(190,70%,22%)]",
-};
-
-const bankTextColor: Record<string, string> = {
-  "bank-nubank": "text-white",
-  "bank-inter": "text-white",
-  "bank-c6": "text-gray-300",
-  "bank-itau": "text-white",
-  "bank-bb": "text-gray-900",
-  "bank-other": "text-white",
-};
-
-const bankProgressColor: Record<string, string> = {
-  "bank-nubank": "[&>div]:bg-white/80",
-  "bank-inter": "[&>div]:bg-white/80",
-  "bank-c6": "[&>div]:bg-white/60",
-  "bank-itau": "[&>div]:bg-white/80",
-  "bank-bb": "[&>div]:bg-gray-900/60",
-  "bank-other": "[&>div]:bg-white/80",
-};
-
 const statusOptions: Bank["status"][] = ["pendente", "pago", "parcial", "cancelado"];
 
 export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) {
@@ -65,9 +39,10 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
 
-  const gradient = bankGradients[bank.color] || "from-primary to-accent";
-  const textColor = bankTextColor[bank.color] || "text-white";
-  const progressColor = bankProgressColor[bank.color] || "[&>div]:bg-white/80";
+  const cardColor = getCardColor(bank.color);
+  const gradient = cardColor.gradient;
+  const textColor = cardColor.text;
+  const progressColor = cardColor.progress;
 
   const cycleStatus = (e: React.MouseEvent) => {
     e.stopPropagation();

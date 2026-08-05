@@ -14,7 +14,6 @@ import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
-import { AlertsInsightsPanel } from "@/components/AlertsInsightsPanel";
 import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard";
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
@@ -81,9 +80,6 @@ const Index = () => {
 
       {/* 2. AI Income Coverage — will your income cover the next months? */}
       <IncomeCoverageAI />
-
-      {/* 3. Alerts & Insights — actionable signals */}
-      <AlertsInsightsPanel />
 
       {/* 4. Financial Health + Spending distribution */}
       <section>
