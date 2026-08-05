@@ -9,22 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const BANK_PRESETS = [
-  { label: "Nubank", color: "bank-nubank", glow: "glow-nubank" },
-  { label: "Inter", color: "bank-inter", glow: "glow-inter" },
-  { label: "C6 Bank", color: "bank-c6", glow: "glow-c6" },
-  { label: "Itaú", color: "bank-itau", glow: "glow-itau" },
-  { label: "Banco do Brasil", color: "bank-bb", glow: "glow-bb" },
-  { label: "Outro", color: "bank-other", glow: "glow-other" },
-];
+import { CardColorPicker } from "@/components/CardColorPicker";
+import { CARD_COLORS, getCardColor } from "@/data/cardColors";
 
 interface AddBankCardProps {
   onAdd: (name: string, limitTotal: number, color: string, glowClass: string) => void;
@@ -34,16 +20,16 @@ export function AddBankCard({ onAdd }: AddBankCardProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [limit, setLimit] = useState("");
-  const [preset, setPreset] = useState("0");
+  const [colorId, setColorId] = useState(CARD_COLORS[0].id);
 
   const handleAdd = () => {
     const limitVal = parseFloat(limit);
     if (!name.trim() || isNaN(limitVal) || limitVal <= 0) return;
-    const p = BANK_PRESETS[parseInt(preset)];
-    onAdd(name.trim(), limitVal, p.color, p.glow);
+    const c = getCardColor(colorId);
+    onAdd(name.trim(), limitVal, c.id, c.glow);
     setName("");
     setLimit("");
-    setPreset("0");
+    setColorId(CARD_COLORS[0].id);
     setOpen(false);
   };
 
@@ -63,19 +49,7 @@ export function AddBankCard({ onAdd }: AddBankCardProps) {
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Banco / Bandeira</label>
-            <Select value={preset} onValueChange={setPreset}>
-              <SelectTrigger className="bg-secondary border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BANK_PRESETS.map((p, i) => (
-                  <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CardColorPicker value={colorId} onChange={(id) => setColorId(id)} label="Cor / bandeira do cartão" />
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Nome do cartão</label>
             <Input

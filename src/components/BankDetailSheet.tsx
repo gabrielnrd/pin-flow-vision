@@ -6,15 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { type Bank, type Installment, type BankId } from "@/data/financialData";
-
-const BANK_CATEGORIES = [
-  { label: "Nubank", color: "bank-nubank", glow: "glow-nubank" },
-  { label: "Inter", color: "bank-inter", glow: "glow-inter" },
-  { label: "C6 Bank", color: "bank-c6", glow: "glow-c6" },
-  { label: "Itaú", color: "bank-itau", glow: "glow-itau" },
-  { label: "Banco do Brasil", color: "bank-bb", glow: "glow-bb" },
-  { label: "Outro", color: "bank-other", glow: "glow-other" },
-];
+import { CardColorPicker } from "@/components/CardColorPicker";
+import { getCardColor } from "@/data/cardColors";
 
 interface BankDetailSheetProps {
   bank: Bank | null;
@@ -198,7 +191,6 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
 
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
-  const currentCategory = BANK_CATEGORIES.find((c) => c.color === bank.color) || BANK_CATEGORIES[BANK_CATEGORIES.length - 1];
 
   const handleDuplicate = (inst: Installment) => {
     onAddInstallment(bank.id, {
@@ -212,11 +204,8 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
     });
   };
 
-  const handleCategoryChange = (colorValue: string) => {
-    const cat = BANK_CATEGORIES.find((c) => c.color === colorValue);
-    if (cat && onUpdateBank) {
-      onUpdateBank(bank.id, { color: cat.color, glowClass: cat.glow });
-    }
+  const handleColorChange = (colorId: string, glow: string) => {
+    if (onUpdateBank) onUpdateBank(bank.id, { color: colorId, glowClass: glow });
   };
 
   const handleDeleteBank = () => {
@@ -244,17 +233,7 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
         {/* Category selector */}
         {onUpdateBank && (
           <div className="mb-4">
-            <label className="text-xs text-muted-foreground mb-1 block">Categoria do cartão</label>
-            <Select value={bank.color} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="bg-secondary border-border h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BANK_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.color} value={cat.color}>{cat.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CardColorPicker value={bank.color} onChange={handleColorChange} />
           </div>
         )}
 
