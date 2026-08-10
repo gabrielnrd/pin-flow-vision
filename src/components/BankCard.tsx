@@ -69,7 +69,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
         }} />
 
         {/* Top: name + status */}
-        <div className="relative z-10 flex items-start justify-between">
+        <div className="relative z-10 flex items-start justify-between shrink-0">
           <div className="flex-1">
             {editingName ? (
               <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
@@ -91,7 +91,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
                 className="flex items-center gap-1.5 group/name"
                 onClick={(e) => { if (onUpdateBank) { e.stopPropagation(); setEditName(bank.name); setEditingName(true); } }}
               >
-                <h3 className="font-bold text-base tracking-wide">{bank.name}</h3>
+                <h3 className="font-bold text-base tracking-wide truncate max-w-[8.5rem]">{bank.name}</h3>
                 {onUpdateBank && <Pencil className="w-3 h-3 opacity-0 group-hover/name:opacity-60 transition-opacity" />}
               </div>
             )}
@@ -116,7 +116,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
         </div>
 
         {/* Bottom: Financial info */}
-        <div className="relative z-10 space-y-1.5">
+        <div className="relative z-10 space-y-1.5 shrink-0 mt-auto">
           {/* Progress bar */}
           <div>
             <div className="flex justify-between text-[10px] opacity-70 mb-1">
