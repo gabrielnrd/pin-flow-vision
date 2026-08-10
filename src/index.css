@@ -5,37 +5,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @layer base {
-  /* Dark theme (default) */
+  /* Ink dark (alternate) */
   :root {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 95%;
+    --background: 30 6% 7%;
+    --foreground: 43 20% 94%;
 
-    --card: 240 6% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 30 5% 10%;
+    --card-foreground: 43 20% 94%;
 
-    --popover: 240 6% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 30 5% 10%;
+    --popover-foreground: 43 20% 94%;
 
-    --primary: 265 80% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 43 22% 92%;
+    --primary-foreground: 30 6% 8%;
 
-    --secondary: 240 5% 16%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 30 5% 15%;
+    --secondary-foreground: 43 12% 82%;
 
-    --muted: 240 5% 16%;
-    --muted-foreground: 240 5% 55%;
+    --muted: 30 5% 15%;
+    --muted-foreground: 35 6% 58%;
 
-    --accent: 265 60% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 20 40% 52%;
+    --accent-foreground: 30 6% 8%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 8 62% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 5% 18%;
-    --input: 240 5% 18%;
-    --ring: 265 80% 50%;
+    --border: 30 5% 18%;
+    --input: 30 5% 18%;
+    --ring: 43 22% 92%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
 
     /* Bank brand colors */
     --bank-nubank: 280 97% 38%;
@@ -46,72 +46,74 @@
     --bank-other: 190 65% 31%;
 
     /* Semantic */
-    --income: 145 63% 42%;
-    --expense: 0 72% 51%;
+    --income: 155 38% 48%;
+    --expense: 8 62% 55%;
 
     /* Glass */
-    --glass-bg: 240 6% 10% / 0.6;
-    --glass-border: 240 5% 25% / 0.4;
-    --glass-blur: 20px;
+    --glass-bg: 30 5% 10% / 0.7;
+    --glass-border: 30 5% 24% / 0.5;
+    --glass-blur: 14px;
 
     /* Glow */
-    --glow-primary: 265 80% 50%;
+    --glow-primary: 43 22% 92%;
 
-    --sidebar-background: 240 10% 6%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 265 80% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 16%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 240 5% 18%;
-    --sidebar-ring: 265 80% 50%;
+    --sidebar-background: 30 6% 6%;
+    --sidebar-foreground: 43 20% 94%;
+    --sidebar-primary: 43 22% 92%;
+    --sidebar-primary-foreground: 30 6% 8%;
+    --sidebar-accent: 30 5% 15%;
+    --sidebar-accent-foreground: 43 20% 94%;
+    --sidebar-border: 30 5% 18%;
+    --sidebar-ring: 43 22% 92%;
   }
 
-  /* Light theme */
+  /* Paper & Ink (default) */
   .light {
-    --background: 0 0% 97%;
-    --foreground: 240 10% 10%;
+    --background: 43 24% 95%;
+    --foreground: 0 0% 8%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card: 42 40% 98%;
+    --card-foreground: 0 0% 8%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover: 42 40% 98%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 265 80% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 43 30% 96%;
 
-    --secondary: 240 5% 92%;
-    --secondary-foreground: 240 5% 30%;
+    --secondary: 40 18% 90%;
+    --secondary-foreground: 0 0% 22%;
 
-    --muted: 240 5% 92%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 40 18% 90%;
+    --muted-foreground: 32 7% 44%;
 
-    --accent: 265 60% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 20 42% 40%;
+    --accent-foreground: 43 30% 96%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 8 62% 42%;
+    --destructive-foreground: 43 30% 96%;
 
-    --border: 240 5% 87%;
-    --input: 240 5% 87%;
-    --ring: 265 80% 50%;
+    --border: 38 14% 84%;
+    --input: 38 14% 84%;
+    --ring: 0 0% 9%;
 
-    --income: 145 63% 35%;
-    --expense: 0 72% 48%;
+    --income: 155 42% 28%;
+    --expense: 8 62% 44%;
 
-    --glass-bg: 0 0% 100% / 0.7;
-    --glass-border: 240 5% 80% / 0.5;
-    --glass-blur: 20px;
+    --glass-bg: 42 40% 98% / 0.85;
+    --glass-border: 38 14% 80% / 0.7;
+    --glass-blur: 10px;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 10% 10%;
-    --sidebar-primary: 265 80% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 92%;
-    --sidebar-accent-foreground: 240 10% 10%;
-    --sidebar-border: 240 5% 87%;
-    --sidebar-ring: 265 80% 50%;
+    --glow-primary: 0 0% 9%;
+
+    --sidebar-background: 43 24% 96%;
+    --sidebar-foreground: 0 0% 8%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 43 30% 96%;
+    --sidebar-accent: 40 18% 90%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 38 14% 84%;
+    --sidebar-ring: 0 0% 9%;
   }
 
   /* Monochrome black & white theme */
