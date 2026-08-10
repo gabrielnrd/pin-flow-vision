@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type Bank, type BankId } from "@/data/financialData";
-import { CreditCard, AlertTriangle, Pencil, Check, X, Wifi } from "lucide-react";
+import { AlertTriangle, Pencil, Check, X, Wifi } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
       className={`w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""} ${isCancelled ? "opacity-50 grayscale" : ""}`}
       style={{ animationDelay: `${index * 80}ms`, aspectRatio: "1.586/1" }}
     >
-      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between ${textColor}`}>
+      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} p-4 flex flex-col justify-between gap-2 ${textColor}`}>
         {/* Subtle pattern */}
         <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{
           backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
@@ -91,7 +91,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
                 className="flex items-center gap-1.5 group/name"
                 onClick={(e) => { if (onUpdateBank) { e.stopPropagation(); setEditName(bank.name); setEditingName(true); } }}
               >
-                <h3 className="font-bold text-lg tracking-wide">{bank.name}</h3>
+                <h3 className="font-bold text-base tracking-wide">{bank.name}</h3>
                 {onUpdateBank && <Pencil className="w-3 h-3 opacity-0 group-hover/name:opacity-60 transition-opacity" />}
               </div>
             )}
@@ -110,13 +110,13 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
         </div>
 
         {/* Chip + Card Number */}
-        <div className="relative z-10 flex items-center gap-3 my-auto">
-          <div className="w-10 h-7 rounded-md bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
-          <span className="text-sm font-mono tracking-[0.2em] opacity-80">{cardNumber}</span>
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-8 h-6 rounded-md bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
+          <span className="text-xs font-mono tracking-[0.18em] opacity-80">{cardNumber}</span>
         </div>
 
         {/* Bottom: Financial info */}
-        <div className="relative z-10 space-y-2">
+        <div className="relative z-10 space-y-1.5">
           {/* Progress bar */}
           <div>
             <div className="flex justify-between text-[10px] opacity-70 mb-1">
@@ -160,7 +160,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
               <p className="text-sm font-bold tabular-nums">
                 R$ {bank.limitUsed.toLocaleString("pt-BR")}
               </p>
-              <p className="text-[8px] opacity-40">soma das parcelas</p>
+              
             </div>
 
             <div className="text-right">
@@ -184,14 +184,10 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
           {/* Debt total */}
           <div className="flex justify-between items-center pt-1 border-t border-white/10">
             <span className="text-[10px] opacity-60">Dívida Total</span>
-            <span className="text-base font-bold tabular-nums">R$ {bank.debtFinal.toLocaleString("pt-BR")}</span>
+            <span className="text-sm font-bold tabular-nums">R$ {bank.debtFinal.toLocaleString("pt-BR")}</span>
           </div>
         </div>
 
-        {/* Brand icon */}
-        <div className="absolute bottom-4 right-5 opacity-20">
-          <CreditCard className="w-10 h-10" />
-        </div>
       </div>
     </div>
   );
