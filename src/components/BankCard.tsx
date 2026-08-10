@@ -61,7 +61,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
       className={`w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""} ${isCancelled ? "opacity-50 grayscale" : ""}`}
       style={{ animationDelay: `${index * 80}ms`, aspectRatio: "1.586/1" }}
     >
-      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} p-4 flex flex-col justify-between gap-2 ${textColor}`}>
+      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} px-4 py-3 flex flex-col justify-between gap-1 ${textColor}`}>
         {/* Subtle pattern */}
         <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{
           backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
@@ -111,12 +111,12 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
 
         {/* Chip + Card Number */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-8 h-6 rounded-md bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
+          <div className="w-7 h-5 rounded-md bg-gradient-to-br from-yellow-300/80 to-yellow-600/80 border border-yellow-400/40" />
           <span className="text-xs font-mono tracking-[0.18em] opacity-80">{cardNumber}</span>
         </div>
 
         {/* Bottom: Financial info */}
-        <div className="relative z-10 space-y-1.5 shrink-0 mt-auto">
+        <div className="relative z-10 space-y-1 shrink-0">
           {/* Progress bar */}
           <div>
             <div className="flex justify-between text-[10px] opacity-70 mb-1">
