@@ -10,12 +10,12 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({ theme: "dark", toggleTheme: () => {}, setTheme: () => {} });
 
-const THEME_ORDER: Theme[] = ["dark", "light", "monochrome"];
+const THEME_ORDER: Theme[] = ["light", "dark", "monochrome"];
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem("fin_theme");
-    return (stored === "light" || stored === "dark" || stored === "monochrome") ? stored : "dark";
+    return (stored === "light" || stored === "dark" || stored === "monochrome") ? stored : "light";
   });
 
   useEffect(() => {
