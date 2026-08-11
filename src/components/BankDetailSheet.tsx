@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, AlertTriangle, Pencil, Check, X, Trash2, Plus, Copy } from "lucide-react";
+import { AlertTriangle, Pencil, Check, X, Trash2, Plus, Copy, Wifi, CalendarClock, CheckCircle2, Clock, TrendingDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { type Bank, type Installment, type BankId } from "@/data/financialData";
 import { CardColorPicker } from "@/components/CardColorPicker";
 import { getCardColor } from "@/data/cardColors";
@@ -27,6 +26,8 @@ const statusStyles = {
 };
 
 const statusCycle: Installment["status"][] = ["pendente", "pago", "atrasado"];
+
+const brl = (n: number) => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function EditableInstallment({ inst, bankId, onUpdate, onRemove, onDuplicate }: {
   inst: Installment;
@@ -80,19 +81,29 @@ function EditableInstallment({ inst, bankId, onUpdate, onRemove, onDuplicate }: 
     );
   }
 
+  const progress = (inst.currentInstallment / inst.totalInstallments) * 100;
+  const remaining = Math.max(inst.totalInstallments - inst.currentInstallment, 0);
+  const dueDate = new Date(inst.dueDate + "T00:00:00");
+  const isPaid = inst.status === "pago";
+  const accent = isPaid ? "bg-income" : inst.status === "atrasado" ? "bg-amber-400" : "bg-primary";
+
   return (
-    <div className="p-4 rounded-xl bg-secondary/40 hover:bg-secondary/60 transition-colors group">
-      <div className="flex justify-between items-start mb-2">
-        <div className="cursor-pointer" onClick={() => { setDesc(inst.description); setAmount(String(inst.installmentAmount)); setTotal(String(inst.totalAmount)); setCurrent(String(inst.currentInstallment)); setTotalInst(String(inst.totalInstallments)); setDue(inst.dueDate); setEditing(true); }}>
-          <p className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+    <div className={`relative overflow-hidden p-4 pl-5 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group ${isPaid ? "opacity-70" : ""}`}>
+      <span className={`absolute left-0 top-0 bottom-0 w-1 ${accent}`} />
+
+      <div className="flex justify-between items-start gap-2">
+        <div className="cursor-pointer min-w-0" onClick={() => { setDesc(inst.description); setAmount(String(inst.installmentAmount)); setTotal(String(inst.totalAmount)); setCurrent(String(inst.currentInstallment)); setTotalInst(String(inst.totalInstallments)); setDue(inst.dueDate); setEditing(true); }}>
+          <p className="text-sm font-medium text-foreground hover:text-primary transition-colors truncate">
             {inst.description}
             <Pencil className="w-3 h-3 inline ml-1.5 opacity-0 group-hover:opacity-50" />
           </p>
-          <p className="text-xs text-muted-foreground">
-            Parcela {inst.currentInstallment} de {inst.totalInstallments}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted-foreground">
+            <span className="text-money">{inst.currentInstallment}/{inst.totalInstallments}</span>
+            <span className="opacity-40">•</span>
+            <span className="flex items-center gap-1"><CalendarClock className="w-3 h-3" />{dueDate.toLocaleDateString("pt-BR")}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <Badge
             variant="outline"
             className={`text-[10px] cursor-pointer ${statusStyles[inst.status]}`}
@@ -112,31 +123,21 @@ function EditableInstallment({ inst, bankId, onUpdate, onRemove, onDuplicate }: 
           </button>
         </div>
       </div>
-      <div className="flex justify-between items-end">
-        <div>
-          <p className="text-xs text-muted-foreground">Vencimento</p>
-          <p className="text-sm text-foreground">
-            {new Date(inst.dueDate + "T00:00:00").toLocaleDateString("pt-BR")}
+
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <div className="flex-1">
+          <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+            <div className={`h-full ${accent} rounded-full transition-all`} style={{ width: `${Math.min(progress, 100)}%` }} />
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            {progress.toFixed(0)}% pago · faltam {remaining} de R$ {brl(inst.installmentAmount)}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Valor da Parcela</p>
-          <p className="text-lg text-money text-foreground">
-            R$ {inst.installmentAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </p>
+        <div className="text-right shrink-0">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Parcela</p>
+          <p className="text-base text-money font-bold text-foreground leading-tight">R$ {brl(inst.installmentAmount)}</p>
+          <p className="text-[10px] text-muted-foreground">total R$ {brl(inst.totalAmount)}</p>
         </div>
-      </div>
-      <div className="mt-2 pt-2 border-t border-border/30">
-        <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
-          <span>Progresso</span>
-          <span>{((inst.currentInstallment / inst.totalInstallments) * 100).toFixed(0)}%</span>
-        </div>
-        <div className="h-1 bg-secondary rounded-full overflow-hidden">
-          <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(inst.currentInstallment / inst.totalInstallments) * 100}%` }} />
-        </div>
-        <p className="text-[11px] text-muted-foreground mt-1">
-          Total: R$ {inst.totalAmount.toLocaleString("pt-BR")}
-        </p>
       </div>
     </div>
   );
@@ -162,8 +163,8 @@ function AddInstallmentRow({ bankId, onAdd }: { bankId: BankId; onAdd: BankDetai
   };
 
   if (!adding) return (
-    <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors mt-3">
-      <Plus className="w-3 h-3" /> Adicionar parcela
+    <button onClick={() => setAdding(true)} className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors mt-3 py-2.5 rounded-xl border border-dashed border-border/60 hover:border-primary/40">
+      <Plus className="w-3.5 h-3.5" /> Adicionar parcela
     </button>
   );
 
@@ -186,11 +187,28 @@ function AddInstallmentRow({ bankId, onAdd }: { bankId: BankId; onAdd: BankDetai
   );
 }
 
+type FilterKey = "todas" | "pendente" | "pago";
+
 export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment, onRemoveInstallment, onAddInstallment, onUpdateBank, onRemoveBank }: BankDetailSheetProps) {
-  if (!bank) return null;
+  const [filter, setFilter] = useState<FilterKey>("todas");
+
+  const stats = useMemo(() => {
+    if (!bank) return null;
+    const open = bank.installments.filter((i) => i.status !== "pago");
+    const paid = bank.installments.filter((i) => i.status === "pago");
+    const late = bank.installments.filter((i) => i.status === "atrasado");
+    const monthly = open.reduce((s, i) => s + i.installmentAmount, 0);
+    const paidTotal = paid.reduce((s, i) => s + i.installmentAmount, 0);
+    const nextDue = [...open].sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
+    return { open, paid, late, monthly, paidTotal, nextDue };
+  }, [bank]);
+
+  if (!bank || !stats) return null;
 
   const isOverLimit = bank.limitUsed > bank.limitTotal;
   const freeAmount = bank.limitTotal - bank.limitUsed;
+  const usagePercent = Math.min((bank.limitUsed / bank.limitTotal) * 100, 100);
+  const cardColor = getCardColor(bank.color);
 
   const handleDuplicate = (inst: Installment) => {
     onAddInstallment(bank.id, {
@@ -215,65 +233,140 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
     }
   };
 
+  const filtered = [...bank.installments]
+    .filter((i) => filter === "todas" || (filter === "pago" ? i.status === "pago" : i.status !== "pago"))
+    .sort((a, b) => {
+      if (a.status === "pago" && b.status !== "pago") return 1;
+      if (a.status !== "pago" && b.status === "pago") return -1;
+      return a.dueDate.localeCompare(b.dueDate);
+    });
+
+  const filters: { key: FilterKey; label: string; count: number }[] = [
+    { key: "todas", label: "Todas", count: bank.installments.length },
+    { key: "pendente", label: "Em aberto", count: stats.open.length },
+    { key: "pago", label: "Pagas", count: stats.paid.length },
+  ];
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="glass-card border-l-border/30 w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-xl bg-${bank.color}/20 flex items-center justify-center`}>
-              <CreditCard className={`w-6 h-6 text-${bank.color}`} />
-            </div>
-            <div className="flex-1">
-              <SheetTitle className="text-foreground text-lg">{bank.name}</SheetTitle>
-              <p className="text-sm text-muted-foreground">{bank.installments.length} parcelas registradas</p>
-            </div>
-          </div>
+          <SheetTitle className="sr-only">{bank.name}</SheetTitle>
         </SheetHeader>
 
-        {/* Category selector */}
-        {onUpdateBank && (
-          <div className="mb-4">
-            <CardColorPicker value={bank.color} onChange={handleColorChange} />
+        {/* Visual card preview */}
+        <div
+          className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${cardColor.gradient} ${cardColor.text} p-4 flex flex-col justify-between`}
+          style={{ aspectRatio: "1.9/1" }}
+        >
+          <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }} />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.2em] opacity-60">Cartão de crédito</p>
+              <h2 className="text-xl font-bold tracking-wide">{bank.name}</h2>
+            </div>
+            <Wifi className="w-5 h-5 opacity-40 rotate-90" />
           </div>
-        )}
-
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="p-3 rounded-xl bg-secondary/50">
-            <p className="text-xs text-muted-foreground">Limite Total</p>
-            <p className="text-base font-bold text-foreground">R$ {bank.limitTotal.toLocaleString("pt-BR")}</p>
-          </div>
-          <div className="p-3 rounded-xl bg-secondary/50">
-            <p className="text-xs text-muted-foreground">Usado</p>
-            <p className={`text-base font-bold ${isOverLimit ? "text-expense" : "text-foreground"}`}>
-              R$ {bank.limitUsed.toLocaleString("pt-BR")}
-            </p>
-          </div>
-          <div className={`p-3 rounded-xl ${isOverLimit ? "bg-expense/10 border border-expense/20" : "bg-income/10 border border-income/20"}`}>
-            <p className="text-xs text-muted-foreground">{isOverLimit ? "Excedido" : "Livre"}</p>
-            <p className={`text-base font-bold ${isOverLimit ? "text-expense" : "text-income"}`}>
-              R$ {Math.abs(freeAmount).toLocaleString("pt-BR")}
-            </p>
+          <div className="relative">
+            <div className="flex justify-between text-[10px] opacity-70 mb-1">
+              <span>Limite usado</span>
+              <span className="text-money">{usagePercent.toFixed(0)}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-white/20 overflow-hidden">
+              <div className="h-full rounded-full bg-white/85 transition-all" style={{ width: `${usagePercent}%` }} />
+            </div>
+            <div className="flex justify-between items-end mt-2">
+              <div>
+                <p className="text-[10px] opacity-60">Usado</p>
+                <p className="text-base text-money font-bold">R$ {brl(bank.limitUsed)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] opacity-60">{isOverLimit ? "Excedido" : "Disponível"}</p>
+                <p className="text-base text-money font-bold">R$ {brl(Math.abs(freeAmount))}</p>
+              </div>
+            </div>
           </div>
         </div>
 
         {isOverLimit && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-expense/10 border border-expense/20 mb-6 animate-pulse-danger">
-            <AlertTriangle className="w-5 h-5 text-expense" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-expense/10 border border-expense/20 mt-4 animate-pulse-danger">
+            <AlertTriangle className="w-5 h-5 text-expense shrink-0" />
             <span className="text-sm text-expense font-medium">
-              Limite excedido em R$ {(bank.limitUsed - bank.limitTotal).toLocaleString("pt-BR")}
+              Limite excedido em R$ {brl(bank.limitUsed - bank.limitTotal)}
             </span>
           </div>
         )}
 
-        <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-          Parcelas
-        </h4>
+        {/* Quick KPIs */}
+        <div className="grid grid-cols-3 gap-2 mt-4">
+          <div className="p-3 rounded-xl bg-secondary/40 border border-border/40">
+            <div className="flex items-center gap-1 text-muted-foreground mb-1">
+              <TrendingDown className="w-3 h-3" />
+              <span className="text-[10px] uppercase tracking-wider">Por mês</span>
+            </div>
+            <p className="text-sm text-money font-bold text-foreground">R$ {brl(stats.monthly)}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40 border border-border/40">
+            <div className="flex items-center gap-1 text-muted-foreground mb-1">
+              <Clock className="w-3 h-3" />
+              <span className="text-[10px] uppercase tracking-wider">Em aberto</span>
+            </div>
+            <p className="text-sm text-money font-bold text-foreground">{stats.open.length} parcelas</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40 border border-border/40">
+            <div className="flex items-center gap-1 text-muted-foreground mb-1">
+              <CheckCircle2 className="w-3 h-3" />
+              <span className="text-[10px] uppercase tracking-wider">Pagas</span>
+            </div>
+            <p className="text-sm text-money font-bold text-income">{stats.paid.length}</p>
+          </div>
+        </div>
+
+        {/* Dívida total + próximo vencimento */}
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="p-3 rounded-xl bg-expense/10 border border-expense/20">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Dívida total</p>
+            <p className="text-base text-money font-bold text-expense">R$ {brl(bank.debtFinal)}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-secondary/40 border border-border/40">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Próximo vencimento</p>
+            <p className="text-base text-money font-bold text-foreground">
+              {stats.nextDue ? new Date(stats.nextDue.dueDate + "T00:00:00").toLocaleDateString("pt-BR") : "—"}
+            </p>
+          </div>
+        </div>
+
+        {/* Cor do cartão */}
+        {onUpdateBank && (
+          <div className="mt-5">
+            <CardColorPicker value={bank.color} onChange={handleColorChange} />
+          </div>
+        )}
+
+        {/* Filtros */}
+        <div className="flex items-center gap-1 mt-6 mb-3">
+          {filters.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider transition-colors border ${
+                filter === f.key
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-secondary/40 text-muted-foreground border-border/40 hover:text-foreground"
+              }`}
+            >
+              {f.label} <span className="text-money">{f.count}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="space-y-2">
-          {[...bank.installments].sort((a, b) => {
-            if (a.status === "pago" && b.status !== "pago") return 1;
-            if (a.status !== "pago" && b.status === "pago") return -1;
-            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-          }).map((inst) => (
+          {filtered.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-6">Nenhuma parcela nesta visão.</p>
+          ) : filtered.map((inst) => (
             <EditableInstallment
               key={inst.id}
               inst={inst}
@@ -287,7 +380,6 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
 
         <AddInstallmentRow bankId={bank.id} onAdd={onAddInstallment} />
 
-        {/* Delete bank button */}
         {onRemoveBank && (
           <div className="mt-8 pt-4 border-t border-border/30">
             <Button variant="destructive" className="w-full" onClick={handleDeleteBank}>
