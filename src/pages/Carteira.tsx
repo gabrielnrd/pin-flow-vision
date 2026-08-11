@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { EXPENSE_CATEGORIES, suggestCategory, getCategory } from "@/data/categories";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { AllCardsGrid } from "@/components/AllCardsGrid";
+
 
 function DebitExpenseForm({ bankName }: { bankName: string }) {
   const { selectedMonth, currentCashflow, addCashflowItem, totalIncome, totalExpense, expectedBalance } =
@@ -286,7 +288,9 @@ function WalletCard({
 export default function CarteiraPage() {
   const { banks } = useFinanceStore();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [view, setView] = useState<"carteira" | "todos">("carteira");
   const touchStartRef = useRef<number | null>(null);
+
 
   const count = banks.length;
 
