@@ -341,7 +341,7 @@ export default function CarteiraPage() {
     <div className="min-h-screen bg-background overflow-hidden">
       <div className="max-w-[1600px] mx-auto px-4 py-6">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 mb-1">
             <Wallet className="w-5 h-5 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Carteira Digital</h1>
@@ -349,8 +349,34 @@ export default function CarteiraPage() {
           <p className="text-muted-foreground text-xs">Seus cartões em um só lugar</p>
         </div>
 
+        {/* View toggle */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex rounded-full border border-border/50 bg-card/60 backdrop-blur p-1">
+            {([
+              { key: "carteira", label: "Carteira" },
+              { key: "todos", label: "Todos os cartões" },
+            ] as const).map((v) => (
+              <button
+                key={v.key}
+                onClick={() => setView(v.key)}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-[11px] uppercase tracking-wider transition-colors",
+                  view === v.key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {view === "todos" && <AllCardsGrid banks={banks} />}
+
         {/* Main layout */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 justify-center">
+        <div className={cn("flex flex-col lg:flex-row items-center lg:items-start gap-10 justify-center", view !== "carteira" && "hidden")}>
+
           {/* Wallet pocket */}
           <div className="flex-shrink-0 flex flex-col items-center gap-4">
             <div
