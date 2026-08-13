@@ -98,12 +98,10 @@ export function ExportXlsxButton({ compact = false }: { compact?: boolean }) {
         [],
         [{ v: "Indicador", t: "s" }, { v: "Valor", t: "s" }, { v: "Observação", t: "s" }],
         ["Dívida Total", { v: store.totalDebt, t: "n", z: BRL }, "Cartões + Credores"],
-        ["Saldo em Conta", { v: store.savedBalance, t: "n", z: BRL }, ""],
         ["Renda (mês atual)", { v: store.totalIncome, t: "n", z: BRL }, store.currentCashflow.month],
         ["Despesas (mês atual)", { v: store.totalExpense, t: "n", z: BRL }, "Manuais + cartões"],
         ["Despesas de Cartão (mês)", { v: store.cardExpensesForMonth, t: "n", z: BRL }, ""],
         ["Saldo Esperado do Mês", { v: store.expectedBalance, t: "n", z: BRL }, "Receita - Despesa"],
-        ["Saldo Projetado Total", { v: store.projectedTotalBalance, t: "n", z: BRL }, "Conta + Saldo mês"],
         ["Meta de Economia Mensal", { v: store.savingsGoalMonth, t: "n", z: BRL }, ""],
         ["Margem de Segurança", { v: store.safetyMargin, t: "n", z: BRL }, ""],
         ["Saldo Fantasma", { v: store.phantomBalance, t: "n", z: BRL }, "Saldo - margem"],
@@ -255,7 +253,7 @@ export function ExportXlsxButton({ compact = false }: { compact?: boolean }) {
       addLine("Total Despesas", expenses.map((e, i) => e + cards[i]));
       addLine("Saldo", incomes.map((v, i) => v - expenses[i] - cards[i]));
 
-      let acc = store.savedBalance;
+      let acc = 0;
       const accArr = incomes.map((v, i) => (acc += v - expenses[i] - cards[i]));
       addLine("Saldo Acumulado", accArr);
       XLSX.utils.book_append_sheet(
@@ -341,7 +339,7 @@ export function ExportXlsxButton({ compact = false }: { compact?: boolean }) {
       const proj: any[][] = [[
         "Mês/Ano", "Receita", "Despesa Total", "Saldo Mês", "Saldo Acumulado",
       ]];
-      let running = store.savedBalance;
+      let running = 0;
       store.cashflowMonths.forEach((m, i) => {
         const bal = incomes[i] - expenses[i] - cards[i];
         running += bal;

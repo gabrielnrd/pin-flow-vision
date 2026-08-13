@@ -34,7 +34,7 @@ export function BalanceProjectionChart() {
     });
 
     // Cumulative real starting from saved balance
-    let acc = store.savedBalance;
+    let acc = 0;
     real.forEach((r, i) => {
       acc += r.balance;
       points.push({ label: r.label, real: acc });
