@@ -257,7 +257,7 @@ export function BankDetailSheet({ bank, open, onOpenChange, onUpdateInstallment,
         {/* Visual card preview */}
         <div
           className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${cardColor.gradient} ${cardColor.text} p-4 flex flex-col justify-between`}
-          style={{ aspectRatio: "1.9/1" }}
+          style={{ aspectRatio: "1.9/1", ...cardColor.style }}
         >
           <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{
             backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,

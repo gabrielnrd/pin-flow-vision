@@ -267,40 +267,6 @@
   .glow-other {
     box-shadow: 0 0 40px -10px hsl(190 65% 31% / 0.3);
   }
-  .glow-pantone-classic-blue {
-    box-shadow: 0 0 40px -10px #0F4C814d;
-  }
-  .glow-pantone-viva-magenta {
-    box-shadow: 0 0 40px -10px #BB26494d;
-  }
-  .glow-pantone-ultra-violet {
-    box-shadow: 0 0 40px -10px #5F4B8B4d;
-  }
-  .glow-pantone-emerald {
-    box-shadow: 0 0 40px -10px #0098744d;
-  }
-  .glow-pantone-living-coral {
-    box-shadow: 0 0 40px -10px #FF6F614d;
-  }
-  .glow-pantone-greenery {
-    box-shadow: 0 0 40px -10px #88B04B4d;
-  }
-  .glow-pantone-marsala {
-    box-shadow: 0 0 40px -10px #9552514d;
-  }
-  .glow-pantone-mocha-mousse {
-    box-shadow: 0 0 40px -10px #A478644d;
-  }
-  .glow-pantone-very-peri {
-    box-shadow: 0 0 40px -10px #6667AB4d;
-  }
-  .glow-pantone-peach-fuzz {
-    box-shadow: 0 0 40px -10px #FFBE984d;
-  }
-  .glow-pantone-graphite {
-    box-shadow: 0 0 40px -10px #3B3B3B4d;
-  }
-
   .text-money {
     @apply font-bold tabular-nums tracking-tight;
     font-family: 'JetBrains Mono', 'Inter', monospace;

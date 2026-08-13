@@ -32,7 +32,7 @@ function CardColumn({ bank }: { bank: Bank }) {
   return (
     <div className="flex flex-col rounded-2xl border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
       {/* Card head */}
-      <div className={cn("relative p-4 bg-gradient-to-br", color.gradient, color.text)}>
+      <div className={cn("relative p-4 bg-gradient-to-br", color.gradient, color.text)} style={color.style}>
         <div
           className="absolute inset-0 opacity-[0.07] pointer-events-none"
           style={{

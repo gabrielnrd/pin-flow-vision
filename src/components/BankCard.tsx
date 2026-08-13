@@ -61,7 +61,7 @@ export function BankCard({ bank, index, onClick, onUpdateBank }: BankCardProps) 
       className={`w-full text-left rounded-2xl cursor-pointer group animate-float-in overflow-hidden ${isOverLimit ? "animate-over-limit" : ""} ${isCancelled ? "opacity-50 grayscale" : ""}`}
       style={{ animationDelay: `${index * 80}ms`, aspectRatio: "1.586/1" }}
     >
-      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} px-4 py-3 flex flex-col justify-between gap-1 ${textColor}`}>
+      <div className={`relative w-full h-full bg-gradient-to-br ${gradient} px-4 py-3 flex flex-col justify-between gap-1 ${textColor}`} style={cardColor.style}>
         {/* Subtle pattern */}
         <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{
           backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
