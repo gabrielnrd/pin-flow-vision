@@ -80,7 +80,7 @@ export default function DesejosPage() {
 
   // Rolling projected balance per month (starts from savedBalance, adds each month's expectedBalance)
   const monthlyProjection = useMemo(() => {
-    let rolling = store.savedBalance;
+    let rolling = 0;
     return store.cashflowMonths.map((m, idx) => {
       const income = m.incomes.reduce((s, i) => s + i.amount, 0);
       const manualExp = m.expenses.reduce((s, e) => s + e.amount, 0);
@@ -108,7 +108,7 @@ export default function DesejosPage() {
         endBalance: rolling,
       };
     });
-  }, [store.cashflowMonths, store.banks, store.savedBalance]);
+  }, [store.cashflowMonths, store.banks]);
 
   // Compute verdict for each wish given other wishes competing in same month
   const wishesEvaluated = useMemo(() => {
