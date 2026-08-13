@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Calendar, Pencil, Trash2, Check, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { type BankId } from "@/data/financialData";
+import { EXPENSE_CATEGORIES, getCategory, suggestCategory } from "@/data/categories";
 
 interface InstallmentItem {
   id: string;
@@ -14,6 +15,7 @@ interface InstallmentItem {
   bankName: string;
   bankColor: string;
   bankId?: BankId;
+  category?: string;
 }
 
 interface InstallmentTimelineProps {
@@ -68,12 +70,13 @@ function EditableInstallment({ item, onUpdate, onRemove }: {
   const [desc, setDesc] = useState(item.description);
   const [amount, setAmount] = useState(String(item.installmentAmount));
   const [date, setDate] = useState(item.dueDate);
+  const [category, setCategory] = useState(item.category ?? suggestCategory(item.description));
 
   const save = () => {
     if (!onUpdate || !item.bankId) return;
     const amt = parseFloat(amount);
     if (isNaN(amt)) return;
-    onUpdate(item.bankId, item.id, { description: desc, installmentAmount: amt, dueDate: date });
+    onUpdate(item.bankId, item.id, { description: desc, installmentAmount: amt, dueDate: date, category });
     setEditing(false);
   };
 
@@ -86,6 +89,9 @@ function EditableInstallment({ item, onUpdate, onRemove }: {
         </div>
         <div className="flex items-center gap-2">
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-7 text-xs w-36" />
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="h-7 text-xs rounded-lg bg-secondary border border-border/50 px-2 text-foreground">
+            {EXPENSE_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
+          </select>
           <button onClick={save} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
           <button onClick={() => setEditing(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
         </div>
@@ -98,16 +104,26 @@ function EditableInstallment({ item, onUpdate, onRemove }: {
       <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${bankDotColor[item.bankColor] || "bg-muted-foreground"}`} />
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground truncate">{item.description}</p>
-        <p className="text-xs text-muted-foreground">
-          {item.bankName} · {item.currentInstallment}/{item.totalInstallments} · {formatDate(item.dueDate)}
-        </p>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className="text-xs text-muted-foreground">
+            {item.bankName} · {item.currentInstallment}/{item.totalInstallments} · {formatDate(item.dueDate)}
+          </p>
+          {(() => {
+            const c = getCategory(item.category ?? suggestCategory(item.description));
+            return (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${c.bg} ${c.color}`}>
+                {c.emoji} {c.label}
+              </span>
+            );
+          })()}
+        </div>
       </div>
       <span className="text-sm text-money text-foreground shrink-0">
         R$ {item.installmentAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
       </span>
       {onUpdate && (
         <div className="flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0">
-          <button onClick={() => { setDesc(item.description); setAmount(String(item.installmentAmount)); setDate(item.dueDate); setEditing(true); }} className="p-1 rounded hover:bg-secondary text-muted-foreground">
+          <button onClick={() => { setDesc(item.description); setAmount(String(item.installmentAmount)); setDate(item.dueDate); setCategory(item.category ?? suggestCategory(item.description)); setEditing(true); }} className="p-1 rounded hover:bg-secondary text-muted-foreground">
             <Pencil className="w-3 h-3" />
           </button>
           {onRemove && item.bankId && (
@@ -128,6 +144,7 @@ function AddInstallmentRow({ banks, onAdd }: { banks: { id: BankId; name: string
   const [date, setDate] = useState("");
   const [total, setTotal] = useState("12");
   const [bankId, setBankId] = useState<BankId>(banks[0]?.id || "nubank");
+  const [category, setCategory] = useState("outros");
 
   const save = () => {
     const amt = parseFloat(amount);
@@ -141,8 +158,9 @@ function AddInstallmentRow({ banks, onAdd }: { banks: { id: BankId; name: string
       totalInstallments: tot,
       dueDate: date,
       status: "pendente" as const,
+      category,
     });
-    setDesc(""); setAmount(""); setDate(""); setTotal("12");
+    setDesc(""); setAmount(""); setDate(""); setTotal("12"); setCategory("outros");
     setOpen(false);
   };
 
@@ -166,6 +184,9 @@ function AddInstallmentRow({ banks, onAdd }: { banks: { id: BankId; name: string
         </select>
         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-7 text-xs w-32" />
         <Input type="number" value={total} onChange={(e) => setTotal(e.target.value)} className="h-7 text-xs w-14" placeholder="Parcelas" />
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="h-7 text-xs rounded-lg bg-secondary border border-border/50 px-2 text-foreground">
+          {EXPENSE_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
+        </select>
         <button onClick={save} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-3.5 h-3.5" /></button>
         <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-3.5 h-3.5" /></button>
       </div>
