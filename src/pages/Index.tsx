@@ -14,9 +14,7 @@ import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
-import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard";
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
-import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
 import { CashflowSankey } from "@/components/CashflowSankey";
 import { EyeOff, Eye } from "lucide-react";
 import { useState } from "react";
@@ -115,11 +113,8 @@ const Index = () => {
               <div className="lg:col-span-2">
                 <FinancialHealthScore />
               </div>
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-6">
                 <SpendingChart banks={store.banks} />
-              </div>
-              <div className="lg:col-span-3">
-                <FinancialHealthDashboard />
               </div>
             </div>
           </section>
