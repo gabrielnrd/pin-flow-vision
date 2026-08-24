@@ -95,6 +95,7 @@ export interface FinanceStore {
   updateBank: (bankId: BankId, updates: Partial<Pick<Bank, "name" | "limitTotal" | "status" | "color" | "glowClass">>) => void;
   removeBank: (bankId: BankId) => void;
   addBank: (name: string, limitTotal: number, color: string, glowClass: string) => void;
+  moveBank: (bankId: BankId, targetId: BankId) => void;
   addInstallment: (bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => void;
   removeInstallment: (bankId: BankId, installmentId: string) => void;
   updateInstallment: (bankId: BankId, installmentId: string, updates: Partial<Omit<import("@/data/financialData").Installment, "id">>) => void;
