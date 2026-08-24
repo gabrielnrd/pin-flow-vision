@@ -387,18 +387,8 @@ export function CashflowCard({
         </div>
       </div>
 
-      {/* Card-based expenses (automatic) */}
-      {cardExpensesForMonth > 0 && (
-        <div className="mb-4 p-3 rounded-xl bg-expense/5 border border-expense/10">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground flex items-center gap-2">
-              <CreditCard className="w-3.5 h-3.5 text-expense" />
-              Parcelas dos Cartões (automático)
-            </span>
-            <span className="text-expense font-medium">R$ {cardExpensesForMonth.toLocaleString("pt-BR")}</span>
-          </div>
-        </div>
-      )}
+      {/* Central de Cartões: parcelas detalhadas por cartão + lançamento rápido */}
+      <CardFlowHub />
 
       {/* Manual Expenses with category filters */}
       <ExpenseSection

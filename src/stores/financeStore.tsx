@@ -549,6 +549,18 @@ function useFinanceStoreInternal(): FinanceStore {
     }]);
   }, []);
 
+  const moveBank = useCallback((bankId: BankId, targetId: BankId) => {
+    setBanks((prev) => {
+      const from = prev.findIndex((b) => b.id === bankId);
+      const to = prev.findIndex((b) => b.id === targetId);
+      if (from < 0 || to < 0 || from === to) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, []);
+
   const addInstallment = useCallback((bankId: BankId, inst: Omit<import("@/data/financialData").Installment, "id">) => {
     setBanks((prev) => prev.map((b) => {
       if (b.id !== bankId) return b;
@@ -624,7 +636,7 @@ function useFinanceStoreInternal(): FinanceStore {
     addCashflowItem, removeCashflowItem, updateCashflowItem, setCashflowItemFixed, replicateFixedItem,
     addCreditor, removeCreditor, updateCreditor,
     addGoal, removeGoal, updateGoal,
-    updateBank, removeBank, addBank, addInstallment, removeInstallment, updateInstallment,
+    updateBank, removeBank, addBank, moveBank, addInstallment, removeInstallment, updateInstallment,
     setSavingsGoalMonth, addIncomeSource, removeIncomeSource, updateIncomeSource,
     salary, monthlyHours, hourlyRate, safetyMargin, dailySavings,
     phantomBalance, survivalDays,
