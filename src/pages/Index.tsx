@@ -211,13 +211,10 @@ const Index = () => {
 
           {/* 07 — Análise */}
           <section>
-            <SectionHead index="07" title="Análise & Visualização" subtitle="Projeções, comparativos e fluxos" />
-            <div className="grid grid-cols-1 gap-4">
+            <SectionHead index="07" title="Análise & Visualização" subtitle="Projeções e fluxo de caixa" />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               <BalanceProjectionChart />
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <MonthCategoryHeatmap />
-                <CashflowSankey />
-              </div>
+              <CashflowSankey />
             </div>
           </section>
 
