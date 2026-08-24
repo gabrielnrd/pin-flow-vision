@@ -14,9 +14,7 @@ import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
-import { FinancialHealthDashboard } from "@/components/FinancialHealthDashboard";
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
-import { MonthCategoryHeatmap } from "@/components/MonthCategoryHeatmap";
 import { CashflowSankey } from "@/components/CashflowSankey";
 import { EyeOff, Eye } from "lucide-react";
 import { useState } from "react";
@@ -57,6 +55,8 @@ function SectionHead({
 const Index = () => {
   const store = useFinanceStore();
   const [showCancelled, setShowCancelled] = useState(false);
+  const [dragBankId, setDragBankId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const activeBanks = store.banks.filter((b) => b.status !== "cancelado");
   const cancelledBanks = store.banks.filter((b) => b.status === "cancelado");
@@ -115,11 +115,8 @@ const Index = () => {
               <div className="lg:col-span-2">
                 <FinancialHealthScore />
               </div>
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-6">
                 <SpendingChart banks={store.banks} />
-              </div>
-              <div className="lg:col-span-3">
-                <FinancialHealthDashboard />
               </div>
             </div>
           </section>
@@ -156,7 +153,7 @@ const Index = () => {
             <SectionHead
               index="04"
               title="Cartões de Crédito"
-              subtitle="Saldo usado calculado automaticamente pelas parcelas"
+              subtitle="Saldo usado calculado automaticamente pelas parcelas • arraste para reordenar"
               action={
                 cancelledBanks.length > 0 ? (
                   <button
@@ -171,13 +168,29 @@ const Index = () => {
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 stagger-children">
               {activeBanks.map((bank, i) => (
-                <BankCard
+                <div
                   key={bank.id}
-                  bank={bank}
-                  index={i}
-                  onClick={() => store.setSelectedBank(bank)}
-                  onUpdateBank={store.updateBank}
-                />
+                  draggable
+                  onDragStart={() => setDragBankId(bank.id)}
+                  onDragEnd={() => { setDragBankId(null); setDragOverId(null); }}
+                  onDragOver={(e) => { e.preventDefault(); if (dragBankId && dragBankId !== bank.id) setDragOverId(bank.id); }}
+                  onDragLeave={() => setDragOverId((cur) => (cur === bank.id ? null : cur))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragBankId && dragBankId !== bank.id) store.moveBank(dragBankId, bank.id);
+                    setDragBankId(null); setDragOverId(null);
+                  }}
+                  className={`transition-all duration-200 ${
+                    dragBankId === bank.id ? "opacity-40 scale-[0.97]" : ""
+                  } ${dragOverId === bank.id ? "ring-2 ring-primary/60 ring-offset-2 ring-offset-background rounded-3xl" : ""}`}
+                >
+                  <BankCard
+                    bank={bank}
+                    index={i}
+                    onClick={() => store.setSelectedBank(bank)}
+                    onUpdateBank={store.updateBank}
+                  />
+                </div>
               ))}
               {showCancelled &&
                 cancelledBanks.map((bank, i) => (
@@ -216,13 +229,10 @@ const Index = () => {
 
           {/* 07 — Análise */}
           <section>
-            <SectionHead index="07" title="Análise & Visualização" subtitle="Projeções, comparativos e fluxos" />
-            <div className="grid grid-cols-1 gap-4">
+            <SectionHead index="07" title="Análise & Visualização" subtitle="Projeções e fluxo de caixa" />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               <BalanceProjectionChart />
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <MonthCategoryHeatmap />
-                <CashflowSankey />
-              </div>
+              <CashflowSankey />
             </div>
           </section>
 
