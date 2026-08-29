@@ -1,11 +1,14 @@
 import { useState, useMemo } from "react";
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard, Pin, PinOff } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Check, Plus, X, CreditCard, Pin, PinOff, Radio } from "lucide-react";
 import { type CashflowMonth } from "@/data/financialData";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EXPENSE_CATEGORIES, getCategory, suggestCategory } from "@/data/categories";
 import { CardFlowHub } from "@/components/CardFlowHub";
+import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { useFinanceStore } from "@/stores/financeStore";
+
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
