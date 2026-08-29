@@ -404,6 +404,49 @@ export function CashflowCard({
             <p className="text-lg sm:text-xl text-expense text-money font-semibold">− {cardExpensesForMonth.toLocaleString("pt-BR")}</p>
           </div>
         </div>
+
+        {/* LIVE — caixa real do mês */}
+        <div className="mt-4 pt-4 border-t border-border/30">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="relative flex items-center">
+              <span className="absolute w-2 h-2 rounded-full bg-expense/60 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-expense" />
+            </span>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+              <Radio className="w-3 h-3" /> Saldo Live (caixa real)
+            </p>
+          </div>
+          <AnimatedNumber
+            value={live.value}
+            prefix="R$ "
+            className={`block text-2xl text-money text-center ${live.value >= 0 ? "text-income" : "text-expense"}`}
+          />
+          <p className="text-[10px] text-muted-foreground text-center mt-1">
+            O mês começa negativo em R$ {live.obligations.toLocaleString("pt-BR")} e sobe a cada entrada recebida.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+            <div className="text-center rounded-lg bg-income/5 py-2 px-1">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Recebido</p>
+              <p className="text-sm text-income text-money">+ {live.received.toLocaleString("pt-BR")}</p>
+            </div>
+            <div className="text-center rounded-lg bg-secondary/60 py-2 px-1">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">A receber</p>
+              <p className="text-sm text-money text-foreground">{live.toReceive.toLocaleString("pt-BR")}</p>
+            </div>
+            <div className="text-center rounded-lg bg-secondary/60 py-2 px-1">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Já pago</p>
+              <p className="text-sm text-money text-muted-foreground">{live.settled.toLocaleString("pt-BR")}</p>
+            </div>
+            <div className="text-center rounded-lg bg-expense/5 py-2 px-1">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">A pagar</p>
+              <p className="text-sm text-expense text-money">− {live.open.toLocaleString("pt-BR")}</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground/80 text-center mt-2">
+            Marcar uma conta como paga só consolida o valor (sai de “A pagar” para “Já pago”) — não altera o saldo.
+          </p>
+        </div>
+
       </div>
 
       {/* Income */}
