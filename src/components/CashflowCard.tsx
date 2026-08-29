@@ -333,6 +333,36 @@ export function CashflowCard({
   onTogglePaid, onAddItem, onRemoveItem, onUpdateItem, onSetFixed, onReplicateFixed,
 }: CashflowCardProps) {
   const manualExpenses = totalExpense - cardExpensesForMonth;
+  const { banks } = useFinanceStore();
+
+  // Live (caixa real): o mês nasce negativo com todas as obrigações e vai sendo
+  // abatido conforme as entradas são efetivamente recebidas (check nas Entradas).
+  const live = useMemo(() => {
+    const MONTHS: Record<string, number> = {
+      "Janeiro": 1, "Fevereiro": 2, "Março": 3, "Abril": 4, "Maio": 5, "Junho": 6,
+      "Julho": 7, "Agosto": 8, "Setembro": 9, "Outubro": 10, "Novembro": 11, "Dezembro": 12,
+    };
+    const m = MONTHS[cashflow.month];
+    const y = cashflow.year;
+    const received = cashflow.incomes.filter((i) => i.paid).reduce((s, i) => s + i.amount, 0);
+    const paidManual = cashflow.expenses.filter((e) => e.paid).reduce((s, e) => s + e.amount, 0);
+    const paidCard = banks.reduce((t, b) => t + b.installments
+      .filter((inst) => {
+        const d = new Date(inst.dueDate + "T00:00:00");
+        return d.getMonth() + 1 === m && d.getFullYear() === y && inst.status === "pago";
+      })
+      .reduce((s, inst) => s + inst.installmentAmount, 0), 0);
+    const obligations = manualExpenses + cardExpensesForMonth;
+    return {
+      received,
+      toReceive: totalIncome - received,
+      settled: paidManual + paidCard,
+      open: obligations - (paidManual + paidCard),
+      obligations,
+      value: received - obligations,
+    };
+  }, [banks, cashflow, manualExpenses, cardExpensesForMonth, totalIncome]);
+
 
   return (
     <div className="glass-card rounded-2xl p-5 animate-float-in">
