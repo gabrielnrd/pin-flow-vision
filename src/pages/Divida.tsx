@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { DebtTrackingChart } from "@/components/DebtTrackingChart";
-import { FinancialFearGreedGauge } from "@/components/FinancialFearGreedGauge";
 import { CreditorWidget } from "@/components/CreditorWidget";
 import { useFinanceStore } from "@/stores/financeStore";
 import { Progress } from "@/components/ui/progress";
