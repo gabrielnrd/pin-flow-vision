@@ -121,32 +121,48 @@ const Index = () => {
             </div>
           </section>
 
-          {/* 03 — Fluxo do mês */}
-          <section key={`cf-${store.selectedMonth}`} className="animate-float-in">
+          {/* 03 — Atalho para o fluxo do mês */}
+          <section>
             <SectionHead
               index="03"
               title="Fluxo do Mês"
-              subtitle="Receitas, despesas e cartão do período selecionado"
+              subtitle="Entradas e saídas detalhadas em seção própria"
+              action={
+                <Link
+                  to="/fluxo"
+                  className="flex items-center gap-1.5 text-[11px] label-mono hover:text-foreground transition-colors border border-border rounded-md px-2.5 py-1.5"
+                >
+                  Abrir fluxo <ArrowRight className="w-3 h-3" />
+                </Link>
+              }
             />
-            <CashflowCard
-              cashflow={store.currentCashflow}
-              totalIncome={store.totalIncome}
-              totalExpense={store.totalExpense}
-              cardExpensesForMonth={store.cardExpensesForMonth}
-              expectedBalance={store.expectedBalance}
-              onPrev={store.prevMonth}
-              onNext={store.nextMonth}
-              canPrev={store.selectedMonth > 0}
-              canNext={store.selectedMonth < store.cashflowMonths.length - 1}
-              monthIndex={store.selectedMonth}
-              onTogglePaid={store.toggleCashflowPaid}
-              onAddItem={store.addCashflowItem}
-              onRemoveItem={store.removeCashflowItem}
-              onUpdateItem={store.updateCashflowItem}
-              onSetFixed={store.setCashflowItemFixed}
-              onReplicateFixed={store.replicateFixedItem}
-            />
+            <Link
+              to="/fluxo"
+              className="block rounded-2xl border border-border bg-card p-5 hover:border-foreground/30 transition-colors"
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <p className="label-mono">Receitas</p>
+                  <p className="text-money text-lg text-income">R$ {store.totalIncome.toLocaleString("pt-BR")}</p>
+                </div>
+                <div>
+                  <p className="label-mono">Despesas</p>
+                  <p className="text-money text-lg text-expense">R$ {store.totalExpense.toLocaleString("pt-BR")}</p>
+                </div>
+                <div>
+                  <p className="label-mono">Cartão</p>
+                  <p className="text-money text-lg text-expense">R$ {store.cardExpensesForMonth.toLocaleString("pt-BR")}</p>
+                </div>
+                <div>
+                  <p className="label-mono">Saldo final</p>
+                  <p className={`text-money text-lg ${store.expectedBalance < 0 ? "text-expense" : "text-income"}`}>
+                    R$ {store.expectedBalance.toLocaleString("pt-BR")}
+                  </p>
+                </div>
+              </div>
+            </Link>
           </section>
+
 
           {/* 04 — Cartões */}
           <section>
