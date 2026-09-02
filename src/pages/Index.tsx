@@ -11,7 +11,6 @@ import { HeroChart } from "@/components/HeroChart";
 import { CalendarCard } from "@/components/CalendarCard";
 import { FinancialHealthScore } from "@/components/FinancialHealthScore";
 import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
-import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { CashflowSankey } from "@/components/CashflowSankey";
@@ -263,12 +262,6 @@ const Index = () => {
               onRemove={store.removeCreditor}
               onUpdate={store.updateCreditor}
             />
-          </section>
-
-          {/* 09 — Cenários */}
-          <section>
-            <SectionHead index="09" title="Cenários de Orçamento" subtitle="Simule e compare a cobertura" />
-            <BudgetScenarios />
           </section>
         </div>
       </div>
