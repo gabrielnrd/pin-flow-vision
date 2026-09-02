@@ -263,11 +263,6 @@ const Index = () => {
               onUpdate={store.updateCreditor}
             />
           </section>
-
-          {/* 09 — Cenários */}
-          <section>
-            <SectionHead index="09" title="Cenários de Orçamento" subtitle="Simule e compare a cobertura" />
-          </section>
         </div>
       </div>
 
