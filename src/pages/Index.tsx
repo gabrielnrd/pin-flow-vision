@@ -2,7 +2,6 @@ import { useFinanceStore } from "@/stores/financeStore";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { BankCard } from "@/components/BankCard";
 import { AddBankCard } from "@/components/AddBankCard";
-import { CashflowCard } from "@/components/CashflowCard";
 import { InstallmentTimeline } from "@/components/InstallmentTimeline";
 import { CreditorWidget } from "@/components/CreditorWidget";
 import { SpendingChart } from "@/components/SpendingChart";
@@ -16,7 +15,8 @@ import { BudgetScenarios } from "@/components/BudgetScenarios";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { CashflowSankey } from "@/components/CashflowSankey";
-import { EyeOff, Eye } from "lucide-react";
+import { EyeOff, Eye, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 /** Editorial section head: numbered mono label + hairline rule */

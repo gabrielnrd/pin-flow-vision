@@ -16,6 +16,7 @@ import RendaPage from "./pages/Renda";
 import TradePage from "./pages/Trade";
 import DividaPage from "./pages/Divida";
 import CarteiraPage from "./pages/Carteira";
+import FluxoPage from "./pages/Fluxo";
 import LifeGamePage from "./pages/LifeGame";
 import DesejosPage from "./pages/Desejos";
 import AuthPage from "./pages/Auth";
@@ -61,6 +62,7 @@ function AppRoutes() {
         <Route path="/trade" element={<TradePage />} />
         <Route path="/divida" element={<DividaPage />} />
         <Route path="/carteira" element={<CarteiraPage />} />
+        <Route path="/fluxo" element={<FluxoPage />} />
         <Route path="/lifegame" element={<LifeGamePage />} />
         <Route path="/desejos" element={<DesejosPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
