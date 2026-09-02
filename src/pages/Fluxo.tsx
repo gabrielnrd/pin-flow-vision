@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 /** Quick entry panel for debit / cash movements of the selected month. */
 function QuickEntryPanel() {
   const { selectedMonth, currentCashflow, addCashflowItem, expectedBalance } = useFinanceStore();
-  const [kind, setKind] = useState<"expenses" | "income">("expenses");
+  const [kind, setKind] = useState<"expenses" | "incomes">("expenses");
   const [label, setLabel] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("outros");
@@ -30,7 +30,7 @@ function QuickEntryPanel() {
     setLabel(""); setAmount(""); setCategory("outros");
   };
 
-  const projected = expectedBalance + (kind === "income" ? 1 : -1) * (parseFloat(amount) || 0);
+  const projected = expectedBalance + (kind === "incomes" ? 1 : -1) * (parseFloat(amount) || 0);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-3">
@@ -47,8 +47,8 @@ function QuickEntryPanel() {
           <ArrowDownCircle className="w-3.5 h-3.5" /> Saída
         </button>
         <button
-          onClick={() => setKind("income")}
-          className={`flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-medium border transition-colors ${kind === "income" ? "border-income text-income bg-income/10" : "border-border text-muted-foreground hover:text-foreground"}`}
+          onClick={() => setKind("incomes")}
+          className={`flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-medium border transition-colors ${kind === "incomes" ? "border-income text-income bg-income/10" : "border-border text-muted-foreground hover:text-foreground"}`}
         >
           <ArrowUpCircle className="w-3.5 h-3.5" /> Entrada
         </button>
