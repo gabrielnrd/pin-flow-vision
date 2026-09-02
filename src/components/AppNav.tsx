@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Target, DollarSign, Sun, Moon, Contrast, TrendingUp, TrendingDown, Gamepad2, Wallet, Sparkles } from "lucide-react";
+import { LayoutDashboard, Target, DollarSign, Sun, Moon, Contrast, TrendingUp, TrendingDown, ArrowLeftRight, Gamepad2, Wallet, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -25,6 +25,9 @@ export function AppNav() {
         </NavLink>
         <NavLink to="/renda" className={({ isActive }) => cn("flex items-center gap-1.5 px-2.5 h-full font-mono text-[11px] uppercase tracking-[0.14em] border-b-2 transition-colors", isActive ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
           <DollarSign className="w-3.5 h-3.5" /> Renda
+        </NavLink>
+        <NavLink to="/fluxo" className={({ isActive }) => cn("flex items-center gap-1.5 px-2.5 h-full font-mono text-[11px] uppercase tracking-[0.14em] border-b-2 transition-colors", isActive ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+          <ArrowLeftRight className="w-3.5 h-3.5" /> Fluxo
         </NavLink>
         <NavLink to="/divida" className={({ isActive }) => cn("flex items-center gap-1.5 px-2.5 h-full font-mono text-[11px] uppercase tracking-[0.14em] border-b-2 transition-colors", isActive ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
           <TrendingDown className="w-3.5 h-3.5" /> Dívida

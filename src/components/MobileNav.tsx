@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, Target, TrendingDown, Wallet, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { DollarSign, TrendingUp, Gamepad2, X, Sparkles } from "lucide-react";
+import { DollarSign, TrendingUp, Gamepad2, X, Sparkles, ArrowLeftRight } from "lucide-react";
 
 const mainTabs = [
   { to: "/", icon: LayoutDashboard, label: "Home", end: true },
@@ -12,6 +12,7 @@ const mainTabs = [
 ];
 
 const moreTabs = [
+  { to: "/fluxo", icon: ArrowLeftRight, label: "Fluxo" },
   { to: "/desejos", icon: Sparkles, label: "Desejos" },
   { to: "/renda", icon: DollarSign, label: "Renda" },
   { to: "/trade", icon: TrendingUp, label: "Trade" },
