@@ -747,14 +747,8 @@ export default function DividaPage() {
         </div>
       </section>
 
-      {/* Simulator + History + Gauge */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <PayoffSimulator creditors={store.creditors} />
-        <div className="space-y-5">
-          <FinancialFearGreedGauge />
-          <PaymentHistory cashflowMonths={store.cashflowMonths} />
-        </div>
-      </div>
+      {/* History */}
+      <PaymentHistory cashflowMonths={store.cashflowMonths} />
 
       {/* Creditors CRUD */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
