@@ -73,10 +73,10 @@ export function SpendingChart({ banks }: SpendingChartProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-3 flex-1 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 flex-1 min-w-0">
           {data.map((d) => (
-            <div key={d.name} className="flex items-center gap-3">
-              <div className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+            <div key={d.name} className="flex items-center gap-2.5">
+              <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-foreground truncate">{d.name}</p>
                 <p className="text-[11px] text-muted-foreground text-money">
