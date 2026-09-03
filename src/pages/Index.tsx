@@ -14,9 +14,9 @@ import { IncomeCoverageAI } from "@/components/IncomeCoverageAI";
 import { AnnualSubscriptionsCard } from "@/components/AnnualSubscriptionsCard";
 import { BalanceProjectionChart } from "@/components/BalanceProjectionChart";
 import { CashflowSankey } from "@/components/CashflowSankey";
-import { EyeOff, Eye, ArrowRight } from "lucide-react";
+import { EyeOff, Eye, ArrowRight, GripVertical, LayoutGrid, RotateCcw, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /** Editorial section head: numbered mono label + hairline rule */
 function SectionHead({
@@ -51,44 +51,69 @@ function SectionHead({
   );
 }
 
+const SECTION_IDS = [
+  "panorama",
+  "cobertura",
+  "fluxo",
+  "cartoes",
+  "vencimentos",
+  "assinaturas",
+  "analise",
+  "credores",
+] as const;
+type SectionId = (typeof SECTION_IDS)[number];
+
+const ORDER_KEY = "dash-section-order-v1";
+
 const Index = () => {
   const store = useFinanceStore();
   const [showCancelled, setShowCancelled] = useState(false);
   const [dragBankId, setDragBankId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
+  const [editLayout, setEditLayout] = useState(false);
+  const [order, setOrder] = useState<SectionId[]>(() => {
+    try {
+      const raw = localStorage.getItem(ORDER_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as SectionId[];
+        const valid = parsed.filter((id) => (SECTION_IDS as readonly string[]).includes(id));
+        const missing = SECTION_IDS.filter((id) => !valid.includes(id));
+        return [...valid, ...missing];
+      }
+    } catch {
+      /* ignore */
+    }
+    return [...SECTION_IDS];
+  });
+  const [dragSection, setDragSection] = useState<SectionId | null>(null);
+  const [overSection, setOverSection] = useState<SectionId | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem(ORDER_KEY, JSON.stringify(order));
+  }, [order]);
+
+  const moveSection = (from: SectionId, to: SectionId) => {
+    setOrder((cur) => {
+      const next = [...cur];
+      const fromIdx = next.indexOf(from);
+      const toIdx = next.indexOf(to);
+      if (fromIdx < 0 || toIdx < 0) return cur;
+      next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, from);
+      return next;
+    });
+  };
+
   const activeBanks = store.banks.filter((b) => b.status !== "cancelado");
   const cancelledBanks = store.banks.filter((b) => b.status === "cancelado");
 
-  return (
-    <div className="relative min-h-screen bg-background">
-      {/* Faint paper grid, no glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.35]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)",
-          backgroundSize: "96px 96px",
-          maskImage: "radial-gradient(ellipse at 50% 0%, black 0%, transparent 75%)",
-          WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, black 0%, transparent 75%)",
-        }}
-      />
-
-      <div className="px-4 py-8 sm:px-8 lg:px-12 max-w-[1440px] mx-auto pb-28 md:pb-16">
-        <DashboardHeader
-          totalDebt={store.totalDebt}
-          expectedBalance={store.expectedBalance}
-          monthLabel={`${store.currentCashflow.month} ${store.currentCashflow.year}`}
-          selectedMonth={store.selectedMonth}
-          totalMonths={store.cashflowMonths.length}
-          onMonthChange={store.setSelectedMonth}
-          cashflowMonths={store.cashflowMonths}
-        />
-
-        <div className="space-y-14">
-          {/* 01 — Panorama (hero bento) */}
-          <section>
+  const sections: Record<SectionId, { title: string; node: React.ReactNode }> = useMemo(
+    () => ({
+      panorama: {
+        title: "Panorama",
+        node: (
+          <>
             <SectionHead index="01" title="Panorama" subtitle="Dívida, saldo e meta do período" />
             <HeroChart
               cashflowMonths={store.cashflowMonths}
@@ -102,10 +127,13 @@ const Index = () => {
               creditors={store.creditors}
               cardExpensesForMonth={store.cardExpensesForMonth}
             />
-          </section>
-
-          {/* 02 — Cobertura de renda + saúde + distribuição (bento) */}
-          <section>
+          </>
+        ),
+      },
+      cobertura: {
+        title: "Cobertura & Saúde",
+        node: (
+          <>
             <SectionHead index="02" title="Cobertura & Saúde" subtitle="A renda cobre os próximos meses?" />
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 auto-rows-min">
               <div className="lg:col-span-4">
@@ -118,10 +146,13 @@ const Index = () => {
                 <SpendingChart banks={store.banks} />
               </div>
             </div>
-          </section>
-
-          {/* 03 — Atalho para o fluxo do mês */}
-          <section>
+          </>
+        ),
+      },
+      fluxo: {
+        title: "Fluxo do Mês",
+        node: (
+          <>
             <SectionHead
               index="03"
               title="Fluxo do Mês"
@@ -160,11 +191,13 @@ const Index = () => {
                 </div>
               </div>
             </Link>
-          </section>
-
-
-          {/* 04 — Cartões */}
-          <section>
+          </>
+        ),
+      },
+      cartoes: {
+        title: "Cartões de Crédito",
+        node: (
+          <>
             <SectionHead
               index="04"
               title="Cartões de Crédito"
@@ -219,10 +252,13 @@ const Index = () => {
                 ))}
               <AddBankCard onAdd={store.addBank} />
             </div>
-          </section>
-
-          {/* 05 — Vencimentos */}
-          <section>
+          </>
+        ),
+      },
+      vencimentos: {
+        title: "Vencimentos",
+        node: (
+          <>
             <SectionHead index="05" title="Vencimentos" subtitle="Parcelas e calendário" />
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
               <InstallmentTimeline
@@ -234,25 +270,34 @@ const Index = () => {
               />
               <CalendarCard installments={store.allInstallments} />
             </div>
-          </section>
-
-          {/* 06 — Assinaturas */}
-          <section>
+          </>
+        ),
+      },
+      assinaturas: {
+        title: "Assinaturas & Serviços",
+        node: (
+          <>
             <SectionHead index="06" title="Assinaturas & Serviços" subtitle="Custo anual recorrente" />
             <AnnualSubscriptionsCard />
-          </section>
-
-          {/* 07 — Análise */}
-          <section>
+          </>
+        ),
+      },
+      analise: {
+        title: "Análise & Visualização",
+        node: (
+          <>
             <SectionHead index="07" title="Análise & Visualização" subtitle="Projeções e fluxo de caixa" />
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               <BalanceProjectionChart />
               <CashflowSankey />
             </div>
-          </section>
-
-          {/* 08 — Credores */}
-          <section>
+          </>
+        ),
+      },
+      credores: {
+        title: "Credores",
+        node: (
+          <>
             <SectionHead index="08" title="Credores" subtitle="Dívidas pessoais" />
             <CreditorWidget
               creditors={store.creditors}
@@ -262,7 +307,106 @@ const Index = () => {
               onRemove={store.removeCreditor}
               onUpdate={store.updateCreditor}
             />
-          </section>
+          </>
+        ),
+      },
+    }),
+    [store, showCancelled, dragBankId, dragOverId, activeBanks, cancelledBanks]
+  );
+
+  return (
+    <div className="relative min-h-screen bg-background">
+      {/* Faint paper grid, no glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)",
+          backgroundSize: "96px 96px",
+          maskImage: "radial-gradient(ellipse at 50% 0%, black 0%, transparent 75%)",
+          WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, black 0%, transparent 75%)",
+        }}
+      />
+
+      <div className="px-4 py-8 sm:px-8 lg:px-12 max-w-[1440px] mx-auto pb-28 md:pb-16">
+        <DashboardHeader
+          totalDebt={store.totalDebt}
+          expectedBalance={store.expectedBalance}
+          monthLabel={`${store.currentCashflow.month} ${store.currentCashflow.year}`}
+          selectedMonth={store.selectedMonth}
+          totalMonths={store.cashflowMonths.length}
+          onMonthChange={store.setSelectedMonth}
+          cashflowMonths={store.cashflowMonths}
+        />
+
+        {/* Layout controls */}
+        <div className="flex items-center justify-end gap-2 mb-6">
+          {editLayout && (
+            <button
+              onClick={() => setOrder([...SECTION_IDS])}
+              className="flex items-center gap-1.5 text-[11px] label-mono hover:text-foreground transition-colors border border-border rounded-md px-2.5 py-1.5"
+            >
+              <RotateCcw className="w-3 h-3" /> Restaurar ordem
+            </button>
+          )}
+          <button
+            onClick={() => setEditLayout((s) => !s)}
+            className={`flex items-center gap-1.5 text-[11px] label-mono transition-colors border rounded-md px-2.5 py-1.5 ${
+              editLayout
+                ? "border-foreground text-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {editLayout ? <Lock className="w-3 h-3" /> : <LayoutGrid className="w-3 h-3" />}
+            {editLayout ? "Concluir layout" : "Editar layout"}
+          </button>
+        </div>
+
+        {editLayout && (
+          <p className="text-xs text-muted-foreground mb-6">
+            Arraste as seções pela alça para reorganizar o dashboard. A ordem é salva automaticamente.
+          </p>
+        )}
+
+        <div className="space-y-14">
+          {order.map((id) => {
+            const section = sections[id];
+            if (!section) return null;
+            return (
+              <section
+                key={id}
+                draggable={editLayout}
+                onDragStart={() => editLayout && setDragSection(id)}
+                onDragEnd={() => { setDragSection(null); setOverSection(null); }}
+                onDragOver={(e) => {
+                  if (!editLayout || !dragSection) return;
+                  e.preventDefault();
+                  if (dragSection !== id) setOverSection(id);
+                }}
+                onDragLeave={() => setOverSection((cur) => (cur === id ? null : cur))}
+                onDrop={(e) => {
+                  if (!editLayout) return;
+                  e.preventDefault();
+                  if (dragSection && dragSection !== id) moveSection(dragSection, id);
+                  setDragSection(null); setOverSection(null);
+                }}
+                className={`relative transition-all duration-200 ${
+                  editLayout ? "rounded-2xl border border-dashed border-border/70 p-4 pt-10" : ""
+                } ${dragSection === id ? "opacity-40 scale-[0.99]" : ""} ${
+                  overSection === id ? "border-foreground/60 ring-1 ring-foreground/30" : ""
+                }`}
+              >
+                {editLayout && (
+                  <div className="absolute top-2 left-3 flex items-center gap-1.5 cursor-grab active:cursor-grabbing select-none">
+                    <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="label-mono">{section.title}</span>
+                  </div>
+                )}
+                {section.node}
+              </section>
+            );
+          })}
         </div>
       </div>
 
