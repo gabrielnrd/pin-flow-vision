@@ -341,7 +341,7 @@ const Index = () => {
         />
 
         {/* Layout controls */}
-        <div className="flex items-center justify-end gap-2 mb-6">
+        <div className="flex items-center justify-end gap-2 -mt-8 mb-2">
           {editLayout && (
             <button
               onClick={() => setOrder([...SECTION_IDS])}
