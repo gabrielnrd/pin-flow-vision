@@ -341,7 +341,7 @@ const Index = () => {
         />
 
         {/* Layout controls */}
-        <div className="flex items-center justify-end gap-2 mb-6">
+        <div className="flex items-center justify-end gap-2 -mt-8 mb-2">
           {editLayout && (
             <button
               onClick={() => setOrder([...SECTION_IDS])}
@@ -364,7 +364,7 @@ const Index = () => {
         </div>
 
         {editLayout && (
-          <p className="text-xs text-muted-foreground mb-6">
+          <p className="text-xs text-muted-foreground mb-4">
             Arraste as seções pela alça para reorganizar o dashboard. A ordem é salva automaticamente.
           </p>
         )}
