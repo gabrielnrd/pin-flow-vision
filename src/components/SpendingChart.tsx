@@ -36,21 +36,21 @@ export function SpendingChart({ banks }: SpendingChartProps) {
   const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="glass-card rounded-2xl p-5 animate-float-in" style={{ animationDelay: "100ms" }}>
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+    <div className="glass-card rounded-2xl p-6 animate-float-in" style={{ animationDelay: "100ms" }}>
+      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-5">
         Distribuição por Banco
       </h3>
 
-      <div className="flex items-center gap-4">
-        <div className="w-32 h-32 shrink-0">
+      <div className="flex items-center gap-6">
+        <div className="w-44 h-44 sm:w-52 sm:h-52 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={35}
-                outerRadius={55}
+                innerRadius={48}
+                outerRadius={78}
                 paddingAngle={3}
                 dataKey="value"
                 strokeWidth={0}
@@ -73,12 +73,17 @@ export function SpendingChart({ banks }: SpendingChartProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-2 flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 flex-1 min-w-0">
           {data.map((d) => (
-            <div key={d.name} className="flex items-center gap-2">
+            <div key={d.name} className="flex items-center gap-2.5">
               <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-              <span className="text-xs text-muted-foreground flex-1">{d.name}</span>
-              <span className="text-xs text-money text-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-foreground truncate">{d.name}</p>
+                <p className="text-[11px] text-muted-foreground text-money">
+                  R$ {d.value.toLocaleString("pt-BR")}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-money text-foreground shrink-0">
                 {((d.value / total) * 100).toFixed(0)}%
               </span>
             </div>
@@ -86,10 +91,10 @@ export function SpendingChart({ banks }: SpendingChartProps) {
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-border/50 text-center relative overflow-hidden group/total">
+      <div className="mt-5 pt-4 border-t border-border/50 text-center relative overflow-hidden group/total">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-expense/[0.04] to-transparent opacity-0 group-hover/total:opacity-100 transition-opacity duration-500" />
         <p className="text-xs text-muted-foreground">Dívida Total em Cartões</p>
-        <p className="text-xl text-money text-expense">R$ {total.toLocaleString("pt-BR")}</p>
+        <p className="text-2xl text-money text-expense">R$ {total.toLocaleString("pt-BR")}</p>
       </div>
     </div>
   );
