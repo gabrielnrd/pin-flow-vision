@@ -248,6 +248,66 @@
     @apply h-px w-full bg-border;
   }
 
+  /* ---- Widget cards (KPI topo): superfície escura, acento neon ---- */
+  :root {
+    --widget-surface: 240 6% 5%;
+    --widget-line: 0 0% 100%;
+    --widget-accent-debt: 6 92% 62%;
+    --widget-accent-next: 190 95% 55%;
+    --widget-accent-goal: 84 82% 55%;
+  }
+
+  .monochrome {
+    --widget-accent-debt: 0 0% 92%;
+    --widget-accent-next: 0 0% 72%;
+    --widget-accent-goal: 0 0% 100%;
+  }
+
+  .widget-card {
+    background: hsl(var(--widget-surface));
+    border: 1px solid hsl(var(--widget-line) / 0.07);
+    border-radius: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .widget-card::before {
+    content: "";
+    position: absolute;
+    inset: -40% 40% 55% -20%;
+    background: radial-gradient(closest-side, hsl(var(--widget-accent) / 0.28), transparent 70%);
+    pointer-events: none;
+  }
+
+  .widget-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--widget-accent) / 0.35);
+    box-shadow: 0 18px 40px -24px hsl(var(--widget-accent) / 0.7);
+  }
+
+  .widget-accent {
+    color: hsl(var(--widget-accent));
+  }
+
+  .widget-value {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: -0.04em;
+    color: hsl(var(--widget-accent));
+    text-shadow: 0 0 24px hsl(var(--widget-accent) / 0.35);
+  }
+
+  .widget-label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    @apply text-[10px] uppercase tracking-[0.2em];
+    color: hsl(var(--widget-line) / 0.55);
+  }
+
+  .widget-sub {
+    color: hsl(var(--widget-line) / 0.42);
+  }
+
+
 
   .glow-nubank {
     box-shadow: 0 0 40px -10px hsl(280 97% 38% / 0.3);

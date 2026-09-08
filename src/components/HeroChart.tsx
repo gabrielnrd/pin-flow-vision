@@ -261,77 +261,107 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
 
         <div className="flex flex-col gap-3 stagger-children">
 
-          <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-1">
-            <div className="w-11 h-11 rounded-xl bg-expense/15 flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-expense" />
+          {/* Dívida Total */}
+          <div
+            className="widget-card p-4 flex-1 flex flex-col justify-between"
+            style={{ ["--widget-accent" as string]: "var(--widget-accent-debt)" }}
+          >
+            <div className="relative flex items-start justify-between gap-3">
+              <span className="widget-label">Dívida Total</span>
+              <DebtTrendBadge current={totalDebt} previous={totalDebt * 1.05} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-xs text-muted-foreground">Dívida Total</p>
-                <DebtTrendBadge current={totalDebt} previous={totalDebt * 1.05} />
+            <div className="relative flex items-end justify-between gap-3 mt-2">
+              <p className="widget-value text-[2rem] leading-none font-semibold">
+                <AnimatedNumber value={totalDebt} prefix="R$ " decimals={0} />
+              </p>
+              <div className="flex items-end gap-[3px] h-8 shrink-0">
+                {breakdownItems.slice(0, 12).map((item, i) => {
+                  const max = Math.max(...breakdownItems.map((b) => b.value), 1);
+                  return (
+                    <span
+                      key={i}
+                      className="w-[5px] rounded-full"
+                      style={{
+                        height: `${Math.max(12, (item.value / max) * 100)}%`,
+                        background: "hsl(var(--widget-accent))",
+                        opacity: 0.35 + (item.value / max) * 0.65,
+                      }}
+                    />
+                  );
+                })}
               </div>
-              <p className="text-2xl text-money text-expense"><AnimatedNumber value={totalDebt} prefix="R$ " decimals={0} /></p>
-              <p className="text-[10px] text-muted-foreground">Cartões + Credores</p>
             </div>
+            <p className="relative text-[10px] widget-sub mt-2">Cartões + Credores</p>
           </div>
 
-          <div className="glass-card rounded-2xl p-4 flex-1">
+          {/* Próximo Total */}
+          <div
+            className="widget-card p-4 flex-1"
+            style={{ ["--widget-accent" as string]: "var(--widget-accent-next)" }}
+          >
             <div
-              className="flex items-center gap-4 cursor-pointer"
+              className="relative cursor-pointer"
               onClick={() => setShowBreakdown(!showBreakdown)}
             >
-              <div className="w-11 h-11 rounded-xl bg-chart-2/15 flex items-center justify-center shrink-0">
-                <TrendingDown className="w-5 h-5 text-chart-2" />
-              </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <span className="widget-label">Próximo Total</span>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs text-muted-foreground">Próximo Total</p>
                   {totalDebt > 0 && cumulativeCardPayments > 0 && (
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-income/10 text-[10px] font-semibold text-income">
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold widget-accent">
                       <TrendingDown className="w-3 h-3" />
                       −{((cumulativeCardPayments / totalDebt) * 100).toFixed(1)}%
                     </span>
                   )}
+                  <span className="widget-sub">
+                    {showBreakdown ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </span>
                 </div>
-                <p className="text-2xl text-money text-chart-2">
-                  <AnimatedNumber value={Math.max(totalDebt - cumulativeCardPayments, 0)} prefix="R$ " decimals={0} />
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  Até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year} (−R$ {cumulativeCardPayments.toLocaleString("pt-BR")})
-                </p>
               </div>
-              <div className="text-muted-foreground">
-                {showBreakdown ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <p className="widget-value text-[2rem] leading-none font-semibold mt-2">
+                <AnimatedNumber value={Math.max(totalDebt - cumulativeCardPayments, 0)} prefix="R$ " decimals={0} />
+              </p>
+              <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--widget-line) / 0.08)" }}>
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${totalDebt > 0 ? Math.min(100, (cumulativeCardPayments / totalDebt) * 100) : 0}%`,
+                    background: "hsl(var(--widget-accent))",
+                    boxShadow: "0 0 12px hsl(var(--widget-accent) / 0.8)",
+                  }}
+                />
               </div>
+              <p className="text-[10px] widget-sub mt-2">
+                Até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year} (−R$ {cumulativeCardPayments.toLocaleString("pt-BR")})
+              </p>
             </div>
 
             {showBreakdown && (
-              <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5 animate-float-in">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Composição da Dívida</p>
+              <div className="relative mt-3 pt-3 space-y-1.5 animate-float-in" style={{ borderTop: "1px solid hsl(var(--widget-line) / 0.08)" }}>
+                <p className="widget-label mb-2">Composição da Dívida</p>
                 {breakdownItems.map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
-                    <div className="w-5 h-5 rounded-md bg-secondary/80 flex items-center justify-center shrink-0">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: "hsl(var(--widget-line) / 0.08)" }}>
                       {item.icon === "card" ? (
-                        <CreditCard className="w-3 h-3 text-muted-foreground" />
+                        <CreditCard className="w-3 h-3 widget-sub" />
                       ) : (
-                        <Users className="w-3 h-3 text-muted-foreground" />
+                        <Users className="w-3 h-3 widget-sub" />
                       )}
                     </div>
-                    <span className="flex-1 text-muted-foreground truncate">{item.label}</span>
-                    <span className="text-expense font-medium tabular-nums">
+                    <span className="flex-1 widget-sub truncate">{item.label}</span>
+                    <span className="font-medium tabular-nums" style={{ color: "hsl(var(--widget-line) / 0.85)" }}>
                       R$ {item.value.toLocaleString("pt-BR")}
                     </span>
                   </div>
                 ))}
                 {cumulativeCardPayments > 0 && (
                   <>
-                    <div className="border-t border-dashed border-border/50 my-2" />
+                    <div className="my-2" style={{ borderTop: "1px dashed hsl(var(--widget-line) / 0.12)" }} />
                     <div className="flex items-center gap-2 text-sm">
-                      <div className="w-5 h-5 rounded-md bg-income/10 flex items-center justify-center shrink-0">
-                        <Check className="w-3 h-3 text-income" />
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: "hsl(var(--widget-accent) / 0.15)" }}>
+                        <Check className="w-3 h-3 widget-accent" />
                       </div>
-                      <span className="flex-1 text-income">Pagamentos até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}</span>
-                      <span className="text-income font-medium tabular-nums">
+                      <span className="flex-1 widget-accent">Pagamentos até {cashflowMonths[selectedMonth]?.month.slice(0, 3)}</span>
+                      <span className="widget-accent font-medium tabular-nums">
                         −R$ {cumulativeCardPayments.toLocaleString("pt-BR")}
                       </span>
                     </div>
@@ -341,31 +371,49 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
             )}
           </div>
 
-          <div className="glass-card rounded-2xl p-4 flex items-center gap-4 flex-1 group">
-            <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center">
-              <Target className="w-5 h-5 text-primary" />
+          {/* Meta de Economia */}
+          <div
+            className="widget-card p-4 flex-1 group flex flex-col justify-between"
+            style={{ ["--widget-accent" as string]: "var(--widget-accent-goal)" }}
+          >
+            <div className="relative flex items-start justify-between gap-3">
+              <span className="widget-label">Meta de Economia</span>
+              <Target className="w-4 h-4 widget-accent" />
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground">Meta de Economia</p>
-              {editingGoal ? (
-                <div className="flex items-center gap-1">
-                  <Input type="number" value={goalValue} onChange={(e) => setGoalValue(e.target.value)} className="h-8 text-sm rounded-lg w-28" autoFocus />
-                  <button onClick={handleSaveGoal} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-4 h-4" /></button>
-                  <button onClick={() => setEditingGoal(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-4 h-4" /></button>
-                </div>
-              ) : (
+            {editingGoal ? (
+              <div className="relative flex items-center gap-1 mt-2">
+                <Input type="number" value={goalValue} onChange={(e) => setGoalValue(e.target.value)} className="h-8 text-sm rounded-lg w-28" autoFocus />
+                <button onClick={handleSaveGoal} className="p-1 rounded hover:bg-income/20 text-income"><Check className="w-4 h-4" /></button>
+                <button onClick={() => setEditingGoal(false)} className="p-1 rounded hover:bg-expense/20 text-expense"><X className="w-4 h-4" /></button>
+              </div>
+            ) : (
+              <>
                 <p
-                  className="text-2xl text-money text-foreground cursor-pointer hover:text-primary transition-colors"
+                  className="relative widget-value text-[2rem] leading-none font-semibold mt-2 cursor-pointer"
                   onClick={() => { setGoalValue(String(savingsGoalMonth)); setEditingGoal(true); }}
                 >
                   R$ {savingsGoalMonth.toLocaleString("pt-BR")}
-                  <span className="text-sm text-muted-foreground font-normal">/mês</span>
-                  <Pencil className="w-3 h-3 inline ml-2 opacity-0 group-hover:opacity-50" />
+                  <span className="text-xs widget-sub font-normal ml-1">/mês</span>
+                  <Pencil className="w-3 h-3 inline ml-2 opacity-0 group-hover:opacity-60" />
                 </p>
-              )}
-            </div>
+                <div className="relative mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--widget-line) / 0.08)" }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${savingsGoalMonth > 0 ? Math.min(100, Math.max(0, (expectedBalance / savingsGoalMonth) * 100)) : 0}%`,
+                      background: "hsl(var(--widget-accent))",
+                      boxShadow: "0 0 12px hsl(var(--widget-accent) / 0.8)",
+                    }}
+                  />
+                </div>
+                <p className="relative text-[10px] widget-sub mt-2">
+                  Saldo previsto: R$ {expectedBalance.toLocaleString("pt-BR")}
+                </p>
+              </>
+            )}
           </div>
         </div>
+
       </div>
     </section>
   );
