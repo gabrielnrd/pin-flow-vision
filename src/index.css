@@ -238,7 +238,7 @@
     z-index: 0;
   }
 
-  .glass-card > * {
+  .glass-card > *:not([class*="absolute"]) {
     position: relative;
     z-index: 1;
   }
