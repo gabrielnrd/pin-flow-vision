@@ -228,8 +228,12 @@
   .glass-card::before {
     content: "";
     position: absolute;
-    inset: -40% 45% 60% -20%;
-    background: radial-gradient(closest-side, hsl(var(--widget-accent) / 0.18), transparent 70%);
+    top: -110px;
+    left: -110px;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: radial-gradient(closest-side, hsl(var(--widget-accent) / 0.14), transparent 72%);
     pointer-events: none;
     z-index: 0;
   }
