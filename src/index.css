@@ -515,7 +515,8 @@
   }
 
   .monochrome .glass-card {
-    @apply bg-card/70 border-white/10 shadow-none;
+    background: hsl(var(--widget-surface));
+    box-shadow: none;
   }
   .monochrome .glass-card:hover {
     border-color: hsl(0 0% 100% / 0.25);
