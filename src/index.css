@@ -214,24 +214,38 @@
 }
 
 @layer utilities {
-  /* Editorial surface: flat paper, hairline rule, no glow */
+  /* Widget surface: same language as the KPI widgets, theme aware */
   .glass-card {
-    @apply bg-card border rounded-lg;
-    border-color: hsl(var(--border));
+    background: hsl(var(--widget-surface));
+    border: 1px solid hsl(var(--widget-line) / var(--widget-border-alpha));
+    border-radius: 1.5rem;
+    position: relative;
+    overflow: hidden;
     box-shadow: none;
     transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
   }
 
-  .glass-card:hover {
-    border-color: hsl(var(--foreground) / 0.28);
-    box-shadow: 0 1px 0 0 hsl(var(--foreground) / 0.06), 0 12px 28px -20px hsl(var(--foreground) / 0.35);
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    top: -110px;
+    left: -110px;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: radial-gradient(closest-side, hsl(var(--widget-accent) / 0.14), transparent 72%);
+    pointer-events: none;
+    z-index: 0;
   }
 
-  .light .glass-card {
-    @apply bg-card;
+  .glass-card > * {
+    position: relative;
+    z-index: 1;
   }
-  .light .glass-card:hover {
-    border-color: hsl(var(--foreground) / 0.3);
+
+  .glass-card:hover {
+    border-color: hsl(var(--widget-accent) / 0.3);
+    box-shadow: 0 18px 40px -26px hsl(var(--widget-accent) / 0.55);
   }
 
   .glass-card-hover {
@@ -248,16 +262,32 @@
     @apply h-px w-full bg-border;
   }
 
-  /* ---- Widget cards (KPI topo): superfície escura, acento neon ---- */
+  /* ---- Widget design language, theme aware ---- */
   :root {
     --widget-surface: 240 6% 5%;
     --widget-line: 0 0% 100%;
+    --widget-border-alpha: 0.07;
+    --widget-accent: 190 95% 55%;
     --widget-accent-debt: 6 92% 62%;
     --widget-accent-next: 190 95% 55%;
     --widget-accent-goal: 84 82% 55%;
   }
 
+  .light {
+    --widget-surface: 42 40% 98%;
+    --widget-line: 0 0% 8%;
+    --widget-border-alpha: 0.12;
+    --widget-accent: 20 42% 40%;
+    --widget-accent-debt: 8 62% 44%;
+    --widget-accent-next: 200 60% 34%;
+    --widget-accent-goal: 155 42% 28%;
+  }
+
   .monochrome {
+    --widget-surface: 0 0% 5%;
+    --widget-line: 0 0% 100%;
+    --widget-border-alpha: 0.14;
+    --widget-accent: 0 0% 100%;
     --widget-accent-debt: 0 0% 92%;
     --widget-accent-next: 0 0% 72%;
     --widget-accent-goal: 0 0% 100%;
@@ -489,7 +519,8 @@
   }
 
   .monochrome .glass-card {
-    @apply bg-card/70 border-white/10 shadow-none;
+    background: hsl(var(--widget-surface));
+    box-shadow: none;
   }
   .monochrome .glass-card:hover {
     border-color: hsl(0 0% 100% / 0.25);
