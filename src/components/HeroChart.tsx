@@ -190,7 +190,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
   return (
     <section className="mb-8 animate-float-in">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-        <div className="glass-card rounded-2xl p-5 relative overflow-hidden group">
+        <div className="glass-card rounded-2xl p-5 relative overflow-hidden group flex flex-col">
           {/* Ambient chart glow */}
           <div aria-hidden className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-60" />
           <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary/20 blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
@@ -203,7 +203,7 @@ export function HeroChart({ cashflowMonths, totalDebt, totalExpense, expectedBal
               {cashflowMonths[selectedMonth]?.month.slice(0, 3)}/{cashflowMonths[selectedMonth]?.year}
             </span>
           </div>
-          <div key={selectedMonth} className="relative h-[240px] animate-float-in">
+          <div key={selectedMonth} className="relative flex-1 min-h-[240px] animate-float-in">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                 <defs>
