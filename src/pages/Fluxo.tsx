@@ -137,6 +137,10 @@ const FluxoPage = () => {
           <div className="hairline mt-5" />
         </header>
 
+        <div className="mb-4">
+          <PaymentSessions />
+        </div>
+
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-4 items-start">
           <div key={`cf-${store.selectedMonth}`} className="animate-float-in">
             <CashflowCard
