@@ -1,8 +1,16 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Target, TrendingDown, Wallet, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Target, TrendingDown, Wallet, MoreHorizontal, Sun, Moon, Contrast } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DollarSign, TrendingUp, Gamepad2, X, Sparkles, ArrowLeftRight } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
+import { Button } from "@/components/ui/button";
+
+const THEME_LABELS = {
+  dark: "Escuro",
+  light: "Claro",
+  monochrome: "P&B",
+};
 
 const mainTabs = [
   { to: "/", icon: LayoutDashboard, label: "Home", end: true },
@@ -22,7 +30,9 @@ const moreTabs = [
 export function MobileNav() {
   const [moreOpen, setMoreOpen] = useState(false);
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const isMoreActive = moreTabs.some(t => location.pathname === t.to);
+  const ThemeIcon = theme === "dark" ? Moon : theme === "light" ? Sun : Contrast;
 
   return (
     <>
@@ -34,21 +44,37 @@ export function MobileNav() {
       {/* Expanded more menu */}
       {moreOpen && (
         <div className="fixed bottom-20 left-4 right-4 z-[99] md:hidden animate-in slide-in-from-bottom-4 duration-200">
-          <div className="bg-card border border-border/50 rounded-2xl p-3 grid grid-cols-4 gap-2">
-            {moreTabs.map(tab => (
-              <NavLink
-                key={tab.to}
-                to={tab.to}
-                onClick={() => setMoreOpen(false)}
-                className={({ isActive }) => cn(
-                  "flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-xs font-medium transition-all",
-                  isActive ? "bg-primary/15 text-primary" : "text-muted-foreground"
-                )}
+          <div className="bg-card border border-border/50 rounded-2xl p-3">
+            <div className="grid grid-cols-4 gap-2">
+              {moreTabs.map(tab => (
+                <NavLink
+                  key={tab.to}
+                  to={tab.to}
+                  onClick={() => setMoreOpen(false)}
+                  className={({ isActive }) => cn(
+                    "flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-xs font-medium transition-all",
+                    isActive ? "bg-primary/15 text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  {tab.label}
+                </NavLink>
+              ))}
+            </div>
+            <div className="mt-2 border-t border-border/50 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={toggleTheme}
+                className="h-11 w-full justify-between rounded-xl px-3 text-muted-foreground"
+                aria-label={`Tema atual: ${THEME_LABELS[theme]}. Toque para alterar`}
               >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
-              </NavLink>
-            ))}
+                <span className="flex items-center gap-2 text-xs font-medium">
+                  <ThemeIcon className="h-4 w-4" /> Tema
+                </span>
+                <span className="font-mono text-[10px] uppercase text-foreground">{THEME_LABELS[theme]}</span>
+              </Button>
+            </div>
           </div>
         </div>
       )}
