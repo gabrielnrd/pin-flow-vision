@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowDownCircle, ArrowUpCircle, Plus, Wallet } from "lucide-react";
 import { useFinanceStore } from "@/stores/financeStore";
 import { CashflowCard } from "@/components/CashflowCard";
+import { PaymentSessions } from "@/components/PaymentSessions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
