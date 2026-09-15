@@ -212,7 +212,7 @@ const FluxoPage = () => {
               onReplicateFixed={store.replicateFixedItem}
             />
           </div>
-          <QuickEntryPanel />
+          <SmartEntryPanel />
         </div>
 
         <div className="mt-4">
