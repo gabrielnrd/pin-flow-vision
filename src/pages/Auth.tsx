@@ -69,7 +69,7 @@ export default function AuthPage() {
             <Wallet className="w-8 h-8 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">
-            PinFlow Vision
+            TheSecondBrain
           </CardTitle>
           <p className="text-sm text-muted-foreground">{subtitle[view]}</p>
         </CardHeader>

@@ -1,6 +1,6 @@
 {
-  "name": "PinFlow Vision",
-  "short_name": "PinFlow",
+  "name": "TheSecondBrain",
+  "short_name": "TheSecondBrain",
   "description": "Painel financeiro pessoal: fluxo de caixa, cartoes, dividas, projecoes e metas.",
   "start_url": "/",
   "display": "standalone",
