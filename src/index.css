@@ -7,8 +7,9 @@
 @layer base {
   /* Ink dark (alternate) */
   :root {
-    --background: 30 6% 7%;
+    --background: 240 6% 5%;
     --foreground: 43 20% 94%;
+
 
     --card: 30 5% 10%;
     --card-foreground: 43 20% 94%;
