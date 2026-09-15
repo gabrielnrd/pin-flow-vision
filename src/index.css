@@ -7,8 +7,9 @@
 @layer base {
   /* Ink dark (alternate) */
   :root {
-    --background: 30 6% 7%;
+    --background: 240 6% 5%;
     --foreground: 43 20% 94%;
+
 
     --card: 30 5% 10%;
     --card-foreground: 43 20% 94%;
@@ -57,8 +58,9 @@
     /* Glow */
     --glow-primary: 43 22% 92%;
 
-    --sidebar-background: 30 6% 6%;
+    --sidebar-background: 240 6% 4%;
     --sidebar-foreground: 43 20% 94%;
+
     --sidebar-primary: 43 22% 92%;
     --sidebar-primary-foreground: 30 6% 8%;
     --sidebar-accent: 30 5% 15%;
