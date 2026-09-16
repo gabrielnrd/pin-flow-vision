@@ -81,7 +81,7 @@ function EditableInstallment({ inst, bankId, onUpdate, onRemove, onDuplicate }: 
     );
   }
 
-  const progress = (inst.currentInstallment / inst.totalInstallments) * 100;
+  const progress = inst.totalInstallments > 0 ? (inst.currentInstallment / inst.totalInstallments) * 100 : 0;
   const remaining = Math.max(inst.totalInstallments - inst.currentInstallment, 0);
   const dueDate = new Date(inst.dueDate + "T00:00:00");
   const isPaid = inst.status === "pago";
