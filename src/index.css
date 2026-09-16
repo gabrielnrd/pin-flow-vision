@@ -221,10 +221,14 @@
     background: hsl(var(--widget-surface));
     border: 1px solid hsl(var(--widget-line) / var(--widget-border-alpha));
     border-radius: 1.5rem;
-    position: relative;
-    overflow: hidden;
     box-shadow: none;
     transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  /* Do not hijack positioning/overflow of overlays (sheets, dialogs, popovers) */
+  .glass-card:not([class*="fixed"]):not([class*="absolute"]):not([class*="sticky"]) {
+    position: relative;
+    overflow: hidden;
   }
 
   .glass-card::before {
